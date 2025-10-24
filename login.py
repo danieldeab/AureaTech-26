@@ -18,7 +18,7 @@ def main(page: ft.Page):
         page.update()
 
     def login_click(e):
-        user = user_input.value
+        user = correo_input.value
         password = pass_input.value
         page.snack_bar = ft.SnackBar(ft.Text(f"Intentando login como: {user}"))
         page.snack_bar.open = True
@@ -33,7 +33,7 @@ def main(page: ft.Page):
         page.update()
 
     # ---------- LOGIN ----------
-    user_input = ft.TextField(label="Usuario", width=250)
+    correo_input = ft.TextField(label="Correo Electronico", width=250)
     pass_input = ft.TextField(label="Contraseña", password=True, can_reveal_password=True, width=250)
     login_btn = ft.ElevatedButton("Iniciar sesión", on_click=login_click, width=250)
     switch_to_register = ft.TextButton("¿No tienes cuenta? Regístrate", on_click=mostrar_registro)
@@ -41,7 +41,7 @@ def main(page: ft.Page):
     login_view = ft.Column(
         [
             ft.Text("Iniciar Sesión", size=25, weight=ft.FontWeight.BOLD),
-            user_input,
+            correo_input,
             pass_input,
             login_btn,
             switch_to_register
