@@ -135,9 +135,3 @@ def main(page: ft.Page):
             ],
         )
     )
-
-# Ejecutar la aplicación
-ft.app(target=main)
-
-# 1. Crear un entorno virtual (si no lo tienes):
-# .\venv\Scripts\Activate.ps1
