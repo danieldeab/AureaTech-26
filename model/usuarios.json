@@ -40,5 +40,12 @@
         "password_hash": "04e64c33837f2a9ee4c7f985224d61e310cbe6962110aef5a9560a9ecc269af2",
         "display_name": "Franco",
         "password": "Zimmermann"
+    },
+    {
+        "id": 7,
+        "email": "franco@gmail.com",
+        "password_hash": "d745650eff98503d064897c67373607d3bd16ae6f8bf48317095267c95698b6a",
+        "display_name": "Franco",
+        "password": "Capisimo22"
     }
 ]

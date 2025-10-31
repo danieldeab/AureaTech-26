@@ -1,7 +1,7 @@
 # controlador/ui_controller.py
 import asyncio
 import flet as ft
-from vista.AlertasLoggin import (
+from view.AlertasLoggin import (
     AlertBox, ERROR_RED, WARNING_YELL, INFO_BLUE, LIGHT_GREEN, PRIMARY_GREEN, WHITE
 )
 
@@ -13,7 +13,7 @@ class UIController:
         self.assets_dir = assets_dir
 
         # Import diferido
-        from vista.views import (
+        from view.views import (
             menu_view, login_view, sign_up_view, home_view,
             recover_view, reset_password_view
         )

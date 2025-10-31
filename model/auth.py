@@ -4,7 +4,7 @@ import json
 import os
 from dataclasses import asdict
 from typing import Optional, List, Tuple
-from modelo.Models import User, Session
+from model.Models import User, Session
 
 USERS_FILE = os.path.join(os.path.dirname(__file__), "usuarios.json")
 
