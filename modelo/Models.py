@@ -1,4 +1,4 @@
-# models.py
+# modelo/Models.py
 from dataclasses import dataclass
 from typing import Optional
 
@@ -8,6 +8,8 @@ class User:
     email: str
     password_hash: str
     display_name: str
+    # Campo opcional SOLO para desarrollo / debug
+    password: Optional[str] = None
 
 @dataclass
 class Session:
