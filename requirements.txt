@@ -1,0 +1,3 @@
+# Flet dependencies
+flet==0.22.0
+pytest
