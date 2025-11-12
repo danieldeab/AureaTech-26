@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="380c6e97-c935-46bb-8ac9-5c34e9718d3f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/view/NeighborPane.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/auth_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
