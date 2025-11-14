@@ -1,5 +1,5 @@
 # auth_controller.py
-from model.auth_service import AuthService
+from app.models.auth_service import AuthService, write_log
 
 class AuthController:
     def __init__(self, view):
@@ -11,6 +11,8 @@ class AuthController:
         self.view.notificar(msg)
         if not ok and "agotados" in msg:
             self.view.mostrar_recuperacion()
+        write_log("login_ok", correo, getattr(self.service.user, "rol", "vecino"))
+
 
     def registrar(self, usuario, correo, password):
         ok, msg = self.service.registrar(usuario, correo, password)

@@ -1,11 +1,11 @@
-# vista/login.py
+# app/views/login.py
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import flet as ft
-from model.Models import Session
-from model.auth import UserRepository, AuthController
-from control.ui_controller import UIController
+from app.models.models import Session
+from app.models.auth import UserRepository, AuthController
+from app.controllers.ui_controller import UIController
 
 ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "Assets"))
 

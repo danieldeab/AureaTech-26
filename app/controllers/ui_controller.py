@@ -1,7 +1,7 @@
-# controlador/ui_controller.py
+# app/controllers/ui_controller.py
 import asyncio
 import flet as ft
-from view.AlertasLoggin import (
+from app.views.alertas_loggin import (
     AlertBox, ERROR_RED, WARNING_YELL, INFO_BLUE, LIGHT_GREEN, PRIMARY_GREEN, WHITE
 )
 
@@ -13,7 +13,7 @@ class UIController:
         self.assets_dir = assets_dir
 
         # Import diferido
-        from view.views import (
+        from app.views.views import (
             menu_view, login_view, sign_up_view, home_view,
             recover_view, reset_password_view
         )
@@ -67,6 +67,12 @@ class UIController:
         self.clear_overlay(); self.page.clean()
         name = self.session.current_user.display_name if self.session.current_user else "Usuario"
         self.page.add(self._home_view_fn(self.assets_dir, name, self.on_logout))
+        if self.session.current_user:
+            email = self.session.current_user.email
+            rol = getattr(self.session.current_user, "rol", "vecino")
+            banner = ft.Text(f"Usuario activo: {email} | Rol: {rol}", color=ft.colors.WHITE)
+            self.page.add(banner)
+
 
     # ✅ NUEVAS VISTAS
     def show_recover(self, e=None):

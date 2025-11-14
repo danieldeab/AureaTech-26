@@ -1,0 +1,70 @@
+{
+  "eventos": [
+    {
+      "ts": 1762103509,
+      "evento": "login_ok",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762103509,
+      "evento": "login_fail",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104063,
+      "evento": "login_ok",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104063,
+      "evento": "login_fail",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104063,
+      "evento": "login_ok",
+      "email": "e2e@test.com",
+      "rol": "tecnico"
+    },
+    {
+      "ts": 1762104073,
+      "evento": "login_ok",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104073,
+      "evento": "login_fail",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104073,
+      "evento": "login_ok",
+      "email": "e2e@test.com",
+      "rol": "tecnico"
+    },
+    {
+      "ts": 1762104091,
+      "evento": "login_ok",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104091,
+      "evento": "login_fail",
+      "email": "demo@test.com",
+      "rol": "vecino"
+    },
+    {
+      "ts": 1762104092,
+      "evento": "login_ok",
+      "email": "e2e@test.com",
+      "rol": "tecnico"
+    }
+  ]
+}

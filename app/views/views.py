@@ -1,4 +1,4 @@
-# vista/views.py
+# app/views/views.py
 import os
 import flet as ft
 

@@ -1,4 +1,5 @@
 import flet as ft  
+from flet import SnackBar, Banner
 # Importamos la librería Flet (versión 0.28.x)
 # Para ejecutar este script:
 # 1. Crear un entorno virtual (si no lo tienes):
@@ -11,8 +12,8 @@ import flet as ft
 # ==============================
 PRIMARY_GREEN = "#2D4A46"   # Verde principal (botones / branding)
 LIGHT_LILAC   = "#DCE0FF"   # Lila claro usado en botones del login
-LIGHT_GREEN   = "#1EF0A0"   # Verde pastel (alerta de éxito)
-ERROR_RED     = "#C62828"   # Rojo para errores
+LIGHT_GREEN   = "#2E7D32"   # Verde pastel (alerta de éxito)
+ERROR_RED     = "#B00020"   # Rojo para errores
 WARNING_YELL  = "#FFEB99"   # Amarillo para advertencias
 INFO_BLUE     = "#CFE2FF"   # Azul para información
 WHITE         = "#FFFFFF"   # Blanco (texto o fondo)
