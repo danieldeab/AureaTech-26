@@ -15,7 +15,7 @@ pii25-aureatech/
 │ └── back.png
 │
 ├── modelo/
-│ ├── Models.py
+│ ├── models.py
 │ └── auth.py
 │
 ├── controlador/

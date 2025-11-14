@@ -1,12 +1,13 @@
-# modelo/auth.py
-import hashlib
-import json
-import os
+# app/models/auth.py
+import hashlib, json, os
 from dataclasses import asdict
 from typing import Optional, List, Tuple
-from model.Models import User, Session
+from app.models.models import User, Session     # ✅ dataclass version
+from app.models.auth_service import read_users, save_user, write_log  # ✅ persistence helpers
 
-USERS_FILE = os.path.join(os.path.dirname(__file__), "usuarios.json")
+USERS_FILE = os.path.abspath(
+    os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "data", "usuarios.json"))
+)
 
 def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -26,28 +27,27 @@ class UserRepository:
         self._users: List[User] = self._load_users()
 
     def _load_users(self) -> List[User]:
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = read_users().get("usuarios", [])
+        users: List[User] = []
         for u in data:
             if "password_hash" not in u:
                 u["password_hash"] = _sha256(u.get("password", "") or "")
-            if "password" not in u:
-                u["password"] = None
-        users: List[User] = []
-        for u in data:
-            users.append(User(
-                id=u["id"],
-                email=u["email"],
-                password_hash=u["password_hash"],
-                display_name=u["display_name"],
-                password=u.get("password"),
-            ))
+            users.append(
+                User(
+                    id=u.get("id", len(users) + 1),
+                    email=u["email"],
+                    password_hash=u["password_hash"],
+                    display_name=u.get("display_name", u["email"]),
+                    password=u.get("password"),
+                )
+            )
         return users
 
     def _save_users(self):
-        data = [asdict(u) for u in self._users]
-        with open(USERS_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+        data = {"usuarios": [u.__dict__ for u in self._users]}
+        from app.models.auth_service import USERS_PATH
+        with open(USERS_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
     # ---------- públicos ----------
     def find_by_email(self, email: str) -> Optional[User]:
