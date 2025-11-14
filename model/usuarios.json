@@ -47,5 +47,12 @@
         "password_hash": "d745650eff98503d064897c67373607d3bd16ae6f8bf48317095267c95698b6a",
         "display_name": "Franco",
         "password": "Capisimo22"
+    },
+    {
+        "id": 8,
+        "email": "lol",
+        "password_hash": "b013dd9dbf2a2c1ee9e8260ac447bb91f154362eeb40fd4a9985b0cb5cab71a5",
+        "display_name": "123456",
+        "password": "*GFBbf"
     }
 ]
