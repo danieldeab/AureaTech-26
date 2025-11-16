@@ -5,7 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="380c6e97-c935-46bb-8ac9-5c34e9718d3f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/model/auth_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/model/auth_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/view/AdminPaneView.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/view/BasePaneView.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/view/NeighborPane.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +44,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.BasePaneView.executor": "Run",
     "Python.NeighborPane.executor": "Run",
     "Python.basic_user_view.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
