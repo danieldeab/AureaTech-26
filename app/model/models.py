@@ -1,4 +1,6 @@
 # app/models/models.py
+# this one should get deprecated
+
 from dataclasses import dataclass
 from typing import Optional
 
