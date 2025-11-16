@@ -1,4 +1,5 @@
 # app/models/user.py
+# this one should change maybe
 class User:
     """Entidad de usuario básica para Sprint 1."""
     def __init__(self, email, password, rol="vecino", nombre=None):
