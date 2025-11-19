@@ -356,10 +356,16 @@ def sign_up_view(assets_dir: str, on_back, on_submit, on_go_login):
     )
 
 # ---------- VISTA: HOME ----------
-def home_view(assets_dir: str, display_name: str, on_logout):
+def home_view(assets_dir: str, display_name: str, on_logout, on_dashboard):
     logout_btn = ft.ElevatedButton(
         "Cerrar sesión", bgcolor=PRIMARY_GREEN, color=WHITE,
         on_click=on_logout, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=24)),
+    )
+
+    # Nuevo botón para ir a Dashboard
+    dashboard_btn = ft.ElevatedButton(
+        "Ver Sensores y Actuadores", color=WHITE,
+        on_click=on_dashboard, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=24)),
     )
 
     header = ft.Row(
@@ -376,6 +382,8 @@ def home_view(assets_dir: str, display_name: str, on_logout):
         controls=[
             ft.Text("Contenido interno de ejemplo.", color=PRIMARY_GREEN),
             ft.Text("Aquí iría tu dashboard/pantalla privada.", color=PRIMARY_GREEN),
+            ft.Container(height=20),
+            dashboard_btn,  # ⬅️ botón para ir al dashboard
         ],
         spacing=8,
     )
@@ -387,3 +395,140 @@ def home_view(assets_dir: str, display_name: str, on_logout):
         content=ft.Column(controls=[header, ft.Divider(), body], expand=True),
     )
 
+# ---------- VISTA: dashboard(actuadores/sensores HISTORIAL) ----------
+def dashboard_view(assets_dir: str, display_name: str, on_home):
+    PRIMARY_GREEN = "#2D4A46"
+    WHITE = "#FFFFFF"
+    LIGHT_GREEN = "#31B057"
+    DARK_BG = "#2D4A46"
+    BORDER_SOFT = "#00000014"
+
+    # Datos simulados
+    sensores_data = [
+        {"nombre": "Sensor 1", "info": ["Temperatura: 22°C", "Humedad: 45%", "Estado: OK"]},
+        {"nombre": "Sensor 2", "info": ["Temperatura: 25°C", "Humedad: 50%", "Estado: OK"]},
+        {"nombre": "Sensor 3", "info": ["Temperatura: 20°C", "Humedad: 42%", "Estado: Alerta"]},
+    ]
+    actuadores_data = [
+        {"nombre": "Actuador 1", "info": ["Tipo: Motor", "Potencia: 5W", "Estado: Activo"]},
+        {"nombre": "Actuador 2", "info": ["Tipo: Luz LED", "Potencia: 2W", "Estado: Inactivo"]},
+        {"nombre": "Actuador 3", "info": ["Tipo: Ventilador", "Potencia: 10W", "Estado: Activo"]},
+    ]
+
+    def generar_lista(items):
+        rows = []
+        for d in items:
+            info_text = [ft.Text(f"- {i}", color="black") for i in d["info"]]
+            rows.append(
+                ft.Column(
+                    controls=[
+                        ft.Text(f"{d['nombre']} (Nombre)", size=16, weight=ft.FontWeight.BOLD, color="black"),
+                        *info_text,
+                        ft.Text("...", color="black"),
+                        ft.Container(height=10)
+                    ]
+                )
+            )
+        return rows
+
+    # Creamos referencias para contenido dinámico y pestañas
+    content_area = ft.Ref[ft.Column]()
+    btn_sensores = ft.Ref[ft.Container]()
+    btn_actuadores = ft.Ref[ft.Container]()
+
+    def build(page: ft.Page):
+        # Contenido inicial
+        content_area.current = ft.Column(controls=generar_lista(sensores_data), spacing=12)
+
+        # ----------- Callbacks dentro de build para acceder a page -----------
+        def mostrar_sensores(e=None):
+            btn_sensores.current.bgcolor = LIGHT_GREEN
+            btn_actuadores.current.bgcolor = WHITE
+            btn_actuadores.current.content.controls[0].color = "black"
+            btn_sensores.current.content.controls[0].color = WHITE
+            content_area.current.controls = generar_lista(sensores_data)
+            scrollable_content.content.controls = content_area.current.controls
+            page.update()
+
+        def mostrar_actuadores(e=None):
+            btn_actuadores.current.bgcolor = LIGHT_GREEN
+            btn_sensores.current.bgcolor = WHITE
+            btn_sensores.current.content.controls[0].color = "black"
+            btn_actuadores.current.content.controls[0].color = WHITE
+            content_area.current.controls = generar_lista(actuadores_data)
+            scrollable_content.content.controls = content_area.current.controls  # actualizar ListView
+            page.update()
+
+        # ----------- Botones de pestañas -----------
+        btn_sensores.current = ft.Container(
+            width=180, height=40, bgcolor=LIGHT_GREEN, border_radius=20,
+            content=ft.Row([ft.Text("Sensores", size=16, weight=ft.FontWeight.BOLD, color=WHITE)],
+                           alignment=ft.MainAxisAlignment.CENTER),
+            on_click=mostrar_sensores
+        )
+
+        btn_actuadores.current = ft.Container(
+            width=180, height=40, bgcolor=WHITE, border_radius=20,
+            content=ft.Row([ft.Text("Actuadores", size=16, weight=ft.FontWeight.BOLD, color="black")],
+                           alignment=ft.MainAxisAlignment.CENTER),
+            on_click=mostrar_actuadores
+        )
+
+        # ----------- Cabecera -----------
+        header = ft.Row(
+            controls=[
+                ft.Image(src=os.path.join(assets_dir, "user.png"), width=50, height=50, border_radius=25),
+                ft.Column([ft.Text("Hi, WelcomeBack", size=14, color="black"),
+                           ft.Text(display_name, size=16, weight=ft.FontWeight.BOLD, color="black")],
+                          spacing=2),
+                ft.Container(expand=True),
+                ft.IconButton(icon=ft.Icons.SETTINGS, icon_color="black"),
+            ],
+            alignment=ft.MainAxisAlignment.START,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+
+        tabs = ft.Row(controls=[btn_sensores.current, btn_actuadores.current],
+                      alignment=ft.MainAxisAlignment.CENTER, spacing=10)
+
+        scrollable_content = ft.Container(
+            expand=True, bgcolor=WHITE, border_radius=8,
+            content=ft.ListView(content_area.current.controls, expand=True, spacing=12, padding=10)
+        )
+
+        home_btn = ft.IconButton(
+            icon=ft.Icons.GRID_VIEW,
+            icon_color=WHITE,
+            icon_size=36,
+            bgcolor=DARK_BG,
+            on_click=on_home,  # 👈 este se ejecutará
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=16)),
+        )
+
+        bottom_bar = ft.Container(
+            content=ft.Row([home_btn], alignment=ft.MainAxisAlignment.CENTER),
+            bgcolor=DARK_BG, height=70,
+            border_radius=ft.border_radius.only(bottom_left=22, bottom_right=22)
+        )
+
+        # ----------- Vista completa -----------
+        page.bgcolor = DARK_BG
+        page.padding = 0
+        page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+        return ft.Container(
+            width=980, height=640, bgcolor=WHITE, border_radius=22,
+            border=ft.border.all(1, BORDER_SOFT),
+            content=ft.Column(
+                controls=[ft.Container(padding=20, content=header),
+                          tabs,
+                          ft.Container(height=10),
+                          ft.Container(expand=True, content=scrollable_content,
+                                       padding=ft.padding.symmetric(horizontal=12)),
+                          bottom_bar],
+                expand=True, spacing=6
+            ),
+        )
+
+    return build

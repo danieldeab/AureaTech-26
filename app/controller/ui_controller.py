@@ -15,7 +15,7 @@ class UIController:
         # Import diferido
         from app.views.views import (
             menu_view, login_view, sign_up_view, home_view,
-            recover_view, reset_password_view
+            recover_view, reset_password_view, dashboard_view
         )
         self._menu_view_fn = menu_view
         self._login_view_fn = login_view
@@ -23,6 +23,7 @@ class UIController:
         self._home_view_fn = home_view
         self._recover_view_fn = recover_view         # 👈 NUEVO
         self._reset_view_fn = reset_password_view    # 👈 NUEVO
+        self._dashboard_view_fn = dashboard_view     # 👈 NUEVO
 
     # ---------- Alertas ----------
     def show_alert(self, message: str, kind: str = "info", autohide_secs: float = 0.9):
@@ -66,13 +67,26 @@ class UIController:
     def show_home(self, e=None):
         self.clear_overlay(); self.page.clean()
         name = self.session.current_user.display_name if self.session.current_user else "Usuario"
-        self.page.add(self._home_view_fn(self.assets_dir, name, self.on_logout))
+        self.page.add(self._home_view_fn(self.assets_dir, name, self.on_logout, on_dashboard=self.show_dashboard ))
         if self.session.current_user:
             email = self.session.current_user.email
             rol = getattr(self.session.current_user, "rol", "vecino")
             banner = ft.Text(f"Usuario activo: {email} | Rol: {rol}", color=ft.colors.WHITE)
             self.page.add(banner)
 
+    def show_dashboard(self, e=None):
+        self.clear_overlay()
+        self.page.clean()
+        display_name = self.session.current_user.display_name if self.session.current_user else "Usuario"
+        
+        # dashboard_view devuelve la función build(page), así que la llamamos con self.page
+        self.page.add(
+            self._dashboard_view_fn(
+                assets_dir=self.assets_dir,
+                display_name=display_name,
+                on_home=self.show_home  # El botón HOME en el dashboard volverá al home real
+            )(self.page)
+        )
 
     # ✅ NUEVAS VISTAS
     def show_recover(self, e=None):
