@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="380c6e97-c935-46bb-8ac9-5c34e9718d3f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/view/AdminPaneView.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/view/BasePaneView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/view/NeighborPane.py" beforeDir="false" />
-    </list>
+    <list default="true" id="380c6e97-c935-46bb-8ac9-5c34e9718d3f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,6 +25,12 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/ProyectoInformatica/pii25-aureatech.git",
+    "accountId": "d1e28624-344c-4a4d-a355-2b350e416518"
+  }
+}]]></component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/model/auth_service.py" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -44,6 +45,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.AdminPaneView.executor": "Run",
     "Python.BasePaneView.executor": "Run",
     "Python.NeighborPane.executor": "Run",
     "Python.basic_user_view.executor": "Run",

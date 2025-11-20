@@ -19,7 +19,7 @@ class BaseUserView:
                 ft.NavigationBarDestination(
                     icon=ft.Icons.INFO_OUTLINE,
                     selected_icon=ft.Icons.INFO,
-                    label="Histórico",
+                    label="Sensores",
                 ),
                 ft.NavigationBarDestination(
                     icon=ft.Icons.LOGOUT,
