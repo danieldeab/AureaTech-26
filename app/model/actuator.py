@@ -13,13 +13,13 @@ class Actuator:
     @staticmethod
     def new(type: str, state: bool = False) -> "Actuator":
         from datetime import datetime
-        return Actuator(id=uuid4(), type=type, state=state, last_changed_at=datetime.utcnow())
+        return Actuator(id=uuid4(), type=type, state=state, last_changed_at=datetime.now(datetime.timezone.utc))
 
     def set_state(self, new_state: bool):
         if self.state != new_state:
             self.state = new_state
             from datetime import datetime
-            self.last_changed_at = datetime.utcnow()
+            self.last_changed_at = datetime.now(datetime.timezone.utc)
 
     def to_dict(self) -> dict:
         d = asdict(self)
