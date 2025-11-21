@@ -1,0 +1,246 @@
+@startuml
+title AureaTech MVC Architecture – Domain, Application, Presentation, Infrastructure
+
+' ==== PACKAGES ====
+package "model (domain layer)" {
+  class User {
+    +UUID id
+    +String name
+    +String email
+    +String passwordHash
+    +RoleEnum role
+    +String picturePath
+    +String pictureUrl
+  }
+
+  class Sensor {
+    +UUID id
+    +String typeD
+    +String location
+    +Map<String,Float> thresholds
+  }
+
+  class Reading {
+    +UUID id
+    +UUID sensorId
+    +DateTime timestamp
+    +Float value
+    +String unit
+  }
+
+  class Actuator {
+    +UUID id
+    +String type
+    +Boolean state
+    +DateTime lastChangedAt
+  }
+
+  class LogEntry {
+    +UUID id
+    +DateTime timestamp
+    +UUID actorId
+    +RoleEnum actorRole
+    +String category
+    +String action
+    +String details
+  }
+
+  class Alert {
+    +UUID id
+    +String type
+    +SeverityEnum severity
+    +String message
+    +UUID targetUserId
+    +DateTime timestamp
+    +Boolean readStatus
+  }
+
+  enum RoleEnum {
+    ADMIN
+    TECHNICIAN
+    NEIGHBOR
+  }
+
+  enum SeverityEnum {
+    INFO
+    WARN
+    CRIT
+  }
+
+  User "1" -- "0..*" LogEntry : creates >
+  User "1" -- "0..*" Alert : receives >
+  Sensor "1" -- "0..*" Reading : produces >
+}
+
+package "repository (interfaces)" {
+  interface UserRepository {
+    +findByEmail(email:String)
+    +save(user:User)
+    +updateRole(userId:UUID,newRole:RoleEnum)
+    +findAll()
+  }
+
+  interface SensorRepository {
+    +findAll()
+    +findById(id:UUID)
+  }
+
+  interface ReadingRepository {
+    +findBySensor(sensorId:UUID)
+    +save(reading:Reading)
+    +query(range:TimeRange)
+  }
+
+  interface ActuatorRepository {
+    +findAll()
+    +findById(id:UUID)
+    +save(actuator:Actuator)
+  }
+
+  interface LogRepository {
+    +add(entry:LogEntry)
+    +query(filters:Map)
+  }
+
+  interface AlertRepository {
+    +save(alert:Alert)
+    +findByUser(userId:UUID)
+    +markRead(alertId:UUID)
+  }
+}
+
+package "service (application layer)" {
+  class AuthService {
+    +register(name,email,pwd):User
+    +login(email,pwd):User
+    +logout(sessionId:String):None
+  }
+
+  class SensorService {
+    +getSensorReadings(filters):List<Reading>
+    +simulateReading(sensor:Sensor):Reading
+  }
+
+  class ActuatorService {
+    +toggleActuator(actuatorId,user:User):Actuator
+    +getActuatorStates():List<Actuator>
+  }
+
+  class DashboardService {
+    +getDashboardSummary(user:User):DashboardDTO
+    +getLogs(range):List<LogEntry>
+  }
+
+  class UserService {
+    +changeRole(userId,newRole,adminId):User
+    +updateProfile(userId,patch):User
+  }
+
+  class AlertService {
+    +evaluate(reading:Reading):Optional<Alert>
+    +markRead(alertId,userId):None
+    +getAlerts(userId):List<Alert>
+  }
+
+  class ExportService {
+    +exportLogs(range,format):File
+    +exportReadings(range,format):File
+  }
+
+  class MonitoringService {
+    +run():None
+  }
+
+  ' dependencies to repositories
+  AuthService ..> UserRepository
+  SensorService ..> SensorRepository
+  SensorService ..> ReadingRepository
+  ActuatorService ..> ActuatorRepository
+  DashboardService ..> LogRepository
+  DashboardService ..> ReadingRepository
+  UserService ..> UserRepository
+  UserService ..> AlertRepository
+  AlertService ..> AlertRepository
+  AlertService ..> ReadingRepository
+  ExportService ..> LogRepository
+  ExportService ..> ReadingRepository
+  MonitoringService ..> SensorService
+  MonitoringService ..> AlertService
+}
+
+package "controller (presentation logic)" {
+  class AuthController
+  class MenuController
+  class DashboardController
+  class ActuatorController
+  class AlertsController
+  class LogsController
+  class AdminController
+  class TechnicianController
+  class NeighborController
+
+  ' controller-service dependencies
+  AuthController ..> AuthService
+  MenuController ..> UserService
+  DashboardController ..> DashboardService
+  ActuatorController ..> ActuatorService
+  AlertsController ..> AlertService
+  LogsController ..> DashboardService
+  AdminController ..> UserService
+  TechnicianController ..> SensorService
+  NeighborController ..> DashboardService
+}
+
+package "view (UI layer)" {
+  class LoginView
+  class MainMenuView
+  class DashboardView
+  class ActuatorPanelView
+  class AlertsView
+  class LogsView
+  class AdminDashboardView
+  class TechnicianPanelView
+  class NeighborPanelView
+  class ReadingSummaryVM
+  class AlertItemVM
+  class UserHeaderVM
+
+  ' interactions
+  LoginView --> AuthController : onSubmit()
+  MainMenuView --> MenuController : onOptionSelect()
+  DashboardView --> DashboardController
+  ActuatorPanelView --> ActuatorController
+  AlertsView --> AlertsController
+  LogsView --> LogsController
+  AdminDashboardView --> AdminController
+  TechnicianPanelView --> TechnicianController
+  NeighborPanelView --> NeighborController
+}
+
+package "infrastructure (adapters & config)" {
+  class JsonDataStore
+  class Config
+  class JsonUserRepository
+  class JsonSensorRepository
+  class JsonReadingRepository
+  class JsonActuatorRepository
+  class JsonAlertRepository
+  class JsonLogRepository
+
+  JsonUserRepository ..|> UserRepository
+  JsonSensorRepository ..|> SensorRepository
+  JsonReadingRepository ..|> ReadingRepository
+  JsonActuatorRepository ..|> ActuatorRepository
+  JsonAlertRepository ..|> AlertRepository
+  JsonLogRepository ..|> LogRepository
+}
+
+' ==== LAYER RELATIONSHIPS ====
+controller ..> service : uses
+service ..> repository : depends on
+repository --> model : manages
+view ..> controller : triggers
+controller --> view : updates
+infrastructure ..|> repository
+
+@enduml

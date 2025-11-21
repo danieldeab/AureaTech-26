@@ -1,0 +1,25 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "email": "demo@test.com",
+      "password_hash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+      "display_name": "demo@test.com",
+      "password": "1234"
+    },
+    {
+      "id": 2,
+      "email": "e2e@test.com",
+      "password_hash": "888df25ae35772424a560c7152a1de794440e0ea5cfee62828333a456a506e05",
+      "display_name": "e2e@test.com",
+      "password": "9999"
+    },
+    {
+      "id": 3,
+      "email": "test@test.com",
+      "password_hash": "7825d1cacf432fafe6b907c8075fc4558ca7f4f8eaa358bad061e2ee244a66f2",
+      "display_name": "Pepillo Grillo",
+      "password": "pinocho"
+    }
+  ]
+}
