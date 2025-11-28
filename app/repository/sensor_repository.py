@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime
 
-from app.repository.interfaces.ISensorRepository import ISensorRepository
+from app.repository.interfaces.sensor_repository_interface import ISensorRepository
 from app.model.sensor import Sensor
 
 SENSORS_PATH = os.path.join("data", "sensores.json")
