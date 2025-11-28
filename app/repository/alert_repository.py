@@ -23,7 +23,6 @@ class AlertRepository(IAlertRepository):
         with open(self.path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # Accepts: { "alertas": [...] } or [ ... ]
         if isinstance(data, dict) and "alertas" in data:
             data = data["alertas"]
 
