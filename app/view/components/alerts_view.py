@@ -11,7 +11,7 @@ from flet import SnackBar, Banner
 # Basada en el mockup de AureaTech
 # ==============================
 PRIMARY_GREEN = "#2D4A46"   # Verde principal (botones / branding)
-LIGHT_LILAC   = "#DCE0FF"   # Lila claro usado en botones del login
+LIGHT_GREY   = "#DCE0FF"   # Lila claro usado en botones del login
 LIGHT_GREEN   = "#2E7D32"   # Verde pastel (alerta de éxito)
 ERROR_RED     = "#B00020"   # Rojo para errores
 WARNING_YELL  = "#FFEB99"   # Amarillo para advertencias

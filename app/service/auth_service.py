@@ -1,7 +1,7 @@
-# app/models/auth_service.py
+# app/service/auth_service.py
 # this one should get deprecated
 import json, os, time
-from app.models.user import User
+from app.model.user import User
 
 # Define rutas relativas
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")

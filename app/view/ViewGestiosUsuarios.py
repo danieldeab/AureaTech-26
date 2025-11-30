@@ -4,7 +4,7 @@ import flet as ft
 
 # Paleta / medidas
 FULL_BLACK = "#000000"
-LIGHT_LILAC = "#E9EDFF"
+LIGHT_GREY = "#D8D8D8"
 PRIMARY_GREEN = "#2D4A46"
 WHITE = "#FFFFFF"
 BORDER_SOFT = "#00000014"
@@ -180,7 +180,7 @@ class ViewGestionUsuario:
         )
 
         card = ft.Container(
-            bgcolor=LIGHT_LILAC,
+            bgcolor=LIGHT_GREY,
             border=ft.border.all(1, WHITE),
             border_radius=12,
             padding=10,

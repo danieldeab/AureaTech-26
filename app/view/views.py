@@ -3,7 +3,7 @@ import os
 import flet as ft
 
 FULL_BLACK = "#000000"
-LIGHT_LILAC = "#E9EDFF"
+LIGHT_GREY = "#D8D8D8"
 PRIMARY_GREEN = "#2D4A46"
 WHITE = "#FFFFFF"
 BORDER_SOFT = "#00000014"
@@ -23,7 +23,7 @@ def menu_view(assets_dir: str, on_login_click, on_signup_click):
     )
     btn_login = ft.ElevatedButton(
         "Login", width=300, height=52,
-        bgcolor=LIGHT_LILAC, color=PRIMARY_GREEN,
+        bgcolor=LIGHT_GREY, color=PRIMARY_GREEN,
         style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=26)),
         on_click=on_login_click,
     )
@@ -70,7 +70,6 @@ def menu_view(assets_dir: str, on_login_click, on_signup_click):
     )
 
 # ---------- VISTA: LOGIN ----------
-# ---------- VISTA: LOGIN ----------
 def login_view(assets_dir: str, on_back, on_submit, on_go_signup, on_go_recover):
     FIELD_W = 460
     FONT_SIZE_LABEL = 14
@@ -78,14 +77,14 @@ def login_view(assets_dir: str, on_back, on_submit, on_go_signup, on_go_recover)
 
     email = ft.TextField(
         label="Email", hint_text="example@example.com", width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000", hint_style=ft.TextStyle(color="#666666"),
     )
     password = ft.TextField(
         label="Contraseña", hint_text="Contraseña",
         password=True, can_reveal_password=True, width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000", hint_style=ft.TextStyle(color="#666666"),
     )
@@ -145,7 +144,7 @@ def recover_view(assets_dir: str, on_back, on_submit, on_go_login):
     FIELD_W = 460
     email = ft.TextField(
         label="Correo", hint_text="example@example.com", width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000", hint_style=ft.TextStyle(color="#666666"),
     )
@@ -200,14 +199,14 @@ def reset_password_view(assets_dir: str, email: str, on_back, on_submit):
     pwd = ft.TextField(
         label="Contraseña", hint_text="Contraseña",
         password=True, can_reveal_password=True, width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000", hint_style=ft.TextStyle(color="#666666"),
     )
     confirm = ft.TextField(
         label="Confirmar Contraseña", hint_text="Confirmar Contraseña",
         password=True, can_reveal_password=True, width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000", hint_style=ft.TextStyle(color="#666666"),
     )
@@ -258,7 +257,7 @@ def sign_up_view(assets_dir: str, on_back, on_submit, on_go_login):
 
     fullname = ft.TextField(
         label="Nombre completo", hint_text="Nombre completo", width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000",                 # 👈 texto negro
         hint_style=ft.TextStyle(color="#666666"),  # 👈 texto del placeholder gris oscuro
@@ -266,21 +265,21 @@ def sign_up_view(assets_dir: str, on_back, on_submit, on_go_login):
     password = ft.TextField(
         label="Contraseña", hint_text="Contraseña",
         password=True, can_reveal_password=True, width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000",
         hint_style=ft.TextStyle(color="#666666"),
     )
     email = ft.TextField(
         label="Email", hint_text="example@example.com", width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000",
         hint_style=ft.TextStyle(color="#666666"),
     )
     dob = ft.TextField(
         label="Fecha De Nacimiento", hint_text="DD / MM / YYYY", width=FIELD_W,
-        bgcolor=LIGHT_LILAC, border_radius=12, border=ft.InputBorder.NONE,
+        bgcolor=LIGHT_GREY, border_radius=12, border=ft.InputBorder.NONE,
         content_padding=ft.padding.symmetric(12, 14),
         color="#000000",
         hint_style=ft.TextStyle(color="#666666"),

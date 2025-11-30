@@ -4,11 +4,11 @@
 import hashlib, json, os
 from dataclasses import asdict
 from typing import Optional, List, Tuple
-from app.models.models import User, Session     # ✅ dataclass version
-from app.models.auth_service import read_users, save_user, write_log  # ✅ persistence helpers
+from app.model.models import User, Session     # ✅ dataclass version
+from app.service.auth_service import read_users, save_user, write_log  # ✅ persistence helpers
 
 USERS_FILE = os.path.abspath(
-    os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "data", "usuarios.json"))
+    os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "usuarios.json"))
 )
 
 def _sha256(text: str) -> str:

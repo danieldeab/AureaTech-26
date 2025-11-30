@@ -1,25 +1,51 @@
-{
-  "usuarios": [
+[
     {
-      "id": 1,
-      "email": "demo@test.com",
-      "password_hash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
-      "display_name": "demo@test.com",
-      "password": "1234"
+        "fullname": "demo@test.com",
+        "email": "demo@test.com",
+        "password": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+        "dob": "2000-01-01",
+        "role": "vecino",
+        "picture_path": "https://images.pexels.com/photos/346529/pexels-photo-346529.jpeg"
     },
     {
-      "id": 2,
-      "email": "e2e@test.com",
-      "password_hash": "888df25ae35772424a560c7152a1de794440e0ea5cfee62828333a456a506e05",
-      "display_name": "e2e@test.com",
-      "password": "9999"
+        "fullname": "e2e@test.com",
+        "email": "e2e@test.com",
+        "password": "888df25ae35772424a560c7152a1de794440e0ea5cfee62828333a456a506e05",
+        "dob": "2000-01-01",
+        "role": "vecino",
+        "picture_path": "https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg"
+
     },
     {
-      "id": 3,
-      "email": "test@test.com",
-      "password_hash": "7825d1cacf432fafe6b907c8075fc4558ca7f4f8eaa358bad061e2ee244a66f2",
-      "display_name": "Pepillo Grillo",
-      "password": "pinocho"
+        "fullname": "Pepillo Grillo",
+        "email": "test@test.com",
+        "password": "7825d1cacf432fafe6b907c8075fc4558ca7f4f8eaa358bad061e2ee244a66f2",
+        "dob": "2000-01-01",
+        "role": "vecino",
+        "picture_path": "https://images.pexels.com/photos/697509/pexels-photo-697509.jpeg"
+    },
+    {
+        "fullname": "Juan",
+        "email": "juan@juan.com",
+        "password": "ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca",
+        "dob": "31052000",
+        "role": "vecino",
+        "picture_path": "https://images.pexels.com/photos/1819483/pexels-photo-1819483.jpeg"
+    },
+    {
+        "fullname": "AureaTech",
+        "email": "aurea@tech.com",
+        "password": "494aea83574267c4173aacdbb7768d0b3d4935eed2f7879f5e558f2198865fb5",
+        "dob": "01/09/2025",
+        "role": "vecino",
+        "picture_path": "https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg"
+    },
+    {
+        "fullname": "Pepe Pérez",
+        "email": "pepe@perez.com",
+        "password": "7c9e7c1494b2684ab7c19d6aff737e460fa9e98d5a234da1310c97ddf5691834",
+        "dob": "04/11/2025",
+        "role": "vecino",
+        "picture_path": "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg"
     }
-  ]
-}
+]
