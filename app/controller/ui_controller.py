@@ -1,12 +1,23 @@
 import flet as ft
 
+# Controller imports
 from app.controller.auth_controller import AuthController, Session
+from app.controller.dashboard_controller import DashboardController
+
+# View imports
 from app.view.auth.view_login import LoginView
 from app.view.auth.view_signup import SignupView
 from app.view.auth.view_menu import MenuView
 from app.view.auth.view_recover import RecoverPasswordView
 from app.view.auth.view_reset_password import ResetPasswordView
+from app.view.lists.view_alerts_dashboard import AlertsDashboardView
 from app.view.dashboard.view_user_dashboard import UserDashboardView
+
+# Repository and Service imports
+from app.repository.alert_repository import AlertRepository
+from app.service.alert_service import AlertService
+
+# Theme imports
 from app.view.theme import (
     SUCCESS_GREEN,
     ERROR_RED,
@@ -34,6 +45,9 @@ class UIController:
     def __init__(self, page: ft.Page, auth_controller: AuthController, session: Session):
         self.page = page
         self.auth = auth_controller
+        self.alert_repo = AlertRepository()
+        self.alert_service = AlertService(self.alert_repo)
+        self.dashboard = DashboardController(self.alert_service)
         self.session = session
 
         self.history = []             # navigation stack
@@ -92,13 +106,13 @@ class UIController:
         if not user:
             return self.show_login()
 
-        role = user.role.lower()
+        role = user.role.value
 
-        if role == "vecino":
+        if role == "NEIGHBOR":
             return self.show_user_dashboard()
-        elif role == "admin":
+        elif role == "ADMIN":
             return self.show_admin_dashboard()
-        elif role == "tecnico":
+        elif role == "TECHNICIAN":
             return self.show_tecnico_dashboard()
         
     def show_user_dashboard(self, e=None):
@@ -108,7 +122,7 @@ class UIController:
             page=self.page,
             controller=self,
             user=user,
-            role="vecino",
+            role=user.role.value,
 
             # nav buttons
             on_settings=self.show_settings,
@@ -121,17 +135,23 @@ class UIController:
         self._replace("dashboard", view)
     
     def show_alerts(self, e=None):
-        self._replace(
-            "alerts",
-            ft.Column(
-                controls=[
-                    ft.Text("No alerts available.", size=20, weight=ft.FontWeight.BOLD),
-                    ft.Text("This view will show sensor alerts later."),
-                ],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
+        print(">>> showing alerts")
+        user = self.session.current_user
+        alerts = self.dashboard.get_alerts()
+
+        view = AlertsDashboardView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value if user else "NEIGHBOR",
+            alerts=alerts,
+            on_dashboard=self.show_user_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
         )
+
+        self._replace("alerts", view)
+
 
     def show_settings(self, e=None):
         self._replace(
@@ -158,7 +178,6 @@ class UIController:
         else:
             # Successful login → dashboard
             return self.show_dashboard()
-
 
     def signup(self, name, email, password, dob, picture_path=None):
         
@@ -191,20 +210,24 @@ class UIController:
         self.page.update()
 
     def recover(self, email):
-        result = self.auth.recover_password(email)
+        ok, msg = self.auth.recover_password(email)
 
         # Show snackbar
         self.page.snack_bar = ft.SnackBar(
-            ft.Text(result),
-            bgcolor=SUCCESS_GREEN if result.startswith("Si el correo") else ERROR_RED,
+            ft.Text(msg),
+            # Simulation of real-world dynamics: red means no 
+            # email was sent, green means email was sent
+            bgcolor=SUCCESS_GREEN if ok else ERROR_RED, 
         )
         self.page.snack_bar.open = True
         self.page.update()
-
-        # Only navigate to reset on successful request
-        if result.startswith("Si el correo"):
+    
+        # Only navigate to reset if user exists
+        if ok:
+            # self.session.start_reset(email)
             self.show_reset()
-
+        else:
+            self.show_menu()
 
     def reset_password(self, pass1, pass2):
         result = self.auth.update_password(pass1, pass2)
@@ -219,8 +242,18 @@ class UIController:
             self._replace("login", LoginView(self.page, self, on_back_click=self.go_back))    
 
     def logout(self, e=None):
-        self.session.clear()
-        self.show_login()
+        print(">>> LOGOUT")
+        
+        # clear session
+        self.session.logout()
+
+        # clear navigation history
+        self.history = []
+
+        # Reset page UI
+        self.page.controls.clear()
+        self.show_menu()    # go to ViewMenu (your first screen)
+        self.page.update()
 
     # ======================================================
     # Navigation callbacks from views

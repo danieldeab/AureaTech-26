@@ -786,6 +786,160 @@
       "role": "vecino",
       "id": "3d5875fe-e479-4a98-8e2c-0c94922868d8",
       "ts": 1764510523
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "473458f1-03ea-4850-9f37-fde352e2ecd9",
+      "ts": 1764514678
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "750e4225-6fb8-4653-9dc0-6cd5098833b8",
+      "ts": 1764515084
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "e60fb4f2-e89f-4a95-b28c-32341e46b9cb",
+      "ts": 1764515366
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "3a1b72f3-3280-47b3-a414-17e473b34e78",
+      "ts": 1764515523
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "08e1091d-6e25-461e-88ea-e7e7ae30b13d",
+      "ts": 1764515616
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "5eb3bc66-f302-4735-964c-a2a42868d626",
+      "ts": 1764515638
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "fcc35453-1890-477e-a608-aaffbf1774b2",
+      "ts": 1764524206
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "ed5b1743-087d-4860-a2d9-d6a93d2ce9e5",
+      "ts": 1764524492
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "c4ea8158-fe05-4ba9-97fe-6a639d3b15cf",
+      "ts": 1764524582
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "8b456b00-2d9f-425c-8203-e8b30907d5f6",
+      "ts": 1764524653
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "b53e4739-c769-474a-966c-8373aa174ba4",
+      "ts": 1764525755
+    },
+    {
+      "action": "recover_request",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "65b13d1b-436e-4c1a-aa21-00e20c57ff27",
+      "ts": 1764525772
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "04587f86-88d0-4762-b6d0-8732d4309cf3",
+      "ts": 1764526289
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "1ac45782-9b60-4f61-b125-fe102044508a",
+      "ts": 1764526354
+    },
+    {
+      "action": "reset_success",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "c2a85fa8-fabf-4b2e-bd96-6553cb7a4386",
+      "ts": 1764526360
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "171ba6c3-8e90-4a12-a6a0-53f7b0286103",
+      "ts": 1764526371
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.es",
+      "role": "unknown",
+      "id": "1e5f0ae1-bffd-4276-84bc-6952207aaaa7",
+      "ts": 1764526382
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "1ff56ed6-ba4d-4f32-bd12-48774d32a242",
+      "ts": 1764526409
+    },
+    {
+      "action": "reset_success",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "854f3040-1ffd-4cd5-b100-44f3ae45048a",
+      "ts": 1764526413
+    },
+    {
+      "action": "recover_request",
+      "email": "this@that.com",
+      "role": "unknown",
+      "id": "3dc55a1c-a5fb-4d63-8c5d-50e163812fdb",
+      "ts": 1764526868
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "8310e2f2-c7e4-4302-97a8-4df231ad4a80",
+      "ts": 1764776560
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "c07cae00-797e-4093-81f1-99c06cc6e902",
+      "ts": 1764777461
     }
   ]
 }

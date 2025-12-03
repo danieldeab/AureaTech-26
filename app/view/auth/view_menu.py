@@ -38,7 +38,6 @@ class MenuView( ft.UserControl):
             fit=ft.ImageFit.CONTAIN,
             error_content=ft.Text("No se encontró 'logo.png'", color="red"),
         )
-        print("Logo path:", os.path.join(self.page.assets_dir, "logo.png"))
         # ---------------------------------------------------
         # Buttons
         # ---------------------------------------------------

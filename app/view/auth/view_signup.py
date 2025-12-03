@@ -71,7 +71,6 @@ class SignupView(ViewBaseAuth):
         )
         return ft.GestureDetector(
             on_tap=lambda e: (
-                print("Back clicked signup"),
                 self.on_back_click(),
             ),
             content=ft.Container(padding=6, content=back_icon),

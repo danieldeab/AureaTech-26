@@ -52,15 +52,15 @@ class BaseDashboardView(ft.UserControl):
     # --------------------------------------------------------
     def _header(self):
         avatar_path = None
-        if self.user and self.user.picture_path:
-            avatar_path = self.user.picture_path
+        if self.user and self.user.picture_url:
+            avatar_path = self.user.picture_url
             avatar = ft.CircleAvatar(
                 foreground_image_src=avatar_path,
                 radius=24,
             )
         else:
-            fullname = self.user.fullname if self.user else "User"
-            initials = "".join([p[0].upper() for p in fullname.split()[:2]])
+            name = self.user.name if self.user else "User"
+            initials = "".join([p[0].upper() for p in name.split()[:2]])
 
             avatar = ft.CircleAvatar(
                 radius=24,
@@ -74,7 +74,7 @@ class BaseDashboardView(ft.UserControl):
             )
 
         name_text = ft.Text(
-            self.user.fullname if self.user else "User",
+            self.user.name if self.user else "User",
             size=18,
             weight=ft.FontWeight.BOLD,
             color=FULL_BLACK,

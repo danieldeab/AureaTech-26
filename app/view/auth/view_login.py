@@ -55,7 +55,6 @@ class LoginView(ViewBaseAuth):
         )
         return ft.GestureDetector(
             on_tap=lambda e: (
-                print("Back clicked login"),
                 self.on_back_click(),
             ),
             content=ft.Container(padding=6, content=back_icon),

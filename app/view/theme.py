@@ -84,6 +84,7 @@ ERROR_RED      = "#B00020"
 WARNING_YELLOW = "#FFEB99"
 INFO_BLUE      = "#CFE2FF"
 SUCCESS_GREEN  = "#2E7D32"
+LIGHT_GREEN   = "#D0F0C0"
 
 # Alternates for foreground text on alert backgrounds
 ALERT_TEXT_DARK  = "#1E1E1E"

@@ -15,10 +15,14 @@ from app.controller.ui_controller import UIController
 
 def main(page: ft.Page):
     page.title = "AureaTech – Front Test"
+    page.fonts = {
+        "Poppins": "https://st.1001fonts.net/download/font/poppins.regular.ttf",
+    }
     page.window_width = 1100
     page.window_height = 750
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.theme = ft.Theme(font_family="Poppins")
 
     # Asset directory for images
     page.assets_dir = "app/assets"

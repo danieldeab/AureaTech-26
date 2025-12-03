@@ -1,22 +1,37 @@
-# app/models/user.py
-# this one should change maybe
-class User:
-    """Entidad de usuario básica para Sprint 1."""
-    def __init__(self, email, password, rol="vecino", nombre=None, picture_path=None):
-        self.email = email
-        self.password = password
-        self.rol = rol
-        self.nombre = nombre or email.split("@")[0]
-        self.picture_path = picture_path
-    def confirmar(self, email, password):
-        """Confirma credenciales."""
-        return self.email == email and self.password == password
+from __future__ import annotations
+from dataclasses import dataclass, asdict
+from typing import Optional
+from uuid import UUID, uuid4
+from .enums import RoleEnum
 
-    def to_dict(self):
-        return {
-            "email": self.email,
-            "password": self.password,
-            "rol": self.rol,
-            "nombre": self.nombre,
-            "picture_path": self.picture_path
-        }
+@dataclass(slots=True)
+class User:
+    id: UUID
+    name: str
+    email: str
+    password_hash: str
+    role: RoleEnum
+    picture_path: Optional[str] = None
+    picture_url: Optional[str] = None
+
+    @staticmethod
+    def new(name: str, email: str, password_hash: str, role: RoleEnum) -> "User":
+        return User(id=uuid4(), name=name, email=email, password_hash=password_hash, role=role)
+
+    def to_dict(self) -> dict:
+        d = asdict(self)
+        d["id"] = str(self.id)
+        d["role"] = self.role.value
+        return d
+
+    @staticmethod
+    def from_dict(d: dict) -> "User":
+        return User(
+            id=UUID(d["id"]),
+            name=d["name"],
+            email=d["email"],
+            password_hash=d["password_hash"],
+            role=RoleEnum(d["role"]),
+            picture_path=d.get("picture_path"),
+            picture_url=d.get("picture_url"),
+        )

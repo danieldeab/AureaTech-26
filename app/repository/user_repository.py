@@ -1,6 +1,6 @@
 import json
 import os
-from app.model.models import User
+from app.model.user import User
 from app.repository.interfaces.user_repository_interface import IUserRepository
 
 USERS_PATH = os.path.join("data", "usuarios.json")
@@ -21,42 +21,30 @@ class UserRepository(IUserRepository):
         if isinstance(data, dict) and "usuarios" in data:
             data = data["usuarios"]
 
-        # Convert legacy users to new schema if needed
-        cleaned = []
+        # Load using the domain factory
+        loaded = []
         for u in data:
-            if "fullname" not in u:
-                # It's legacy style: convert it
-                cleaned.append(self._convert_legacy_user(u))
-            else:
-                cleaned.append(User(**u))
-
-        return cleaned
-
-    def _convert_legacy_user(self, u):
-        """
-        Convert old format:
-            id, email, password_hash, display_name, password
-        to new format:
-            fullname, email, password(hashed), dob, role
-        """
-        return User(
-            fullname=u.get("display_name", "Usuario"),
-            email=u.get("email"),
-            password=u.get("password_hash"),   # we keep legacy hash
-            dob="2000-01-01",                  # default (no dob in legacy)
-            role="vecino"
-        )
-
+            try:
+                loaded.append(User.from_dict(u))
+            except Exception as e:
+                print(f"[UserRepository] Error loading user: {e}\nUser data: {u}")
+        return loaded
+    
     def save(self):
-        with open(self.path, "w", encoding="utf-8") as f:
-            json.dump([u.__dict__ for u in self.users], f, ensure_ascii=False, indent=4)
+        tmp_path = self.path + ".tmp"
+
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            json.dump([u.to_dict() for u in self.users], f, ensure_ascii=False, indent=4)
+
+        os.replace(tmp_path, self.path)
 
     def add_user(self, user: User):
         self.users.append(user)
 
     def find_by_email(self, email: str):
+        email = email.strip().lower()
         for u in self.users:
-            if u.email.lower() == email.lower():
+            if u.email.lower() == email:
                 return u
         return None
     

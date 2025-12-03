@@ -2,8 +2,12 @@
 
 class DashboardController:
     """
-    Placeholder controller until we implement real sensor/actuator logic.
+    Orchestrates dashboard-related operations.
     """
-    def __init__(self, sensor_repo=None, actuator_repo=None):
-        self.sensor_repo = sensor_repo
-        self.actuator_repo = actuator_repo
+
+    def __init__(self, alert_service):
+        self.alert_service = alert_service
+
+    def get_alerts(self):
+        """Return all alerts (no filtering yet)."""
+        return self.alert_service.get_all_alerts()
