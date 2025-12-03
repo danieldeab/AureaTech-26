@@ -1,0 +1,16 @@
+{
+  "usuarios": [
+    {
+      "email": "demo@test.com",
+      "password": "1234",
+      "rol": "vecino",
+      "nombre": "demo"
+    },
+    {
+      "email": "e2e@test.com",
+      "password": "9999",
+      "rol": "tecnico",
+      "nombre": "e2e"
+    }
+  ]
+}
