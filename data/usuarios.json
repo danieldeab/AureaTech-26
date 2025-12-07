@@ -1,25 +1,29 @@
-{
-  "usuarios": [
-    {
-      "id": 1,
-      "email": "demo@test.com",
-      "password_hash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
-      "display_name": "demo@test.com",
-      "password": "1234"
-    },
-    {
-      "id": 2,
-      "email": "e2e@test.com",
-      "password_hash": "888df25ae35772424a560c7152a1de794440e0ea5cfee62828333a456a506e05",
-      "display_name": "e2e@test.com",
-      "password": "9999"
-    },
-    {
-      "id": 3,
-      "email": "test@test.com",
-      "password_hash": "7825d1cacf432fafe6b907c8075fc4558ca7f4f8eaa358bad061e2ee244a66f2",
-      "display_name": "Pepillo Grillo",
-      "password": "pinocho"
-    }
-  ]
-}
+[
+  {
+    "id": "4d9b3a91-0aa3-4d14-a09e-dc5c73f30311",
+    "name": "System Administrator",
+    "email": "admin@example.com",
+    "passwordHash": "e10adc3949ba59abbe56e057f20f883e",
+    "role": "ADMIN",
+    "picturePath": "/images/users/admin.png",
+    "pictureUrl": "https://cdn.example.com/users/admin.png"
+  },
+  {
+    "id": "83e497b5-3df1-4a3f-b108-f7c47b5df282",
+    "name": "Tech Support",
+    "email": "technician@example.com",
+    "passwordHash": "25d55ad283aa400af464c76d713c07ad",
+    "role": "TECHNICIAN",
+    "picturePath": "/images/users/technician.png",
+    "pictureUrl": "https://cdn.example.com/users/technician.png"
+  },
+  {
+    "id": "d5a38f92-9a19-4c1d-9f1e-e2c94befb127",
+    "name": "Neighbor User",
+    "email": "neighbor@example.com",
+    "passwordHash": "d8578edf8458ce06fbc5bb76a58c5ca4",
+    "role": "NEIGHBOR",
+    "picturePath": "/images/users/neighbor.png",
+    "pictureUrl": "https://cdn.example.com/users/neighbor.png"
+  }
+]
