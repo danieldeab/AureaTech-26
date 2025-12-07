@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime, timezone
 from typing import List, Optional
-from app.models.actuator import Actuator
+from app.model.actuator import Actuator
 from app.models.user import User
 
 # Define rutas relativas
