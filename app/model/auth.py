@@ -1,9 +1,4 @@
 # app/models/auth.py
-<<<<<<<< HEAD:app/models/auth.py
-========
-# this one should get deprecated
-
->>>>>>>> 820dbe6f368e76ecb102f7496dea06f9fe4108ee:app/model/auth.py
 import hashlib, json, os
 from dataclasses import asdict
 from typing import Optional, List, Tuple
