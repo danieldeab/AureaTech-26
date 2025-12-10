@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.model.models import User
+from app.model.user import User
 from typing import Optional, List
 
 class IUserRepository(ABC):

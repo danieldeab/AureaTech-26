@@ -7,7 +7,10 @@ from datetime import datetime
 from app.model.alert import Alert
 from app.repository.interfaces.alert_repository_interface import IAlertRepository
 
-ALERTS_PATH = os.path.join("data", "alertas.json")
+# Resolve data path relative to the package root (project-level data dir)
+_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
+ALERTS_PATH = os.path.join(DATA_DIR, "alerts.json")
 
 
 class AlertRepository(IAlertRepository):

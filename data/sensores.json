@@ -1,0 +1,20 @@
+[
+    {
+        "id": "af9f342a-4149-4aeb-9a13-9b1d72303584",
+        "type": "temperature",
+        "location": "Zona Residencial",
+        "thresholds": {
+            "min": -5.0,
+            "max": 42.0
+        }
+    },
+    {
+        "id": "f594b044-b8c5-40ba-a88f-0ad2d4ea2861",
+        "type": "humidity",
+        "location": "Zona Residencial",
+        "thresholds": {
+            "min": 20.0,
+            "max": 85.0
+        }
+    }
+]
