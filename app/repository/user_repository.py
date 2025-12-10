@@ -1,9 +1,12 @@
 import json
 import os
-from app.model.models import User
+from app.model.user import User
 from app.repository.interfaces.user_repository_interface import IUserRepository
 
-USERS_PATH = os.path.join("data", "usuarios.json")
+# Always resolve data path relative to the project root, not the CWD
+_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
+USERS_PATH = os.path.join(DATA_DIR, "usuarios.json")
 
 class UserRepository(IUserRepository):
     def __init__(self, path=USERS_PATH):
@@ -21,35 +24,19 @@ class UserRepository(IUserRepository):
         if isinstance(data, dict) and "usuarios" in data:
             data = data["usuarios"]
 
-        # Convert legacy users to new schema if needed
-        cleaned = []
+        # Cargar usuarios usando from_dict; tolerar entradas legacy
+        users = []
         for u in data:
-            if "fullname" not in u:
-                # It's legacy style: convert it
-                cleaned.append(self._convert_legacy_user(u))
-            else:
-                cleaned.append(User(**u))
-
-        return cleaned
-
-    def _convert_legacy_user(self, u):
-        """
-        Convert old format:
-            id, email, password_hash, display_name, password
-        to new format:
-            fullname, email, password(hashed), dob, role
-        """
-        return User(
-            fullname=u.get("display_name", "Usuario"),
-            email=u.get("email"),
-            password=u.get("password_hash"),   # we keep legacy hash
-            dob="2000-01-01",                  # default (no dob in legacy)
-            role="vecino"
-        )
+            try:
+                users.append(User.from_dict(u))
+            except Exception:
+                # Ignorar registros que no encajan con el modelo actual
+                continue
+        return users
 
     def save(self):
         with open(self.path, "w", encoding="utf-8") as f:
-            json.dump([u.__dict__ for u in self.users], f, ensure_ascii=False, indent=4)
+            json.dump([u.to_dict() for u in self.users], f, ensure_ascii=False, indent=4)
 
     def add_user(self, user: User):
         self.users.append(user)

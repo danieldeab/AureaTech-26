@@ -2,12 +2,18 @@ import json, uuid, os
 from datetime import datetime
 from app.repository.interfaces.log_repository_interface import ILogRepository
 
+# Resolve data path to package root, not CWD
+_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
+LOGS_PATH = os.path.join(DATA_DIR, "logs.json")
+
 class LogRepository(ILogRepository):
-    def __init__(self, path="data/logs.json"):
+    def __init__(self, path=LOGS_PATH):
         self.path = path
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
         if not os.path.exists(self.path):
-            with open(self.path, "w") as f:
-                json.dump({"eventos": []}, f)
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump({"eventos": []}, f, ensure_ascii=False, indent=2)
 
     def add(self, entry: dict):
         entry["id"] = str(uuid.uuid4())
