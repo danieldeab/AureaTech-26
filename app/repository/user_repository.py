@@ -24,28 +24,40 @@ class UserRepository(IUserRepository):
         if isinstance(data, dict) and "usuarios" in data:
             data = data["usuarios"]
 
-        # Cargar usuarios usando from_dict; tolerar entradas legacy
-        users = []
+        # Load using the domain factory
+        loaded = []
         for u in data:
             try:
-                users.append(User.from_dict(u))
-            except Exception:
-                # Ignorar registros que no encajan con el modelo actual
-                continue
-        return users
-
+                loaded.append(User.from_dict(u))
+            except Exception as e:
+                print(f"[UserRepository] Error loading user: {e}\nUser data: {u}")
+        return loaded
+    
     def save(self):
-        with open(self.path, "w", encoding="utf-8") as f:
+        # Using temp to avoid unfinished transactions from corruopting data
+        tmp_path = self.path + ".tmp"
+
+        with open(tmp_path, "w", encoding="utf-8") as f:
             json.dump([u.to_dict() for u in self.users], f, ensure_ascii=False, indent=4)
+
+        os.replace(tmp_path, self.path)
 
     def add_user(self, user: User):
         self.users.append(user)
 
     def find_by_email(self, email: str):
+        email = email.strip().lower()
         for u in self.users:
-            if u.email.lower() == email.lower():
+            if u.email.lower() == email:
                 return u
         return None
     
+    def find_by_community_id(self, community_id: int):
+        users = []
+        for u in self.users:
+            if u.community_id == community_id:
+                users.append(u)
+        return users
+
     def get_all(self):
         return self.users

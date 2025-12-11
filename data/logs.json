@@ -65,6 +65,913 @@
       "evento": "login_ok",
       "email": "e2e@test.com",
       "rol": "tecnico"
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "vecino",
+      "id": "8ec888ad-96c6-437c-8195-829f8ca45670",
+      "ts": 1764259010
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "91cec2cc-32e3-44dc-8600-4edd4b0edff2",
+      "ts": 1764259027
+    },
+    {
+      "action": "signup_ok",
+      "email": "pepe@perez.com",
+      "role": "vecino",
+      "id": "87ec7085-ae70-40f7-a2e0-efa083f06c57",
+      "ts": 1764260200
+    },
+    {
+      "action": "login_ok",
+      "email": "pepe@perez.com",
+      "role": "vecino",
+      "id": "499b5c7b-e61e-4403-8e6d-99b2a7f1484e",
+      "ts": 1764260209
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "vecino",
+      "id": "aef8f65a-6bdc-4c9d-a36f-24e7bc14e264",
+      "ts": 1764260547
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "vecino",
+      "id": "83aa46e0-2daf-46f2-bf00-389fffa38cfa",
+      "ts": 1764265543
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@gmail.com",
+      "role": "unknown",
+      "id": "c8bdcbbb-8140-4a2d-94bc-ac6e9e07d299",
+      "ts": 1764265620
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "vecino",
+      "id": "2a8d5b9d-f589-471c-8035-9e7fe031558c",
+      "ts": 1764265702
+    },
+    {
+      "action": "reset_attempt_no_session",
+      "email": "unknown",
+      "role": "unknown",
+      "id": "738eb9ff-2627-436a-926d-92a071a0637e",
+      "ts": 1764265740
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "vecino",
+      "id": "41f02456-d2b2-4f0b-bc9c-bdc8b43502c7",
+      "ts": 1764265750
+    },
+    {
+      "action": "reset_attempt_no_session",
+      "email": "unknown",
+      "role": "unknown",
+      "id": "5cb4aeca-4e4c-4b01-9c53-2831632525c8",
+      "ts": 1764265755
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@gmail.com",
+      "role": "unknown",
+      "id": "e34b63a8-82fa-4c0a-8c6e-8375f41bf112",
+      "ts": 1764266617
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@gmail.com",
+      "role": "unknown",
+      "id": "dc178dee-ee8e-48db-9d07-9592b26a3cd3",
+      "ts": 1764266669
+    },
+    {
+      "action": "reset_attempt_no_session",
+      "email": "unknown",
+      "role": "unknown",
+      "id": "0d34eb1d-70ea-462c-9dbb-1ce5e6cdaa3b",
+      "ts": 1764266682
+    },
+    {
+      "action": "recover_request",
+      "email": "2@2.com",
+      "role": "unknown",
+      "id": "1515d38a-4511-43d3-9ea8-efa09e349d9b",
+      "ts": 1764266704
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@f.com",
+      "role": "unknown",
+      "id": "bfe36ada-db1c-4db3-852d-e731d76c8080",
+      "ts": 1764266991
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "22f2b482-0ff9-4ffd-9057-29cfdcf07016",
+      "ts": 1764328189
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "1d1cf07c-e83e-49a4-8f43-d08310f992b0",
+      "ts": 1764328623
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "4bf443a5-6153-42c6-8603-1331ae3ba43d",
+      "ts": 1764328683
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "7195f387-205e-4f5e-a9b2-61445254a0dc",
+      "ts": 1764345973
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "c2bd4379-1e12-4471-ab24-8867dc1b6e3c",
+      "ts": 1764346307
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "42910639-8ef0-4549-9812-0ee240c76bdd",
+      "ts": 1764346344
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "40549ddd-0636-42eb-979a-457d35f96788",
+      "ts": 1764346647
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "f98eba34-7c5d-4e56-bb86-7f6856ca21e0",
+      "ts": 1764346734
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "8208bf81-1b68-4b3c-875d-0ccf16661dc5",
+      "ts": 1764346834
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "1cd074e3-7b4e-4a4c-b5c3-f13d607a475f",
+      "ts": 1764346930
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "fa27e734-20f8-46d0-b8be-e8f02345da85",
+      "ts": 1764346932
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "87d02d3f-0a94-4a58-8a56-090f20ea81f0",
+      "ts": 1764346964
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "52a7a2ba-bcca-4d13-bc01-498b46df281b",
+      "ts": 1764347195
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "da61086f-97db-4bb5-b9d5-8314e84d082d",
+      "ts": 1764347651
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "6be4c9de-5f7a-4663-914d-8da6eb95ac4f",
+      "ts": 1764348619
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "6369607b-21b6-4cf3-b0d0-94c7f1ec3464",
+      "ts": 1764348865
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "f10e76d2-cf6b-48a2-bc6d-63796cd1f9e0",
+      "ts": 1764348904
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "e76e1d74-18d1-427c-9986-3e446581d2e1",
+      "ts": 1764348993
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "07a74902-7012-4c4a-8b36-05551bdd262f",
+      "ts": 1764350107
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "2a21de02-d61c-4126-8b12-99ab53c3ca39",
+      "ts": 1764350168
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "947b547b-995a-41e3-a395-6bb2588235d1",
+      "ts": 1764350460
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "5d6cd133-7a0f-4385-92f0-cb7cd9dd3132",
+      "ts": 1764350539
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "38ee10c1-0eb1-40f2-add3-eb51bae3569e",
+      "ts": 1764350554
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "20facbf7-0c2c-49cf-9c8b-9da2709912cb",
+      "ts": 1764350572
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "ba3534ad-744c-4166-9640-b08a112992b3",
+      "ts": 1764350590
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "3c01c243-03b0-4ab9-a2ee-c99e86843922",
+      "ts": 1764350606
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "41ff893e-bdfa-4419-a75b-87237bf655d4",
+      "ts": 1764350727
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "d4c91892-b7e4-401a-80a8-3e4d8f7526f9",
+      "ts": 1764350838
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "760ce326-7843-4054-bf7b-b700c78cbde3",
+      "ts": 1764350880
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "4d22c350-741f-4787-a9cf-8bea0e6247e3",
+      "ts": 1764350926
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "975611c2-2017-4137-ba08-0ce519eaeada",
+      "ts": 1764350988
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "82eb4fd4-16db-4fb3-a7f7-d391f303296b",
+      "ts": 1764351086
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "60f38401-a822-4934-88ad-017154e974b0",
+      "ts": 1764351187
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "c1ade21b-aad3-4621-b5f1-0b7175560e70",
+      "ts": 1764351293
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "28083efe-118c-4f47-9994-00763d00b1d9",
+      "ts": 1764351355
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "5a3f7309-9e27-400f-8896-161c28b09855",
+      "ts": 1764351676
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "1ed479ba-32b4-460c-aa3b-4d2890581eb5",
+      "ts": 1764351756
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "4a2ab3b8-0131-42d1-bd07-0630bddebb15",
+      "ts": 1764351790
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "56246479-cea8-4338-85e3-74f4ea15f5a2",
+      "ts": 1764351842
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "a4ae5ac3-1b24-45fd-8b9c-822d308d3b8c",
+      "ts": 1764351892
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "eefeea53-40b3-4e71-8388-8625f99473b9",
+      "ts": 1764351919
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "8ccc381b-7111-4e26-a871-64a7187ef5ce",
+      "ts": 1764351954
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "ff9b9dda-32f6-4447-a06e-7609e49367c2",
+      "ts": 1764352008
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "3ae38b92-7fae-40b1-b55e-dcb2d1159f43",
+      "ts": 1764352041
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "12c70ed8-643e-448d-94b5-fb621191a408",
+      "ts": 1764352071
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "f5011cf3-5993-4dc0-b077-cd7f94713af4",
+      "ts": 1764352296
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "5de9ac22-ce29-4985-a4e7-40d66b3e2525",
+      "ts": 1764352328
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "2ccc5c64-c4d3-470e-a745-219ea1d4040b",
+      "ts": 1764352380
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "6c3e02c6-63d3-45a5-9e34-e0caf595b5ca",
+      "ts": 1764352407
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "184ad17e-2b58-411e-b963-a9df048cf198",
+      "ts": 1764352757
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "26e930da-353f-4199-a413-87d272323bc1",
+      "ts": 1764352872
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "0030f0a0-3506-47da-a6ff-6f0e0ea5b960",
+      "ts": 1764352896
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "2fa4425c-bbde-42e7-8384-7b93b25123f3",
+      "ts": 1764353013
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "3ab64044-cffd-4592-9d66-fcd353f34ec4",
+      "ts": 1764353046
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "22d43900-f209-476c-a6be-867bdbef312a",
+      "ts": 1764353138
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "b6396f11-3b57-48a2-814c-79b36d938b57",
+      "ts": 1764353245
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "a7b98512-a859-4b4a-8ab1-54ee176851d3",
+      "ts": 1764353353
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "9d20862e-a952-4cf0-b38f-73dc5209450f",
+      "ts": 1764353368
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "55312bb0-de3a-49ab-a47c-5045f8a2c36a",
+      "ts": 1764354263
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "4d3d083c-5bf9-4c45-8df3-04d319372a33",
+      "ts": 1764354267
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "45475003-66e7-4cac-b5f0-693fe5930273",
+      "ts": 1764354365
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "60d59248-a3f1-4b8c-bdc3-ac3c4d106480",
+      "ts": 1764354488
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "a6e93910-03cd-4c34-a21c-ffcdcafd29c2",
+      "ts": 1764354507
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "b28bc540-9925-49cc-81fc-2b85d65d6010",
+      "ts": 1764354575
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "83b26dbf-25a8-4c50-9360-aff96478f27e",
+      "ts": 1764354602
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "72818ee8-9b10-487a-9ac0-c8b5e217fcf2",
+      "ts": 1764354864
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "d3b2b090-b95a-4c77-a09f-7836c2f30f88",
+      "ts": 1764507103
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "d44e5ea3-daab-41c7-afde-0b8fb4a52044",
+      "ts": 1764507164
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "dbc235c6-f0f6-43c0-91b1-02dbc5a31d41",
+      "ts": 1764507208
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "572234ce-e969-425d-87cf-1f5c08126956",
+      "ts": 1764507375
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "16f062cb-eb32-4a39-a171-b9c94bcf48ba",
+      "ts": 1764507523
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "8d2e5b49-ebd9-445f-aff2-3c7cc05c8c73",
+      "ts": 1764507592
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "d0c3e89f-d04d-485f-a636-eadca670c7b8",
+      "ts": 1764507817
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "70e64b44-863a-441b-ad17-bc364c871bfc",
+      "ts": 1764508055
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "dd995b3e-5993-4f13-a123-bb5bc205b669",
+      "ts": 1764508151
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "9b080f45-ee0d-4eb1-b102-a0b0f5b935d8",
+      "ts": 1764508371
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "748b7a05-ce68-41c4-97c8-5c9419fd931e",
+      "ts": 1764508442
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "19410930-bf06-4954-9f35-a690b84ff1e1",
+      "ts": 1764508476
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "2cd50daa-f4f7-401b-93e9-8040f2992c7a",
+      "ts": 1764508537
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "3b158a44-7bf0-416e-a65e-2c093ec92cea",
+      "ts": 1764508575
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "c6bd75cf-19c3-4ea4-b89d-ecb4d8cfd181",
+      "ts": 1764508657
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "34af3978-e015-4a0e-b379-88a0af9efa43",
+      "ts": 1764509265
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "09d39aec-d9e1-4644-ab53-7335d66df3a9",
+      "ts": 1764509380
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "a98584b3-bc64-42a4-8e9a-5a1e0003db35",
+      "ts": 1764509434
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "c39a73dd-9bd2-45a6-92cb-9e6e65f03804",
+      "ts": 1764509513
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "17ff652e-4d08-41a0-b09b-44afa9f4fa11",
+      "ts": 1764510514
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "vecino",
+      "id": "3d5875fe-e479-4a98-8e2c-0c94922868d8",
+      "ts": 1764510523
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "473458f1-03ea-4850-9f37-fde352e2ecd9",
+      "ts": 1764514678
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "750e4225-6fb8-4653-9dc0-6cd5098833b8",
+      "ts": 1764515084
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "e60fb4f2-e89f-4a95-b28c-32341e46b9cb",
+      "ts": 1764515366
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "3a1b72f3-3280-47b3-a414-17e473b34e78",
+      "ts": 1764515523
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "08e1091d-6e25-461e-88ea-e7e7ae30b13d",
+      "ts": 1764515616
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "vecino",
+      "id": "5eb3bc66-f302-4735-964c-a2a42868d626",
+      "ts": 1764515638
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "fcc35453-1890-477e-a608-aaffbf1774b2",
+      "ts": 1764524206
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "ed5b1743-087d-4860-a2d9-d6a93d2ce9e5",
+      "ts": 1764524492
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "c4ea8158-fe05-4ba9-97fe-6a639d3b15cf",
+      "ts": 1764524582
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "8b456b00-2d9f-425c-8203-e8b30907d5f6",
+      "ts": 1764524653
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "b53e4739-c769-474a-966c-8373aa174ba4",
+      "ts": 1764525755
+    },
+    {
+      "action": "recover_request",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "65b13d1b-436e-4c1a-aa21-00e20c57ff27",
+      "ts": 1764525772
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "04587f86-88d0-4762-b6d0-8732d4309cf3",
+      "ts": 1764526289
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "1ac45782-9b60-4f61-b125-fe102044508a",
+      "ts": 1764526354
+    },
+    {
+      "action": "reset_success",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "c2a85fa8-fabf-4b2e-bd96-6553cb7a4386",
+      "ts": 1764526360
+    },
+    {
+      "action": "login_ok",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "171ba6c3-8e90-4a12-a6a0-53f7b0286103",
+      "ts": 1764526371
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.es",
+      "role": "unknown",
+      "id": "1e5f0ae1-bffd-4276-84bc-6952207aaaa7",
+      "ts": 1764526382
+    },
+    {
+      "action": "recover_request",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "1ff56ed6-ba4d-4f32-bd12-48774d32a242",
+      "ts": 1764526409
+    },
+    {
+      "action": "reset_success",
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "854f3040-1ffd-4cd5-b100-44f3ae45048a",
+      "ts": 1764526413
+    },
+    {
+      "action": "recover_request",
+      "email": "this@that.com",
+      "role": "unknown",
+      "id": "3dc55a1c-a5fb-4d63-8c5d-50e163812fdb",
+      "ts": 1764526868
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "8310e2f2-c7e4-4302-97a8-4df231ad4a80",
+      "ts": 1764776560
+    },
+    {
+      "action": "login_ok",
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "c07cae00-797e-4093-81f1-99c06cc6e902",
+      "ts": 1764777461
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "acf5dc7b-5102-4754-a18b-088f3ea8a0be",
+      "ts": 1765412227
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "8153e67c-0396-4c14-a4f6-518c933a0a24",
+      "ts": 1765412435
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "9d48f9f3-f246-4fed-95df-45bcecdce9ac",
+      "ts": 1765412492
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "81adae7e-c6e2-4a97-a470-6993ee83036b",
+      "ts": 1765412654
     }
   ]
 }

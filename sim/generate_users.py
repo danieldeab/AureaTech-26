@@ -8,7 +8,6 @@ from app.repository.user_repository import UserRepository
 class UserGenerator:
     """
     Generador de usuarios de simulación.
-
     """
 
     def __init__(self, repository: UserRepository | None = None):

@@ -1,50 +1,46 @@
-# app/models/actuator.py
+# app/model/actuator.py
 
-import uuid
+from __future__ import annotations
+from dataclasses import dataclass, asdict
+from uuid import UUID, uuid4
 from datetime import datetime
+from .enums import ActuatorTypeEnum
 
+
+@dataclass(slots=True)
 class Actuator:
-    """Entidad de actuador básica para Sprint 3."""
+    id: UUID
+    type: str                     # accept raw string or enum
+    state: bool
+    lastChangedAt: datetime
+    community_id: int
 
-    def __init__(self, 
-                 type: str,
-                 state: bool = False):
-        
-        self._id = str(uuid.uuid4())            # siempre aleatorio
-        self._type = type
-        self._state = state
-        self._lastChangedAt = datetime.now(datetime.timezone.utc)
+    @staticmethod
+    def new(type: str, community_id: int, state: bool = False) -> "Actuator":
+        return Actuator(
+            id=uuid4(),
+            type=type,
+            state=state,
+            lastChangedAt=datetime.utcnow(),
+            community_id=community_id
+        )
 
-    # ---------- GETTERS ----------
-    def get_id(self):
-        return self._id
-
-    def get_type(self):
-        return self._type
-
-    def get_state(self):
-        return self._state
-
-    def get_last_changed_at(self):
-        return self._lastChangedAt
-
-
-    # ---------- MÉTODOS ----------
     def toggle(self):
-        """Invierte el estado del actuador y actualiza lastChangedAt."""
-        self._state = not self._state
-        self._lastChangedAt = datetime.now(datetime.timezone.utc)
+        self.state = not self.state
+        self.lastChangedAt = datetime.utcnow()
 
-    def set_state(self, new_state: bool):
-        """Cambia el estado explícitamente."""
-        if self._state != new_state:
-            self._state = new_state
-            self._lastChangedAt = datetime.now(datetime.timezone.utc)
+    def to_dict(self) -> dict:
+        d = asdict(self)
+        d["id"] = str(self.id)
+        d["lastChangedAt"] = self.lastChangedAt.isoformat()
+        return d
 
-    def to_dict(self):
-        return {
-            "id": self._id,
-            "type": self._type,
-            "state": self._state,
-            "lastChangedAt": self._lastChangedAt.isoformat(),
-        }
+    @staticmethod
+    def from_dict(d: dict) -> "Actuator":
+        return Actuator(
+            id=UUID(d["id"]),
+            type=d["type"],
+            state=bool(d["state"]),
+            lastChangedAt=datetime.fromisoformat(d["lastChangedAt"]),
+            community_id=d.get("community_id", 0),
+        )

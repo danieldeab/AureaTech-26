@@ -7,6 +7,7 @@ from .enums import RoleEnum
 @dataclass(slots=True)
 class User:
     id: UUID
+    community_id: int
     name: str
     email: str
     password_hash: str
@@ -15,8 +16,8 @@ class User:
     picture_url: Optional[str] = None
 
     @staticmethod
-    def new(name: str, email: str, password_hash: str, role: RoleEnum) -> "User":
-        return User(id=uuid4(), name=name, email=email, password_hash=password_hash, role=role)
+    def new(name: str, email: str, password_hash: str, role: RoleEnum, community_id: int) -> "User":
+        return User(id=uuid4(), name=name, email=email, password_hash=password_hash, role=role, community_id=community_id)
 
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -28,6 +29,7 @@ class User:
     def from_dict(d: dict) -> "User":
         return User(
             id=UUID(d["id"]),
+            community_id=d["community_id"],
             name=d["name"],
             email=d["email"],
             password_hash=d["password_hash"],

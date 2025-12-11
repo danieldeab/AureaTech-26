@@ -1,326 +1,52 @@
 [
     {
-        "id": "2f6ab29d-ef53-4755-9355-4010ebafe0c0",
-        "name": "Jorge García",
-        "email": "jorge.garcía142@hotmail.com",
-        "password_hash": "VYlukMe4qjVlsJHOrIDrsF0bHMfIklefTNRLAVSdnRo9EFjcDCYOKiJ4fNTa",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
+        "id": "170268e2-5b76-4de8-ba71-01233b7db61c",
+        "community_id": 0,
+        "name": "María Esperanza",
+        "email": "admin@test.com",
+        "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+        "role": "ADMIN",
+        "picture_path": "",
+        "picture_url": "https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg"
     },
     {
-        "id": "996574d9-e8f5-4ad6-88f9-ad905317d82b",
-        "name": "Jorge Gómez",
-        "email": "jorge.gómez596@outlook.com",
-        "password_hash": "tCLVG8DSGV6Xdajp3GRzATJhSZ2SaRn3nSXo6VxZ4eOTTk9buvWIy9YPNsLA",
+        "id": "c7ae94d4-fc00-4d0a-bd0e-3cdf44e45bc9",
+        "community_id": 1,
+        "name": "Tech Support Comunidad 1",
+        "email": "tech@test.com",
+        "password_hash": "fe9bbd400bb6cb314531e3462507661401959afc69aae96bc6aec2c213b83bc1",
         "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
+        "picture_path": "",
+        "picture_url": "https://images.pexels.com/photos/346529/pexels-photo-346529.jpeg"
     },
     {
-        "id": "4998cfb1-b57d-4a38-b9a3-47d304277bb3",
-        "name": "David Ruiz",
-        "email": "david.ruiz468@aureatech.com",
-        "password_hash": "iidXkF8iBTbMw3dc3FBrZkmWTxFo4vYCUsrkBjgIvE6NePrCPyuBpi40AxNR",
+        "id": "c7ae94d4-fc00-4d0a-bd0e-3cdf44e45bc9",
+        "community_id": 2,
+        "name": "Tech Support Comunidad 2",
+        "email": "tech@test.com",
+        "password_hash": "fe9bbd400bb6cb314531e3462507661401959afc69aae96bc6aec2c213b83bc1",
+        "role": "TECHNICIAN",
+        "picture_path": "",
+        "picture_url": "https://images.pexels.com/photos/346529/pexels-photo-346529.jpeg"
+    },    
+    {
+        "id": "c8d42925-001f-476c-9929-82558cf97ab9",
+        "community_id": 1,
+        "name": "Juan",
+        "email": "juan@juan.com",
+        "password_hash": "ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca",
         "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
+        "picture_path": "",
+        "picture_url": "https://images.pexels.com/photos/1819483/pexels-photo-1819483.jpeg"
     },
     {
-        "id": "0041c78c-eab7-443c-a561-77623f86d769",
-        "name": "Ana Pérez",
-        "email": "ana.pérez745@gmail.com",
-        "password_hash": "noLCB9lm7G3Oe6ic25YTGcRVoH6c1iwSpu3NuTBJYlaF1IgvuiMKCWsZCaSG",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "86e19724-343e-42f9-bce4-b46ece062476",
-        "name": "David García",
-        "email": "david.garcía958@outlook.com",
-        "password_hash": "0hQQJlPDdbje33wKWUD3y5J06m3KSyzu5bb3Vlub5M7PrU6agSCqyDsRqtx7",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "a9cf00e3-e61e-40fe-bf45-5e965f515293",
-        "name": "Pedro Torres",
-        "email": "pedro.torres585@hotmail.com",
-        "password_hash": "dW3ivhVapW6RozWWtExTi2DtqL67JjIxZxdRnOniVEqq8bV1kfjqUs5ydKxs",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "4b918359-27cd-4f44-a988-4a02b62557cd",
-        "name": "Lucía Ruiz",
-        "email": "lucía.ruiz434@aureatech.com",
-        "password_hash": "kjQOHvZhAbFmzt3QhvQPINgJ3IdoXJQYw3hfNTpUI9xVa2UeMz73ILwUYf3R",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "c2fe494b-f030-4bf9-96dc-108a5ebd5be0",
-        "name": "Sara García",
-        "email": "sara.garcía13@hotmail.com",
-        "password_hash": "CZqdEDRFS3uKu0J1cTVdM2dLWSJTWHbU71HdyVyXYO39oo2tgq0xCin5vgUs",
+        "id": "e5227768-8dd8-4302-883b-bda3c14819c5",
+        "community_id": 2,
+        "name": "AureaTech",
+        "email": "aurea@tech.com",
+        "password_hash": "494aea83574267c4173aacdbb7768d0b3d4935eed2f7879f5e558f2198865fb5",
         "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "e7809e35-c3e8-4e62-b110-bb13f23ee59d",
-        "name": "Carlos Díaz",
-        "email": "carlos.díaz98@aureatech.com",
-        "password_hash": "0TlAEWU5jeHdh7khoBGDT9lfXGj4vhons2Y2TfBmnutUAFMUi0aBAKEBs5R9",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "a8154e7e-44df-42a9-b8c2-360817403b76",
-        "name": "Pedro Ruiz",
-        "email": "pedro.ruiz822@gmail.com",
-        "password_hash": "P3QvJZiwcXSe4De6eDRghr0CNdSWXNmgJLnPBIDiqCJUHxZwrglDHw4PZtbK",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "01f892f6-7aad-4c12-b3c3-17419fd93cac",
-        "name": "Paula Díaz",
-        "email": "paula.díaz905@hotmail.com",
-        "password_hash": "JWPA5FCWFjZj4YfNVKqSiW20n6epD9nUWctw3DUSzWE3mNtAffoEGXiJfbuT",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "a87cbead-8180-4f10-b902-c3ddd74b8c78",
-        "name": "Sara Fernández",
-        "email": "sara.fernández239@hotmail.com",
-        "password_hash": "SJnHYMR3doLqbN8jY4yQD4QtHAGAcfk84fIytiVJxIOLKWoZCtfz5EgYUfaV",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "009ce5e3-beb8-458b-8e8a-4e96e7adbab9",
-        "name": "María Fernández",
-        "email": "maría.fernández558@outlook.com",
-        "password_hash": "abtVwONBCFJBxchRvVnxrylPDs3olycbBAMvD7lDs4A0HYXVekJaHjNXqnpU",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "48e0308a-4cb6-4ace-9c73-3e1b50d76f90",
-        "name": "Paula Gómez",
-        "email": "paula.gómez521@gmail.com",
-        "password_hash": "k7HlJpwuIIoi6TWxxYGGqCUYhA8vhuetCU0xT9IxZBjBLpT3sr7qy0JF8IPa",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "2b8a4938-c22b-473f-8bec-a0b8729eaa87",
-        "name": "Paula García",
-        "email": "paula.garcía2@aureatech.com",
-        "password_hash": "AWUh887lLUi9snGGbRZZ6DeiEQk8i8uB0qNXDCAGGjyborYPneyxKZ85coNp",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "47d8f701-65ec-40dd-a51f-249c1cfa4b69",
-        "name": "David Díaz",
-        "email": "david.díaz331@gmail.com",
-        "password_hash": "l9NEFihMRLRT8C0jYKKCxwnARbJV3TqM6oJcepuDAZghAfN9KuLkbJXLFJU7",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "67ed6f08-7456-44e5-8421-f1842b32552b",
-        "name": "David Pérez",
-        "email": "david.pérez631@outlook.com",
-        "password_hash": "gjVuQZrcME8aeiA7zRUjKYIM9bYWeWZIkPGpyw2eCbzYLM4eyPd0vOmiUa6Z",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "c165f2d6-4aa5-42ae-8bce-5b162c9c23d7",
-        "name": "Lucía Martínez",
-        "email": "lucía.martínez203@gmail.com",
-        "password_hash": "WcIBDIHdFszNZvQJsL4LUJFyE2MzHbng2xcKvsIiL3XiYmzdZsbXwGx5cniG",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "b123f4bd-bfce-4c4b-8bcb-5b266eae1a98",
-        "name": "Carlos Ruiz",
-        "email": "carlos.ruiz893@aureatech.com",
-        "password_hash": "0RJF5wBojzvWYuyTFHio8aXyyiwKxRnhjrAyRB0LTOiL9blKqOazLqCIgIHe",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "bc795d58-bb01-4c27-b775-00ef896f4809",
-        "name": "Carlos López",
-        "email": "carlos.lópez956@hotmail.com",
-        "password_hash": "xfdZjX99w97tEhpEX22P4GfFzcWNiz2WZSG0am2ngcHW6ymyfM9I2dMSsbrz",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "f81797ea-17b1-4ae0-85eb-b1d13f91c7dc",
-        "name": "Pedro Martínez",
-        "email": "pedro.martínez786@hotmail.com",
-        "password_hash": "YnBZsU8VGtEwf4eUFyiKyJF1Itgszv7VqJO8mzkmIzQ9JGQbCCZ2DlbNuIx8",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "7f29eace-14fe-4422-9274-e7d6aafcd19e",
-        "name": "Jorge Pérez",
-        "email": "jorge.pérez127@outlook.com",
-        "password_hash": "em7W2Pwzmid3nhxIWTLPeWOGrp4Ym14BLF2SAYkYixDDCXah8uvUMxwtKSXJ",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "dba131b7-7de7-44f2-b157-575ae916580c",
-        "name": "Lucía Sánchez",
-        "email": "lucía.sánchez158@aureatech.com",
-        "password_hash": "ssWysUWk63Ad1dCD0eYHgC1ylnrTm8Mt0viTbdIzMz64llCRnNzp70wIWgU2",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "a6dc9657-4aa3-4c01-907d-f70cca9513f1",
-        "name": "Paula Gómez",
-        "email": "paula.gómez811@gmail.com",
-        "password_hash": "Y1BYsyiQ8mR9YK5wCzyo19LX1nuGgLoM4npET0ufc1GvJtUsXVXyM0nqZG4U",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "b507aa0a-455e-4f92-9068-df306536dcd9",
-        "name": "Paula Fernández",
-        "email": "paula.fernández986@gmail.com",
-        "password_hash": "FwPeahpkrtuwaOpLkNGH6vfDu4Z0uM9wj989oBUrRVf9jQn89iKAtQGjJ1n8",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "f1905f9b-6d1d-48e0-8a4b-7ed8711f57b2",
-        "name": "Carlos Gómez",
-        "email": "carlos.gómez619@gmail.com",
-        "password_hash": "COMmxk1wSFbDX0uimja2xvzUFzPvIAzstaphCO7bof3zrfdSlQTgoEwJhgh2",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "bba091b7-3313-4064-b6e3-3b7d7eeb4d71",
-        "name": "Paula Gómez",
-        "email": "paula.gómez214@hotmail.com",
-        "password_hash": "tJcaDALf9hpYog9eJTKAoC5ZdUk3ZvB7dIggmsvCw4EBIoNZGPxZse1xXNSf",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "a0cec1b5-778e-4e48-82b9-714e7f88d6f2",
-        "name": "Pedro García",
-        "email": "pedro.garcía524@hotmail.com",
-        "password_hash": "ADuv3BZngH9MdjgMY3oxQmdUOa3GjidgJY2OTOwXdr51i9jFMBqps7zR5RyR",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "141c8b51-c931-4e81-8205-55665b413157",
-        "name": "Marcos Ruiz",
-        "email": "marcos.ruiz27@gmail.com",
-        "password_hash": "BwWrz7U6E2ufbbl7Z63sTfdql0hshvzMQEBvX93zhZU6Bme3boBUEo6kCoKF",
-        "role": "TECHNICIAN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "9f3eeade-a5ce-4857-8f4c-d650746a4460",
-        "name": "Pedro Gómez",
-        "email": "pedro.gómez820@aureatech.com",
-        "password_hash": "PQEBRtd4Ogp8iqnQdLKQB0mG1YZAmUYQvXnbISMcjnt64ZlbRl2rCyf2fqPY",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "16269835-cb01-4e19-9bab-1d74c0139d43",
-        "name": "Jorge Martínez",
-        "email": "jorge.martínez433@gmail.com",
-        "password_hash": "FONk4peb80i7h8BGS5lCTgyX1QT2680HCZkVzhJcBCpZHxIgy1SvFLL1u6xg",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "0a2bc9d7-31d9-4498-bd7f-e7747064cff7",
-        "name": "Jorge Fernández",
-        "email": "jorge.fernández690@aureatech.com",
-        "password_hash": "npqhDncmlcroPRthrvAaq5ESNLo4uaydsErPNoGbGivwwH3k6pgBLt3fQAXm",
-        "role": "NEIGHBOR",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "0d9562b4-1b16-4f61-82b0-f06d9fa0da9b",
-        "name": "Paula Martínez",
-        "email": "paula.martínez486@aureatech.com",
-        "password_hash": "OqGfzwZepnQjgTfOn2ucpMO4ieHMhwXNfUeyZ9kFlJSAMXKANouvYGbRtFFR",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "a30c4ce5-b240-450c-ac3e-d7c0fb660f47",
-        "name": "María Díaz",
-        "email": "maría.díaz788@outlook.com",
-        "password_hash": "tynSBVQTRw2xyO5mJxqaOZqwLfL8jCXoHdmmfFgjkncYnF3VQ8yJJmxH6jjS",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "ce3c7b08-0a03-4c66-b505-b5f6ff7372b7",
-        "name": "Jorge Fernández",
-        "email": "jorge.fernández591@outlook.com",
-        "password_hash": "0a1khmFFAAR7mypAU1Os5grEeSO8vBMIIhMyq2o5tbAxCizvN7tnezXxsA3B",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
-    },
-    {
-        "id": "5318ff59-b266-4427-accf-207d1970f22d",
-        "name": "Lucía Gómez",
-        "email": "lucía.gómez548@gmail.com",
-        "password_hash": "uVtOTDdQ8CfEfau5edIvA1E6uPcHyGlVtPDeOkm07TfG5TVLUm3IrifCJkVS",
-        "role": "ADMIN",
-        "picture_path": null,
-        "picture_url": null
+        "picture_path": "",
+        "picture_url": "https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg"
     }
 ]

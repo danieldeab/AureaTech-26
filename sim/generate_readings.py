@@ -11,9 +11,7 @@ from app.repository.reading_repository import ReadingRepository
 
 class ReadingGenerator:
     """
-    Genera lecturas simuladas para sensores de temperatura y humedad
-    de una zona residencial en Madrid (interior, lejos del mar).
-
+    Genera lecturas simuladas para sensores de temperatura y humedad.
     """
 
     def __init__(self, sensors: SensorRepository | None = None, readings: ReadingRepository | None = None):

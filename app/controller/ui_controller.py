@@ -1,160 +1,307 @@
-# app/controllers/ui_controller.py
-import asyncio
 import flet as ft
-from app.views.alertas_loggin import (
-    AlertBox, ERROR_RED, WARNING_YELL, INFO_BLUE, LIGHT_GREEN, PRIMARY_GREEN, WHITE
+
+# Controller imports
+from app.controller.auth_controller import AuthController, Session
+from app.controller.dashboard_controller import DashboardController
+
+# View imports
+from app.view.auth.view_login import LoginView
+from app.view.auth.view_signup import SignupView
+from app.view.auth.view_menu import MenuView
+from app.view.auth.view_recover import RecoverPasswordView
+from app.view.auth.view_reset_password import ResetPasswordView
+from app.view.lists.view_alerts_dashboard import AlertsDashboardView
+from app.view.dashboard.view_user_dashboard import UserDashboardView
+
+# Repository and Service imports
+from app.repository.alert_repository import AlertRepository
+from app.service.alert_service import AlertService
+
+# Theme imports
+from app.view.theme import (
+    SUCCESS_GREEN,
+    ERROR_RED,
 )
 
+# Dashboard imports will be added once dashboard migration is complete
+# from app.view.dashboard.main_dashboard import MainDashboardView
+# from app.view.admin.admin_dashboard import AdminDashboardView
+# ...
+
+
 class UIController:
-    def __init__(self, page: ft.Page, auth, session, assets_dir: str):
+    """
+    Final UI Controller integrating:
+      - Authentication flow (Menu → Login → Signup → Recover → Reset)
+      - Navigation stack for back-navigation
+      - AuthController for authentication logic
+
+    Responsibilities according to the class diagram:
+      - Navigation between all views
+      - Delegation of login/signup/reset to AuthController
+      - Global user session and role handling
+    """
+
+    def __init__(self, page: ft.Page, auth_controller: AuthController, session: Session):
         self.page = page
-        self.auth = auth
+        self.auth = auth_controller
+        self.alert_repo = AlertRepository()
+        self.alert_service = AlertService(self.alert_repo)
+        self.dashboard = DashboardController(self.alert_service)
         self.session = session
-        self.assets_dir = assets_dir
 
-        # Import diferido
-        from app.views.views import (
-            menu_view, login_view, sign_up_view, home_view,
-            recover_view, reset_password_view, dashboard_view
-        )
-        self._menu_view_fn = menu_view
-        self._login_view_fn = login_view
-        self._signup_view_fn = sign_up_view
-        self._home_view_fn = home_view
-        self._recover_view_fn = recover_view         # 👈 NUEVO
-        self._reset_view_fn = reset_password_view    # 👈 NUEVO
-        self._dashboard_view_fn = dashboard_view     # 👈 NUEVO
+        self.history = []             # navigation stack
+        self.page.assets_dir = "app/assets"
 
-    # ---------- Alertas ----------
-    def show_alert(self, message: str, kind: str = "info", autohide_secs: float = 0.9):
-        if kind == "error":   bg, fg = ERROR_RED, WHITE
-        elif kind == "warn":  bg, fg = WARNING_YELL, PRIMARY_GREEN
-        elif kind == "success": bg, fg = LIGHT_GREEN, PRIMARY_GREEN
-        else:                 bg, fg = INFO_BLUE, PRIMARY_GREEN
+    # ======================================================
+    # Internal navigation utilities
+    # ======================================================
+    def _push(self, name: str, view:  ft.UserControl):
+        if not self.history or self.history[-1] != name:
+            self.history.append(name)
 
-        alert = ft.Container(
-            content=AlertBox(message, bg, fg),
-            alignment=ft.alignment.top_center, left=0, right=0, top=16,
-        )
-        self.page.overlay.append(alert)
+        self.page.controls.clear()
+        self.page.add(view)
         self.page.update()
 
-        async def _auto_close():
-            if autohide_secs and autohide_secs > 0:
-                await asyncio.sleep(autohide_secs)
-                if alert in self.page.overlay:
-                    self.page.overlay.remove(alert)
-                    await self.page.update_async()
-        self.page.run_task(_auto_close)
+    def _replace(self, name: str, view:  ft.UserControl):
+        if self.history:
+            self.history[-1] = name
+        else:
+            self.history.append(name)
 
-    def clear_overlay(self):
-        if self.page.overlay:
-            self.page.overlay.clear()
+        self.page.controls.clear()
+        self.page.add(view)
+        self.page.update()
 
-    # ---------- Navegación ----------
-    def show_menu(self, e=None):
-        self.clear_overlay(); self.page.clean()
-        self.page.add(self._menu_view_fn(self.assets_dir, self.on_go_login, self.on_go_signup))
+    def _notify(self, msg):
+        self.page.snack_bar = ft.SnackBar(ft.Text(msg))
+        self.page.snack_bar.open = True
+        self.page.update()
 
-    def show_login(self, e=None):
-        self.clear_overlay(); self.page.clean()
-        self.page.add(self._login_view_fn(self.assets_dir, self.on_back_menu, self.on_login_submit, self.on_go_signup, self.on_go_recover))
+    def switch_community(self, new_id):
+        self.session.current_community_id = new_id
+        return self.show_admin_dashboard()
 
-    def show_signup(self, e=None):
-        self.clear_overlay(); self.page.clean()
-        self.page.add(self._signup_view_fn(self.assets_dir, self.on_back_menu, self.on_signup_submit, self.on_go_login))
 
-    def show_home(self, e=None):
-        self.clear_overlay(); self.page.clean()
-        name = self.session.current_user.display_name if self.session.current_user else "Usuario"
-        self.page.add(self._home_view_fn(self.assets_dir, name, self.on_logout, on_dashboard=self.show_dashboard ))
-        if self.session.current_user:
-            email = self.session.current_user.email
-            rol = getattr(self.session.current_user, "rol", "vecino")
-            banner = ft.Text(f"Usuario activo: {email} | Rol: {rol}", color=ft.colors.WHITE)
-            self.page.add(banner)
+    # ======================================================
+    # Screens
+    # ======================================================
+    def show_menu(self):
+        self._push("menu", MenuView(self.page, self))
 
+    def show_login(self):
+        self._push("login", LoginView(self.page, controller=self, on_back_click=self.go_back))
+
+    def show_signup(self):
+        self._push("signup", SignupView(self.page, controller=self, on_back_click=self.go_back))
+
+    def show_recover(self):
+        self._push("recover", RecoverPasswordView(self.page, controller=self, on_back_click=self.go_back))
+
+    def show_reset(self):
+        self._push("reset", ResetPasswordView(self.page, controller=self, on_back_click=self.go_back))
+
+    # ======================================================
+    # Post-authentication navigation
+    # ======================================================
     def show_dashboard(self, e=None):
-        self.clear_overlay()
-        self.page.clean()
-        display_name = self.session.current_user.display_name if self.session.current_user else "Usuario"
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        role = user.role.value
+
+        if role == "NEIGHBOR":
+            return self.show_user_dashboard()
+        elif role == "ADMIN":
+            return self.show_admin_dashboard()
+        elif role == "TECHNICIAN":
+            return self.show_tecnico_dashboard()
         
-        # dashboard_view devuelve la función build(page), así que la llamamos con self.page
-        self.page.add(
-            self._dashboard_view_fn(
-                assets_dir=self.assets_dir,
-                display_name=display_name,
-                on_home=self.show_home  # El botón HOME en el dashboard volverá al home real
-            )(self.page)
+    def show_user_dashboard(self, e=None):
+        user = self.session.current_user
+
+        view = UserDashboardView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            community_id=user.community_id,
+
+            # nav buttons
+            on_settings=self.show_settings,
+            on_alerts=self.show_alerts,
+            on_dashboard=self.show_user_dashboard,
+            on_logout=self.logout,
         )
 
-    # ✅ NUEVAS VISTAS
-    def show_recover(self, e=None):
-        self.clear_overlay(); self.page.clean()
-        self.page.add(self._recover_view_fn(self.assets_dir, self.on_back_menu, self.on_recover_submit, self.on_go_login))
+        self.history = ["dashboard"]
+        self._replace("dashboard", view)
 
-    def show_reset(self, email: str):
-        self.clear_overlay(); self.page.clean()
-        self.page.add(self._reset_view_fn(self.assets_dir, email, self.on_back_menu, self.on_reset_submit))
+    def show_tecnico_dashboard(self, e=None):
+        # Remember to add the community
+        # For now, technicians see the same as neighbors
+        return self.show_user_dashboard()
+    
+    def show_admin_dashboard(self, e=None):
+        # Rememer to add the filtering by selected community
+        # For now, admins see the same as neighbors
+        return self.show_user_dashboard()
+    
+    def show_alerts(self, e=None):
+        print(">>> showing alerts")
+        user = self.session.current_user
+        alerts = self.dashboard.get_alerts(self.session.current_user)
 
-    # ---------- Callbacks ----------
-    def on_go_login(self, e=None):  self.show_login()
-    def on_go_signup(self, e=None): self.show_signup()
-    def on_go_recover(self, e=None): self.show_recover()
-    def on_back_menu(self, e=None):
-        self.show_alert("Volviendo al menú principal...", "info"); self.show_menu()
+        view = AlertsDashboardView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value if user else "NEIGHBOR",
+            alerts=alerts,
+            on_dashboard=self.show_user_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+        )
 
-    def on_login_submit(self, email: str, password: str):
-        ok, msg = self.auth.login((email or "").strip(), (password or "").strip())
+        self._replace("alerts", view)
+
+
+    def show_settings(self, e=None):
+        self._replace(
+            "settings",
+            ft.Column(
+                controls=[
+                    ft.Text("Settings view.", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Text("This view will allow changing user settings later."),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                alignment=ft.MainAxisAlignment.CENTER,
+            ),
+        )
+
+    # ======================================================
+    # View Callbacks (delegations to AuthController)
+    # ======================================================
+    def login(self, email, password):
+        ok, msg, user = self.auth.login(email, password)
+        self._notify(msg)
+
+        if not ok:
+            return
+        else:
+            # Successful login → dashboard
+            return self.show_dashboard()
+
+    def signup(self, name, community_id, email, password, dob, picture_path=None):
+        
+        result = self.auth.signup(
+            name=name, 
+            community_id=community_id,
+            email=email,
+            password=password, 
+            dob=dob, 
+            picture_temp_path=picture_path
+        )
+
+        if result is True:
+            # Signup success → Login
+            self._replace("login", LoginView(self.page, self, on_back_click=self.go_back))
+
+            self.page.snack_bar = ft.SnackBar(
+                ft.Text("Cuenta creada con éxito. Inicia sesión."),
+                bgcolor=SUCCESS_GREEN
+            )
+            self.page.snack_bar.open = True
+            self.page.update()
+            return
+
+        # Signup failed
+        self.page.snack_bar = ft.SnackBar(
+            ft.Text(result or "Error al registrarse."), 
+            bgcolor=ERROR_RED
+        )
+        self.page.snack_bar.open = True
+        self.page.update()
+
+    def recover(self, email):
+        ok, msg = self.auth.recover_password(email)
+
+        # Show snackbar
+        self.page.snack_bar = ft.SnackBar(
+            ft.Text(msg),
+            # Simulation of real-world dynamics: red means no 
+            # email was sent, green means email was sent
+            bgcolor=SUCCESS_GREEN if ok else ERROR_RED, 
+        )
+        self.page.snack_bar.open = True
+        self.page.update()
+    
+        # Only navigate to reset if user exists
         if ok:
-            self.show_alert(msg, "success")
-            async def _go_home():
-                await asyncio.sleep(0.8); self.clear_overlay(); self.show_home()
-            self.page.run_task(_go_home)
+            # self.session.start_reset(email)
+            self.show_reset()
         else:
-            self.show_alert(msg, "error" if "error" in msg.lower() else "warn")
+            self.show_menu()
 
-    def on_signup_submit(self, fullname: str, email: str, password: str, dob: str | None = None):
-        if not fullname or not email or not password:
-            self.show_alert("Completa nombre, email y contraseña.", "warn"); return
-        ok, msg = self.auth.repo.add_user(email=email, password=password, display_name=fullname)
-        if ok:
-            self.show_alert("Cuenta creada con éxito. Inicia sesión.", "success")
-            async def _go_login():
-                await asyncio.sleep(0.8); self.clear_overlay(); self.show_login()
-            self.page.run_task(_go_login)
-        else:
-            self.show_alert(msg, "error")
+    def reset_password(self, pass1, pass2):
+        result = self.auth.update_password(pass1, pass2)
 
-    # ✅ RECUPERACIÓN
-    def on_recover_submit(self, email: str):
-        email = (email or "").strip().lower()
-        if not email:
-            self.show_alert("Ingresá tu correo.", "warn"); return
-        if not self.auth.repo.find_by_email(email):
-            # por seguridad, respondemos igual
-            self.show_alert("Si el correo existe, te enviamos un enlace (simulado).", "info")
-        else:
-            self.show_alert("Enlace de recuperación enviado (simulado).", "success")
-        async def _go_reset():
-            await asyncio.sleep(0.8); self.clear_overlay(); self.show_reset(email)
-        self.page.run_task(_go_reset)
+        color = SUCCESS_GREEN if "éxito" in result.lower() else ERROR_RED
+        self.page.snack_bar = ft.SnackBar(ft.Text(result), bgcolor=color)
+        self.page.snack_bar.open = True
+        self.page.update()
 
-    def on_reset_submit(self, email: str, pwd: str, confirm: str):
-        if not pwd or not confirm:
-            self.show_alert("Completá ambos campos.", "warn"); return
-        if len(pwd) < 6:
-            self.show_alert("La contraseña debe tener al menos 6 caracteres.", "warn"); return
-        if pwd != confirm:
-            self.show_alert("Las contraseñas no coinciden.", "error"); return
-        ok, msg = self.auth.repo.update_password(email, pwd)
-        if ok:
-            self.show_alert("Contraseña actualizada. Inicia sesión.", "success")
-            async def _go_login():
-                await asyncio.sleep(0.8); self.clear_overlay(); self.show_login()
-            self.page.run_task(_go_login)
-        else:
-            self.show_alert(msg, "error")
+        if "éxito" in result.lower():
+            self.history = ["login"]
+            self._replace("login", LoginView(self.page, self, on_back_click=self.go_back))    
 
-    def on_logout(self, e=None):
-        self.auth.logout(); self.show_alert("Sesión cerrada.", "success"); self.show_menu()
+    def logout(self, e=None):
+        print(">>> LOGOUT")
+        
+        # clear session
+        self.session.logout()
+
+        # clear navigation history
+        self.history = []
+
+        # Reset page UI
+        self.page.controls.clear()
+        self.show_menu()    # go to ViewMenu (your first screen)
+        self.page.update()
+
+    # ======================================================
+    # Navigation callbacks from views
+    # ======================================================
+    def go_login(self): self.show_login()
+    def go_signup(self): self.show_signup()
+    def go_recover(self): self.show_recover()
+    def go_reset(self): self.show_reset()
+
+    # ======================================================
+    # BACK navigation
+    # ======================================================
+    def go_back(self):
+        if not self.history:
+            return
+
+        self.history.pop()
+
+        if not self.history:
+            return self._replace("menu", MenuView(self.page, self))
+
+        last = self.history[-1]
+
+        if last == "menu":
+            self._replace("menu", MenuView(self.page, self))
+        elif last == "login":
+            self._replace("login", LoginView(self.page, self, on_back_click=self.go_back))
+        elif last == "signup":
+            self._replace("signup", SignupView(self.page, self, on_back_click=self.go_back))
+        elif last == "recover":
+            self._replace("recover", RecoverPasswordView(self.page, self, on_back_click=self.go_back))
+        elif last == "reset":
+            self._replace("reset", ResetPasswordView(self.page, self, on_back_click=self.go_back))
+        elif last == "dashboard":
+            self.show_dashboard()

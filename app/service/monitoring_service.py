@@ -1,305 +1,243 @@
 # app/service/monitoring_service.py
-import time
+
+from __future__ import annotations
 import threading
-from typing import List, Optional
-from datetime import datetime
-from app.service.sensor_service import simulateReading, getSensorReadings
-from app.service.alert_service import evaluate, getAlerts
+import time
+import random
+from datetime import datetime, timezone
+from typing import Optional, Callable
+
+from app.model.reading import Reading
+from app.model.sensor import Sensor
 from app.repository.sensor_repository import SensorRepository
+from app.repository.reading_repository import ReadingRepository
+from app.repository.alert_repository import AlertRepository
 from app.repository.log_repository import LogRepository
-
-# Instancias de repositorios
-sensor_repo = SensorRepository()
-log_repo = LogRepository()
-
-# Variables de control del servicio
-_monitoring_active = False
-_monitoring_thread: Optional[threading.Thread] = None
-_monitoring_interval = 30  # Intervalo en segundos entre cada ciclo de monitoreo
+from app.model.alert import Alert
+from app.model.enums import SeverityEnum
 
 
-def run() -> None:
+class MonitoringService:
     """
-    Inicia el servicio de monitoreo continuo.
-    
-    Este servicio realiza las siguientes tareas de forma periódica:
-    1. Simula lecturas de todos los sensores activos
-    2. Evalúa cada lectura para generar alertas si es necesario
-    3. Registra eventos importantes en el log
-    4. Maneja errores de forma robusta para mantener el servicio activo
-    
-    El servicio se ejecuta en un hilo separado para no bloquear la aplicación.
-    """
-    global _monitoring_active, _monitoring_thread
-    
-    # Si ya está activo, no iniciar otro
-    if _monitoring_active:
-        print("El servicio de monitoreo ya está en ejecución")
-        return
-    
-    # Marcar como activo
-    _monitoring_active = True
-    
-    # Crear y iniciar el hilo de monitoreo
-    _monitoring_thread = threading.Thread(target=_monitoring_loop, daemon=True)
-    _monitoring_thread.start()
-    
-    print(f"✓ Servicio de monitoreo iniciado (intervalo: {_monitoring_interval}s)")
-    
-    # Registrar inicio en el log
-    try:
-        log_repo.add({
-            "event_type": "monitoring_started",
-            "description": f"Servicio de monitoreo iniciado con intervalo de {_monitoring_interval} segundos",
-            "metadata": {
-                "interval": _monitoring_interval,
-                "timestamp": datetime.now().isoformat()
-            }
-        })
-    except Exception as e:
-        print(f"Error registrando inicio del monitoreo: {e}")
+    Global monitoring engine:
+    - Monitors ALL sensors in the system
+    - Generates readings
+    - Triggers alerts
+    - Writes logs
+    - Runs in a background thread
 
+    Community filtering happens in DashboardService & AlertService,
+    NOT here (Option A).
+    """
 
-def stop() -> None:
-    """
-    Detiene el servicio de monitoreo.
-    """
-    global _monitoring_active
-    
-    if not _monitoring_active:
-        print("El servicio de monitoreo no está en ejecución")
-        return
-    
-    _monitoring_active = False
-    print("✓ Servicio de monitoreo detenido")
-    
-    # Registrar detención en el log
-    try:
-        log_repo.add({
-            "event_type": "monitoring_stopped",
-            "description": "Servicio de monitoreo detenido",
-            "metadata": {
-                "timestamp": datetime.now().isoformat()
-            }
-        })
-    except Exception as e:
-        print(f"Error registrando detención del monitoreo: {e}")
+    def __init__(
+        self,
+        sensor_repo: SensorRepository,
+        reading_repo: ReadingRepository,
+        alert_repo: AlertRepository,
+        log_repo: LogRepository,
+        *,
+        interval_seconds: int = 10,
+    ):
+        self.sensor_repo = sensor_repo
+        self.reading_repo = reading_repo
+        self.alert_repo = alert_repo
+        self.log_repo = log_repo
 
+        self.interval = interval_seconds
+        self._thread: Optional[threading.Thread] = None
+        self._running = False
 
-def is_running() -> bool:
-    """
-    Verifica si el servicio de monitoreo está activo.
-    
-    Returns:
-        True si está activo, False en caso contrario
-    """
-    return _monitoring_active
+    # ----------------------------------------------------------------------
+    # PUBLIC API
+    # ----------------------------------------------------------------------
 
+    def start(self):
+        """Starts the monitoring loop in the background."""
+        if self._running:
+            return  # already running
 
-def set_interval(seconds: int) -> None:
-    """
-    Configura el intervalo de monitoreo.
-    
-    Args:
-        seconds: Intervalo en segundos (mínimo 5, máximo 3600)
-    """
-    global _monitoring_interval
-    
-    # Validar rango
-    if seconds < 5:
-        seconds = 5
-    elif seconds > 3600:
-        seconds = 3600
-    
-    _monitoring_interval = seconds
-    print(f"✓ Intervalo de monitoreo actualizado a {seconds} segundos")
+        self._running = True
+        self._thread = threading.Thread(target=self._run_loop, daemon=True)
+        self._thread.start()
 
+    def stop(self):
+        """Stops the monitoring thread safely."""
+        self._running = False
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=2)
 
-def _monitoring_loop() -> None:
-    """
-    Bucle principal del servicio de monitoreo.
-    Se ejecuta continuamente mientras _monitoring_active sea True.
-    """
-    cycle_count = 0
-    
-    print("Iniciando bucle de monitoreo...")
-    
-    while _monitoring_active:
-        try:
-            cycle_count += 1
-            cycle_start = datetime.now()
-            
-            print(f"\n--- Ciclo de monitoreo #{cycle_count} - {cycle_start.strftime('%Y-%m-%d %H:%M:%S')} ---")
-            
-            # 1. Obtener todos los sensores
-            sensors = _get_active_sensors()
-            
-            if not sensors:
-                print(" No hay sensores activos para monitorear")
-                time.sleep(_monitoring_interval)
-                continue
-            
-            print(f"Monitoreando {len(sensors)} sensores...")
-            
-            # Contadores de estadísticas
-            readings_count = 0
-            alerts_count = 0
-            errors_count = 0
-            
-            # 2. Para cada sensor, simular lectura y evaluar alertas
-            for sensor in sensors:
-                try:
-                    # Simular lectura
-                    reading = simulateReading(sensor)
-                    readings_count += 1
-                    
-                    print(f"  Sensor {sensor.type} ({sensor.id}): {reading.value} {reading.unit}")
-                    
-                    # Evaluar si genera alerta
-                    alert = evaluate(reading)
-                    
-                    if alert:
-                        alerts_count += 1
-                        severity = alert.severity.value if hasattr(alert.severity, 'value') else str(alert.severity)
-                        print(f"   ALERTA generada: [{severity}] {alert.message}")
-                        
-                        # Registrar alerta en el log
-                        log_repo.add({
-                            "event_type": "alert_generated",
-                            "description": f"Alerta generada: {alert.message}",
-                            "metadata": {
-                                "alert_id": str(alert.id),
-                                "sensor_id": str(sensor.id),
-                                "sensor_type": sensor.type,
-                                "severity": severity,
-                                "value": reading.value
-                            }
-                        })
-                
-                except Exception as e:
-                    errors_count += 1
-                    print(f" Error procesando sensor {sensor.id}: {e}")
-                    
-                    # Registrar error en el log
-                    try:
-                        log_repo.add({
-                            "event_type": "monitoring_error",
-                            "description": f"Error al procesar sensor: {str(e)}",
-                            "metadata": {
-                                "sensor_id": str(sensor.id),
-                                "error": str(e)
-                            }
-                        })
-                    except:
-                        pass
-            
-            # 3. Resumen del ciclo
-            cycle_duration = (datetime.now() - cycle_start).total_seconds()
-            
-            print(f"\n✓ Ciclo completado en {cycle_duration:.2f}s")
-            print(f"  - Lecturas: {readings_count}")
-            print(f"  - Alertas: {alerts_count}")
-            print(f"  - Errores: {errors_count}")
-            
-            # Registrar resumen del ciclo
+    # ----------------------------------------------------------------------
+    # MAIN LOOP
+    # ----------------------------------------------------------------------
+
+    def _run_loop(self):
+        """Monitoring loop: runs every interval_seconds."""
+        while self._running:
             try:
-                log_repo.add({
-                    "event_type": "monitoring_cycle",
-                    "description": f"Ciclo de monitoreo #{cycle_count} completado",
-                    "metadata": {
-                        "cycle": cycle_count,
-                        "duration": cycle_duration,
-                        "sensors_monitored": len(sensors),
-                        "readings_generated": readings_count,
-                        "alerts_generated": alerts_count,
-                        "errors": errors_count
-                    }
-                })
+                self._process_once()
             except Exception as e:
-                print(f"Error registrando resumen del ciclo: {e}")
-            
-            # 4. Esperar hasta el próximo ciclo
-            print(f"Esperando {_monitoring_interval} segundos hasta el próximo ciclo...\n")
-            time.sleep(_monitoring_interval)
-        
-        except KeyboardInterrupt:
-            print("\nMonitoreo interrumpido por el usuario")
-            break
-        
-        except Exception as e:
-            print(f"Error crítico en el bucle de monitoreo: {e}")
-            errors_count += 1
-            
-            # Intentar continuar después de un error crítico
-            print(f"Reintentando en {_monitoring_interval} segundos...")
-            time.sleep(_monitoring_interval)
-    
-    print("Bucle de monitoreo finalizado")
+                self._log_system_event(
+                    event="monitoring_error",
+                    description=f"Error in monitoring loop: {e}"
+                )
+            time.sleep(self.interval)
 
+    # ----------------------------------------------------------------------
+    # SINGLE MONITORING CYCLE
+    # ----------------------------------------------------------------------
 
-def _get_active_sensors() -> List:
-    """
-    Obtiene la lista de sensores activos del repositorio.
-    
-    Returns:
-        Lista de sensores activos
-    """
-    try:
-        all_sensors = sensor_repo.findAll()
-        
-        # Filtrar solo sensores activos si tienen ese atributo
-        active_sensors = [
-            sensor for sensor in all_sensors
-            if getattr(sensor, 'is_active', True)
-        ]
-        
-        return active_sensors
-    
-    except Exception as e:
-        print(f"Error obteniendo sensores: {e}")
-        return []
+    def _process_once(self):
+        """Process all sensors one time."""
+        sensors = self.sensor_repo.get_all()
 
+        for sensor in sensors:
+            reading = self._simulate_reading(sensor)
+            self._store_reading(sensor, reading)
+            self._check_alert(sensor, reading)
 
-def get_monitoring_stats() -> dict:
-    """
-    Obtiene estadísticas del servicio de monitoreo.
-    
-    Returns:
-        Diccionario con estadísticas del servicio
-    """
-    try:
-        # Obtener logs de monitoreo recientes
-        all_logs = log_repo.all()
-        monitoring_logs = [
-            log for log in all_logs
-            if log.get("event_type") in ["monitoring_cycle", "alert_generated", "monitoring_error"]
-        ]
-        
-        # Contar por tipo
-        cycles = len([l for l in monitoring_logs if l.get("event_type") == "monitoring_cycle"])
-        alerts = len([l for l in monitoring_logs if l.get("event_type") == "alert_generated"])
-        errors = len([l for l in monitoring_logs if l.get("event_type") == "monitoring_error"])
-        
-        # Último ciclo
-        cycle_logs = [l for l in monitoring_logs if l.get("event_type") == "monitoring_cycle"]
-        last_cycle = None
-        if cycle_logs:
-            cycle_logs.sort(key=lambda x: x.get("ts", 0), reverse=True)
-            last_cycle = datetime.fromtimestamp(cycle_logs[0].get("ts", 0)).isoformat()
-        
-        return {
-            "is_running": _monitoring_active,
-            "interval_seconds": _monitoring_interval,
-            "total_cycles": cycles,
-            "total_alerts_generated": alerts,
-            "total_errors": errors,
-            "last_cycle": last_cycle,
-            "monitored_sensors": len(_get_active_sensors())
+    # ----------------------------------------------------------------------
+    # READING GENERATION
+    # (simple simulation, NOT the generate_readings.py historical batch generator)
+    # ----------------------------------------------------------------------
+
+    def _simulate_reading(self, sensor: Sensor) -> Reading:
+        """
+        Simple simulation logic for live monitoring.
+        Uses thresholds if present, otherwise defaults.
+        """
+
+        sensor_type = sensor.type.lower()
+        thresholds = sensor.thresholds or {}
+
+        def _val(minv, maxv):
+            return round(random.uniform(minv, maxv), 2)
+
+        if sensor_type == "temperature":
+            minv = thresholds.get("min", 10)
+            maxv = thresholds.get("max", 40)
+            unit = "°C"
+            value = _val(minv, maxv)
+
+        elif sensor_type == "humidity":
+            minv = thresholds.get("min", 20)
+            maxv = thresholds.get("max", 90)
+            unit = "%"
+            value = _val(minv, maxv)
+
+        elif sensor_type == "light":
+            minv = thresholds.get("min", 50)
+            maxv = thresholds.get("max", 2000)
+            unit = "lux"
+            value = _val(minv, maxv)
+
+        elif sensor_type == "air_quality":
+            minv = thresholds.get("min", 0)
+            maxv = thresholds.get("max", 500)
+            unit = "aqi"
+            value = _val(minv, maxv)
+
+        elif sensor_type == "motion":
+            unit = "bool"
+            value = 1 if random.random() > 0.7 else 0
+
+        else:
+            minv = thresholds.get("min", 0)
+            maxv = thresholds.get("max", 100)
+            unit = "u"
+            value = _val(minv, maxv)
+
+        reading = Reading.new(
+            sensor_id=sensor.id,
+            value=value,
+            unit=unit,
+        )
+        return reading
+
+    # ----------------------------------------------------------------------
+    # STORAGE
+    # ----------------------------------------------------------------------
+
+    def _store_reading(self, sensor: Sensor, reading: Reading):
+        """Store reading in both sensor and reading repository."""
+        sensor.readings.append(reading)
+        self.sensor_repo.save(sensor)
+        self.reading_repo.save(sensor.id, reading)
+
+    # ----------------------------------------------------------------------
+    # ALERT GENERATION
+    # ----------------------------------------------------------------------
+
+    def _check_alert(self, sensor: Sensor, reading: Reading):
+        """
+        Generates alerts according to simplified rules:
+        - Temperature critical
+        - Humidity extremes
+        - Light too low
+        - Bad air quality
+
+        Alerts target the community's users:
+        - Technicians & neighbors will see them based on DashboardService filtering
+        """
+
+        t = sensor.type.lower()
+        v = reading.value
+
+        alert: Optional[Alert] = None
+
+        if t == "temperature" and v > 35:
+            alert = Alert.new(
+                type="high_temperature",
+                severity=SeverityEnum.HIGH,
+                message=f"Critical temperature detected: {v}°C",
+                target_user_id=sensor.community_id,  # TEMPORARY (explained below)
+            )
+        elif t == "humidity" and v < 25:
+            alert = Alert.new(
+                type="low_humidity",
+                severity=SeverityEnum.MEDIUM,
+                message=f"Low humidity detected: {v}%",
+                target_user_id=sensor.community_id,
+            )
+        elif t == "light" and v < 100:
+            alert = Alert.new(
+                type="low_light",
+                severity=SeverityEnum.LOW,
+                message=f"Low light detected: {v} lux",
+                target_user_id=sensor.community_id,
+            )
+        elif t == "air_quality" and v > 200:
+            alert = Alert.new(
+                type="air_quality_bad",
+                severity=SeverityEnum.HIGH,
+                message=f"Poor air quality: {v} AQI",
+                target_user_id=sensor.community_id,
+            )
+
+        if alert:
+            self.alert_repo.add_alert(alert)
+            self._log_system_event(
+                event="alert_generated",
+                description=alert.message,
+                metadata={
+                    "sensor_id": str(sensor.id),
+                    "community_id": sensor.community_id,
+                    "alert_type": alert.type,
+                }
+            )
+
+    # ----------------------------------------------------------------------
+    # LOGGING
+    # ----------------------------------------------------------------------
+
+    def _log_system_event(self, event: str, description: str, metadata: Optional[dict] = None):
+        ts = int(time.time())
+        entry = {
+            "id": f"log-{ts}-{random.randint(1000,9999)}",
+            "ts": ts,
+            "event_type": event,
+            "description": description,
+            "metadata": metadata or {},
+            "user_id": None,
         }
-    
-    except Exception as e:
-        return {
-            "is_running": _monitoring_active,
-            "interval_seconds": _monitoring_interval,
-            "error": str(e)
-        }
+        self.log_repo.add(entry)
