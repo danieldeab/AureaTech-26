@@ -14,7 +14,7 @@ class Session:
 
     current_user: Optional[User] = None
     reset_email: Optional[str] = None
-    selected_community_id: Optional[int] = None
+    selected_community_id: Optional[int] = None # For ADMIN users ONLY
 
     @property
     def is_authenticated(self) -> bool:

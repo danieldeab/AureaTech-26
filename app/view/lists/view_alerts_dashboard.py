@@ -26,6 +26,8 @@ class AlertsDashboardView(BaseListView):
         on_dashboard,
         on_alerts,
         on_logout,
+        on_back=None,
+        on_settings=None,
     ):
         super().__init__(
             page=page,
@@ -35,9 +37,12 @@ class AlertsDashboardView(BaseListView):
             on_dashboard=on_dashboard,
             on_alerts=on_alerts,
             on_logout=on_logout,
+            on_back=on_back,
+            on_settings=on_settings,
             title="Alertas",
         )
         self.alerts = alerts
+
 
     def build_list(self) -> ft.Control:
         """

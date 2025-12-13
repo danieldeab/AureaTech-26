@@ -5,7 +5,7 @@ from app.view.theme import (
     PRIMARY_GREEN,
     WHITE,
     BACK_BLUE,
-    LIGHT_GREY,
+    BRAND_ACCENT_BLUE,
     FULL_BLACK,
     PANEL_W,
     PANEL_H,
@@ -33,6 +33,7 @@ class BaseDashboardView(ft.UserControl):
         on_dashboard,
         on_alerts,
         on_logout,
+        on_back=None,
     ):
         super().__init__()
         self.page = page
@@ -45,12 +46,26 @@ class BaseDashboardView(ft.UserControl):
         self.on_dashboard = on_dashboard
         self.on_alerts = on_alerts
         self.on_logout = on_logout
+        self.on_back = on_back
     
 
     # --------------------------------------------------------
     # HEADER BAR
     # --------------------------------------------------------
     def _header(self):
+
+        back_btn = None
+        if self.on_back:
+            back_btn = ft.GestureDetector(
+                on_tap=lambda e: self.on_back(),
+                content=ft.Image(
+                    src=f"{self.page.assets_dir}/back.png",
+                    width=26,
+                    height=26,
+                    error_content=ft.Text("<"),
+                ),
+            )
+
         avatar_path = None
         if self.user and self.user.picture_url:
             avatar_path = self.user.picture_url
@@ -83,7 +98,7 @@ class BaseDashboardView(ft.UserControl):
         role_text = ft.Text(
             self.role.capitalize(),
             size=14,
-            color=LIGHT_GREY,
+            color=BRAND_ACCENT_BLUE,
         )
 
         info_column = ft.Column(
@@ -107,7 +122,11 @@ class BaseDashboardView(ft.UserControl):
                     ft.Row(
                         spacing=10,
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                        controls=[avatar, info_column],
+                        controls=[
+                            back_btn if back_btn else ft.Container(width=0),
+                            avatar,
+                            info_column
+                        ],
                     ),
                     right_icon,
                 ],
@@ -115,55 +134,89 @@ class BaseDashboardView(ft.UserControl):
         )
 
     # --------------------------------------------------------
-    # BOTTOM NAVIGATION
+    # BOTTOM NAVIGATION (role-based)
     # --------------------------------------------------------
-    def _bottom_nav(self):
+    def _bottom_nav(self) -> ft.Control:
+        role = self.role.lower()
+
+        # Common buttons:
+        logout_btn = ft.IconButton(
+            icon=ft.icons.LOGOUT,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.on_logout(),
+        )
+
+        alerts_btn = ft.IconButton(
+            icon=ft.icons.CRISIS_ALERT,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.on_alerts(),
+        )
+
+        dashboard_btn = ft.IconButton(
+            icon=ft.icons.HOME,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.on_dashboard(),
+        )
+
+        # Role-specific buttons
+        info_btn = ft.IconButton(
+            icon=ft.icons.INFO_OUTLINE,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.controller.show_info_control(),
+        )
+
+        history_btn = ft.IconButton(
+            icon=ft.icons.HISTORY,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.controller.show_history(),
+        )
+
+        user_mgmt_btn = ft.IconButton(
+            icon=ft.icons.GROUPS,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.controller.show_user_management(),
+        )
+
+        # Build bar according to role
+        if role == "neighbor":
+            controls = [
+                dashboard_btn,
+                alerts_btn,
+                logout_btn,
+            ]
+
+        elif role == "technician":
+            controls = [
+                dashboard_btn,
+                info_btn,
+                alerts_btn,
+                history_btn,
+                logout_btn,
+            ]
+
+        elif role == "admin":
+            controls = [
+                user_mgmt_btn,
+                dashboard_btn,
+                alerts_btn,
+                info_btn,
+                history_btn,
+                logout_btn,
+            ]
+
+        else:
+            controls = [dashboard_btn, logout_btn]
+
         return ft.Container(
-            bgcolor=WHITE,
-            padding=ft.padding.symmetric(vertical=10, horizontal=20),
+            bgcolor=BG_CARD_PRIMARY,
+            padding=12,
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_AROUND,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                controls=[
-                    # DASHBOARD
-                    ft.GestureDetector(
-                        on_tap=lambda e: self.on_dashboard(),
-                        content=ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            spacing=4,
-                            controls=[
-                                ft.Icon(ft.icons.DASHBOARD, color=PRIMARY_GREEN, size=22),
-                                ft.Text("Dashboard", size=12, color=FULL_BLACK),
-                            ],
-                        ),
-                    ),
-                    # ALERTAS
-                    ft.GestureDetector(
-                        on_tap=lambda e: self.on_alerts(),
-                        content=ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            spacing=4,
-                            controls=[
-                                ft.Icon(ft.icons.WARNING, color=PRIMARY_GREEN, size=22),
-                                ft.Text("Alertas", size=12, color=FULL_BLACK),
-                            ],
-                        ),
-                    ),
-                    # LOGOUT
-                    ft.GestureDetector(
-                        on_tap=lambda e: self.on_logout(),
-                        content=ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            spacing=4,
-                            controls=[
-                                ft.Icon(ft.icons.LOGOUT, color=PRIMARY_GREEN, size=22),
-                                ft.Text("Salir", size=12, color=FULL_BLACK),
-                            ],
-                        ),
-                    ),
-                ],
+                controls=controls,
             ),
         )
+
 
     # --------------------------------------------------------
     # MAIN LAYOUT (WORKING MODEL)

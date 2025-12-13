@@ -52,6 +52,23 @@ class UserRepository(IUserRepository):
                 return u
         return None
     
+    def update_role(self, user_id: str, new_role: str):
+        for u in self.users:
+            if str(u.id) == str(user_id):
+                from app.model.enums import RoleEnum
+                u.role = RoleEnum(new_role)     # convert string → enum
+                self.save()
+                return u
+        return None
+    
+    def update_community(self, user_id: str, new_community_id: int):
+        for u in self.users:
+            if str(u.id) == str(user_id):
+                u.community_id = new_community_id
+                self.save()
+                return u
+        return None
+
     def find_by_community_id(self, community_id: int):
         users = []
         for u in self.users:
@@ -61,3 +78,14 @@ class UserRepository(IUserRepository):
 
     def get_all(self):
         return self.users
+    
+    def get_all_communities(self):
+        comm_ids = set()
+        for u in self.users:
+            if u.community_id is not None:
+                comm_ids.add(u.community_id)
+        return sorted(comm_ids)
+    
+    def delete_user(self, user_id: str):
+        self.users = [u for u in self.users if str(u.id) != str(user_id)]
+        self.save()

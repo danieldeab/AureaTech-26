@@ -11,16 +11,30 @@ from app.view.auth.view_menu import MenuView
 from app.view.auth.view_recover import RecoverPasswordView
 from app.view.auth.view_reset_password import ResetPasswordView
 from app.view.lists.view_alerts_dashboard import AlertsDashboardView
+from app.view.lists.view_user_management import UserManagementView
 from app.view.dashboard.view_user_dashboard import UserDashboardView
+from app.view.dashboard.view_admin_dashboard import AdminDashboardView
+from app.view.dashboard.view_tecnico_dashboard import TechnicianDashboardView
+from app.view.dashboard.view_info_control import InfoControlView
+from app.view.edit.view_user_edit import UserEditView
+from app.view.historico.view_sya_history import HistoryView
 
-# Repository and Service imports
+# Repository imports
 from app.repository.alert_repository import AlertRepository
+from app.repository.sensor_repository import SensorRepository
+from app.repository.actuator_repository import ActuatorRepository
+from app.repository.log_repository import LogRepository
+from app.repository.reading_repository import ReadingRepository
+
+# Service imports
 from app.service.alert_service import AlertService
+from app.service.dashboard_service import DashboardService
 
 # Theme imports
 from app.view.theme import (
     SUCCESS_GREEN,
     ERROR_RED,
+    PRIMARY_GREEN,
 )
 
 # Dashboard imports will be added once dashboard migration is complete
@@ -45,9 +59,25 @@ class UIController:
     def __init__(self, page: ft.Page, auth_controller: AuthController, session: Session):
         self.page = page
         self.auth = auth_controller
+       
+        # Alerts
         self.alert_repo = AlertRepository()
         self.alert_service = AlertService(self.alert_repo)
+        
+        # Dashboard summary
         self.dashboard = DashboardController(self.alert_service)
+        self.sensor_repo = SensorRepository()
+        self.actuator_repo = ActuatorRepository()
+        self.log_repo = LogRepository()
+        self.reading_repo = ReadingRepository()
+        self.dashboard_service = DashboardService(
+            self.sensor_repo,
+            self.actuator_repo,
+            self.alert_repo,
+            self.log_repo,
+            self.reading_repo,
+        )
+
         self.session = session
 
         self.history = []             # navigation stack
@@ -79,10 +109,15 @@ class UIController:
         self.page.snack_bar.open = True
         self.page.update()
 
+    # For admins to change the community of another user
     def switch_community(self, new_id):
         self.session.current_community_id = new_id
         return self.show_admin_dashboard()
 
+    # For admins to select a community to manage
+    def set_selected_community(self, cid: int):
+        self.session.selected_community_id = cid
+        self.show_admin_dashboard()
 
     # ======================================================
     # Screens
@@ -101,6 +136,117 @@ class UIController:
 
     def show_reset(self):
         self._push("reset", ResetPasswordView(self.page, controller=self, on_back_click=self.go_back))
+
+    # ============================================
+    # INFO CONTROL VIEW (Sensors + Actuators)
+    # ============================================
+    def show_info_control(self, e=None):
+        '''
+        Combined Sensors Info + Actuators 
+        Control screen (ADMIN + TECH only).
+        '''
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        role = user.role.value.lower()
+
+        # Determine community
+        if role == "admin":
+            cid = getattr(self.session, "selected_community_id", None)
+            if cid is None:
+                self._notify("Seleccione una comunidad primero.")
+                return self.show_admin_dashboard()
+        else:
+            cid = user.community_id
+
+        # Choose where the "Dashboard" button should go back to
+        if role == "admin":
+            back_dashboard = self.show_admin_dashboard
+        elif role == "technician":
+            back_dashboard = self.show_tecnico_dashboard
+        else:
+            back_dashboard = self.show_user_dashboard
+
+        view = InfoControlView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            community_id=cid,
+            on_dashboard=back_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+            on_settings=self.show_settings,
+        )
+
+        self._replace("info_control", view)
+
+    # ============================================
+    # HISTORY VIEW
+    # ============================================
+    def show_history(self, e=None):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        role = user.role.value.lower()
+
+        # Community selection logic (admin must choose)
+        if role == "admin":
+            cid = getattr(self.session, "selected_community_id", None)
+            if cid is None:
+                self._notify("Seleccione una comunidad primero.")
+                return self.show_admin_dashboard()
+        else:
+            cid = user.community_id
+
+        # Choose dashboard return path
+        if role == "admin":
+            back = self.show_admin_dashboard
+        elif role == "technician":
+            back = self.show_tecnico_dashboard
+        else:
+            back = self.show_user_dashboard
+
+        view = HistoryView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            community_id=cid,
+            on_dashboard=back,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+            on_settings=self.show_settings,
+        )
+        self._replace("history", view)
+
+
+    # ============================================
+    # USER MANAGEMENT VIEW
+    # ============================================
+    def show_user_management(self, e=None):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        if user.role.value.lower() != "admin":
+            return self._notify("Solo administradores pueden gestionar usuarios.")
+
+        view = UserManagementView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            on_dashboard=self.show_admin_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+            on_settings=self.show_settings,
+        )
+
+        self._replace("user_management", view)
+
 
     # ======================================================
     # Post-authentication navigation
@@ -139,47 +285,165 @@ class UIController:
         self.history = ["dashboard"]
         self._replace("dashboard", view)
 
+
     def show_tecnico_dashboard(self, e=None):
-        # Remember to add the community
-        # For now, technicians see the same as neighbors
-        return self.show_user_dashboard()
-    
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        # For technicians, effective community is always their own
+        summary_dto = self.dashboard_service.get_dashboard_summary(
+            user=user,
+            effective_community_id=user.community_id,
+        )
+        summary = summary_dto.to_dict()
+
+        view = TechnicianDashboardView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            community_id=user.community_id,
+            summary=summary,
+            on_settings=self.show_settings,
+            on_alerts=self.show_alerts,
+            on_dashboard=self.show_tecnico_dashboard,
+            on_logout=self.logout,
+        )
+
+        self.history = ["dashboard"]
+        self._replace("dashboard", view)
+
     def show_admin_dashboard(self, e=None):
-        # Rememer to add the filtering by selected community
-        # For now, admins see the same as neighbors
-        return self.show_user_dashboard()
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        # Admin must explicitly choose a community
+        cid = self.session.selected_community_id
+
+        if cid is None:
+            # Show minimal view prompting the user to select a community
+            prompt = ft.Text(
+                "Seleccione una comunidad para continuar",
+                size=18,
+                weight=ft.FontWeight.BOLD,
+                color=PRIMARY_GREEN,
+            )
+
+            # Show empty admin view with just the dropdown
+            # NOTE: We use an empty summary so the dropdown still populates
+            summary_dto = self.dashboard_service.get_dashboard_summary(
+                user=user,
+                effective_community_id=0
+            )
+            summary = summary_dto.to_dict()
+
+            view = AdminDashboardView(
+                page=self.page,
+                controller=self,
+                user=user,
+                role=user.role.value,
+                community_id=None,
+                summary=summary,
+                on_settings=self.show_settings,
+                on_alerts=self.show_alerts,
+                on_dashboard=self.show_admin_dashboard,
+                on_logout=self.logout,
+            )
+            
+            self.history = ["dashboard"]
+            self._replace("dashboard", view)
+            return
+
+        summary_dto = self.dashboard_service.get_dashboard_summary(
+            user=user,
+            effective_community_id=cid,
+        )
+        summary = summary_dto.to_dict()
+
+        view = AdminDashboardView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            community_id=cid,
+            summary=summary,
+            on_settings=self.show_settings,
+            on_alerts=self.show_alerts,
+            on_dashboard=self.show_admin_dashboard,
+            on_logout=self.logout,
+        )
+            
+        self.history = ["dashboard"]
+        self._replace("dashboard", view)
+
     
     def show_alerts(self, e=None):
         print(">>> showing alerts")
-        user = self.session.current_user
-        alerts = self.dashboard.get_alerts(self.session.current_user)
 
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        role = user.role.value.lower()
+
+        # determine community id based on role
+        if role == "admin":
+            cid = self.session.selected_community_id
+            if cid is None:
+                # Admin must select a community first
+                self._notify("Seleccione una comunidad primero.")
+                return self.show_admin_dashboard()
+        else:
+            # Technician / Neighbor -> always fixed community
+            cid = user.community_id
+
+        alerts = self.dashboard.get_alerts(user, selected_community_id=cid)
+        print(f">>> fetched {len(alerts)} alerts for community {cid}")
+        # route to dashboard
+        if role == "admin":
+            back_fn = self.show_admin_dashboard
+        elif role == "technician":
+            back_fn = self.show_tecnico_dashboard
+        else:
+            back_fn = self.show_user_dashboard
+
+        # render view
         view = AlertsDashboardView(
             page=self.page,
             controller=self,
             user=user,
-            role=user.role.value if user else "NEIGHBOR",
+            role=user.role.value,
             alerts=alerts,
-            on_dashboard=self.show_user_dashboard,
+            on_dashboard=back_fn,       
             on_alerts=self.show_alerts,
             on_logout=self.logout,
+            on_back=None,
+            on_settings=self.show_settings,
         )
 
         self._replace("alerts", view)
 
 
     def show_settings(self, e=None):
-        self._replace(
-            "settings",
-            ft.Column(
-                controls=[
-                    ft.Text("Settings view.", size=20, weight=ft.FontWeight.BOLD),
-                    ft.Text("This view will allow changing user settings later."),
-                ],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                alignment=ft.MainAxisAlignment.CENTER,
-            ),
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        view = UserEditView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            on_dashboard=self.show_dashboard,
+            on_settings=self.show_settings,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
         )
+
+        self._replace("settings", view)
+
 
     # ======================================================
     # View Callbacks (delegations to AuthController)
@@ -255,7 +519,46 @@ class UIController:
 
         if "éxito" in result.lower():
             self.history = ["login"]
-            self._replace("login", LoginView(self.page, self, on_back_click=self.go_back))    
+            self._replace("login", LoginView(self.page, self, on_back_click=self.go_back))  
+
+    def update_profile(self, name: str, email: str):
+        """
+        Called from UserEditView when saving the profile.
+
+        For this simulation:
+        - Validate basic fields
+        - Ensure email uniqueness
+        - Update the in-memory User
+        - Persist via UserRepository (self.auth.repo)
+        """
+
+        user = self.session.current_user
+        if not user:
+            return False, "No hay usuario en sesión."
+
+        name = (name or "").strip()
+        email = (email or "").strip().lower()
+
+        if not name or not email:
+            return False, "Nombre y correo son obligatorios."
+
+        if "@" not in email or "." not in email:
+            return False, "Formato de correo no válido."
+
+        # Check if another user already has this email
+        existing = self.auth.repo.find_by_email(email)
+        if existing and getattr(existing, "id", None) != getattr(user, "id", None):
+            return False, "Ya existe un usuario con ese correo."
+
+        # Update the current user
+        user.name = name
+        user.email = email
+
+        # Persist changes
+        self.auth.repo.save()
+
+        return True, "Perfil actualizado correctamente."
+  
 
     def logout(self, e=None):
         print(">>> LOGOUT")

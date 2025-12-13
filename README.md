@@ -73,6 +73,8 @@ SRP: Cada módulo tiene una única responsabilidad.
 
 DIP: Los controladores dependen de abstracciones, no de implementaciones concretas.
 
+Para generar más lecturas, ejecutar python -m sim.generate_readings
+
 ⚙️ Requisitos
 Python 3.10 o superior
 

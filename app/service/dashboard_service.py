@@ -22,6 +22,7 @@ from app.repository.actuator_repository import ActuatorRepository
 @dataclass
 class DashboardDTO:
     user_info: Dict[str, Any]
+    available_communities: List[int]
     sensors_summary: Dict[str, Any]
     actuators_summary: Dict[str, Any]
     alerts_summary: Dict[str, Any]
@@ -124,7 +125,7 @@ class DashboardService:
         # ---------------------------------------------------------------------
         user_info = {
             "id": str(user.id),
-            "fullname": user.fullname,
+            "name": user.name,
             "email": user.email,
             "role": user.role.value if hasattr(user.role, "value") else str(user.role),
             "community_id": user.community_id,
@@ -269,9 +270,14 @@ class DashboardService:
             "last_update": datetime.now().isoformat(),
             "system_status": "operational",
         }
+        
+        available_communities = sorted(
+            {s.community_id for s in self.sensor_repo.get_all()}
+        )
 
         return DashboardDTO(
             user_info=user_info,
+            available_communities=available_communities,
             sensors_summary=sensors_summary,
             actuators_summary=actuators_summary,
             alerts_summary=alerts_summary,

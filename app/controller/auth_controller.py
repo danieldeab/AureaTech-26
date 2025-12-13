@@ -102,6 +102,7 @@ class AuthController:
         # Create proper domain User
         # --------------------------------------
         new_user = User.new(
+            id=uuid4(),
             name=name,
             community_id=community_id,
             email=email.lower(),

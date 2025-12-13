@@ -972,6 +972,630 @@
       "role": "NEIGHBOR",
       "id": "81adae7e-c6e2-4a97-a470-6993ee83036b",
       "ts": 1765412654
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "18466471-40d7-4f4b-9165-75f54fe45bd6",
+      "ts": 1765471126
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "2f1257c9-3646-4f7a-b04f-3da07df5b136",
+      "ts": 1765471165
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech@test.com",
+      "role": "TECHNICIAN",
+      "id": "d7339609-540d-478a-ae67-e20a902270ba",
+      "ts": 1765471186
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "dd5a2a75-efed-4755-95a7-8ad93d3f73d3",
+      "ts": 1765471245
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "4e135f0b-d4c4-4ef2-9316-a57a38ca73a0",
+      "ts": 1765471272
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "3394efff-f057-4f35-bf11-9a6c56e4c55d",
+      "ts": 1765471469
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech@test.com",
+      "role": "TECHNICIAN",
+      "id": "035d84c1-3589-4cb1-938e-5beb564159ae",
+      "ts": 1765471508
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "138a6363-c013-442e-96d2-aa71dea70b03",
+      "ts": 1765471529
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "04e93b00-4e86-4af5-9a20-ed19949d8546",
+      "ts": 1765478244
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "90ce21fc-d94d-4807-95bd-3c071feeef69",
+      "ts": 1765478296
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "95619ce9-3f87-47f6-8cd1-334ee704929c",
+      "ts": 1765478445
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "2488e0d3-ff2f-4b75-ac97-ad19fea9ce39",
+      "ts": 1765478599
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "a8890ee9-0e85-4bbd-a5f5-08eec08c6f26",
+      "ts": 1765478605
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "61f64ece-2adf-4cb4-8227-0ad97986685c",
+      "ts": 1765478632
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "66abbb3a-57d6-41bc-b092-afe09e5b0ba9",
+      "ts": 1765478980
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "a1081c99-d40c-45b5-a953-500ae3337c77",
+      "ts": 1765479024
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "f6d95a19-4bb4-4057-99d5-fd26fec8dcea",
+      "ts": 1765479158
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "c68de3de-7a06-411b-b320-06242f9264ed",
+      "ts": 1765479195
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "e5ea1735-19d9-4062-9903-43bda5a77312",
+      "ts": 1765480050
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "f83af783-f782-4cd7-9f53-37b89d2d534c",
+      "ts": 1765559076
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "b2ab6ec1-d190-48bd-8fb5-2b3d7ea6705d",
+      "ts": 1765559093
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "2e72d6e1-e811-4ac1-9123-64ef4904c084",
+      "ts": 1765559127
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "c8dae698-53ae-46e9-8a00-b90f8729e20d",
+      "ts": 1765560434
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "3c11262e-7b76-4625-b39e-fe7c6329a4de",
+      "ts": 1765560502
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "9bc58bb0-6bfb-4548-8e90-64ce38057576",
+      "ts": 1765560534
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "2da161bc-2eb4-489c-a4c5-7b97546ca02f",
+      "ts": 1765561197
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "2c25af4a-8e0c-43e5-a3a9-b516b18626e5",
+      "ts": 1765561252
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "8ac720f8-ac67-45ba-bc7b-6d00acc82f30",
+      "ts": 1765561273
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "32db5a03-6343-470c-b032-2c6180b8f653",
+      "ts": 1765562195
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "52c055f3-34d8-4282-8e0f-9cac33a8d28d",
+      "ts": 1765562209
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "d64dd775-f639-43cc-85a9-57aebba78e61",
+      "ts": 1765562220
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "f81d0ca2-ddae-4f6f-813a-dc896416a442",
+      "ts": 1765563361
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "7b1ae17b-904c-46a4-8aed-6d99fb1b099d",
+      "ts": 1765565747
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "1c83f992-b2c0-489b-bd0c-0865ad27947d",
+      "ts": 1765565808
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "f2003e97-cd3e-4621-9df7-57b69b0da66a",
+      "ts": 1765566718
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "118fda9c-2ab4-4f5a-9045-89f1e9cf8278",
+      "ts": 1765566775
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "af6b99cc-076a-4b72-b31f-57edd0993d80",
+      "ts": 1765566844
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "686a5c4c-4ac0-4a90-9134-edb379e0395c",
+      "ts": 1765567248
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "db9f04fc-6d9c-4d92-8e21-b0c0fe255f19",
+      "ts": 1765567269
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "50e08351-f701-434a-bd45-49c01da14d42",
+      "ts": 1765567298
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "4ccf164d-ff54-44d8-a986-5328e447b230",
+      "ts": 1765567592
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "30ed7c97-7238-45fe-91aa-8f2dfbd13eaa",
+      "ts": 1765568249
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "ADMIN@TEST.COM",
+      "role": "ADMIN",
+      "id": "8dca5887-7031-43fb-a4ab-bd85db5b921a",
+      "ts": 1765568503
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "17c24c19-23c4-4b77-90fd-25d455b2624e",
+      "ts": 1765568796
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "ADMIN@TEST.COM",
+      "role": "ADMIN",
+      "id": "d4b13575-6886-405f-9d52-d307a20f0e2f",
+      "ts": 1765569067
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "27a505d5-2061-443f-8c23-ea5559c65051",
+      "ts": 1765569112
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "f1cc3382-8bed-4874-ab51-2826ab02bf37",
+      "ts": 1765569400
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "a1595509-c702-4d4f-a751-25d944811461",
+      "ts": 1765569792
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "dcfa7029-0d99-4655-90da-1819fe478bbd",
+      "ts": 1765569848
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "cf566a86-fcca-4cae-9a33-dd04ae32d53d",
+      "ts": 1765569904
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "3ec6e8ef-0416-4aa6-ad05-2cec1a24077a",
+      "ts": 1765570431
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "ADMIN@TEST.COM",
+      "role": "ADMIN",
+      "id": "83197362-98ea-4bbb-9764-79fdb0bb5226",
+      "ts": 1765570981
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "77976113-bb7e-49b0-a04a-df376e32b9ff",
+      "ts": 1765571026
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "439b6c0b-a9da-4829-a541-2a016fede732",
+      "ts": 1765571049
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "f275d188-d215-4f9b-b303-ece1a404a0ea",
+      "ts": 1765571480
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "7c789c8a-ab9b-4ca2-aa8b-d44d0be8356e",
+      "ts": 1765571578
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "afdc0e80-85bd-4464-9b51-81415bd8d722",
+      "ts": 1765571606
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "aurea@tech.com",
+      "role": "NEIGHBOR",
+      "id": "4c516c9c-726a-48ad-8435-748a53a897c2",
+      "ts": 1765572147
+    },
+    {
+      "action": "login_ok",
+      "community_id": 2,
+      "email": "juan@juan.com",
+      "role": "NEIGHBOR",
+      "id": "4f41246a-3848-4d58-8964-663c3cbd8b2e",
+      "ts": 1765572175
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "f75f572d-b1f1-48b6-a60c-4c50a01acdd3",
+      "ts": 1765572204
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "aaa076a4-b3b1-4c15-8e00-c1852db0dcab",
+      "ts": 1765572411
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "547010d6-83c6-48e2-9f72-a6d0b87d2f3a",
+      "ts": 1765573457
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "c621b0b6-fdbd-48f5-b424-9799c11c2f29",
+      "ts": 1765573514
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "3a2e5513-31f5-4bb2-a41e-c21fe8cc3f2e",
+      "ts": 1765573543
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "c9bb84a9-dd93-4f26-b58c-baa8f507ad5c",
+      "ts": 1765573735
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "35a29a9e-eae8-4d5c-85a3-f69e97a4adb8",
+      "ts": 1765573766
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "e25a9614-f082-4dba-a166-c2767c4835d9",
+      "ts": 1765573786
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "d3943958-28d2-4b8c-9d77-367f482e4bde",
+      "ts": 1765573851
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "05481071-6fd4-4b6b-8a66-273d257775b0",
+      "ts": 1765579777
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "d35d5523-3cd1-481d-b5d1-bbaca58ee463",
+      "ts": 1765580024
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "26159b69-f7f6-4e39-a429-a53176991935",
+      "ts": 1765580407
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "8b828f49-8ffa-40b2-812a-c8a0c94f6e68",
+      "ts": 1765580867
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "69bfaa69-88c8-492f-a25e-595f08bcf4e8",
+      "ts": 1765581226
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "40633837-d318-4d76-9d0f-25fef612ea4d",
+      "ts": 1765581474
+    },
+    {
+      "action": "login_ok",
+      "community_id": 2,
+      "email": "tech2@test.com",
+      "role": "TECHNICIAN",
+      "id": "8d78e90f-440d-4ec3-818e-2b2616cea327",
+      "ts": 1765581529
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "0e870088-2a30-4ecf-92a4-457bbf119984",
+      "ts": 1765582921
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "803c9e22-9e10-4d8d-99e9-6c258aa586d2",
+      "ts": 1765583493
+    },
+    {
+      "action": "login_ok",
+      "community_id": 1,
+      "email": "tech1@test.com",
+      "role": "TECHNICIAN",
+      "id": "220a1fdc-7d98-4c14-95b3-a098ed8499b4",
+      "ts": 1765583853
     }
   ]
 }

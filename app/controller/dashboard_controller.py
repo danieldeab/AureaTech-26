@@ -9,12 +9,18 @@ class DashboardController:
     def __init__(self, alert_service):
         self.alert_service = alert_service
 
-    def get_alerts(self, user):
+    def get_alerts(self, user, selected_community_id=None):
+        '''
+        Decide which community's alerts to return.
+        - Admin: uses selected_community_id (from session)
+        - Technician / Neighbor: always their own community_id
+        '''
         if user.role == RoleEnum.ADMIN:
-            comm = user.selected_community_id
-            return self.alert_service.get_alerts_for_community(comm)
-        elif user.role == RoleEnum.TECHNICIAN:
-            return self.alert_service.get_alerts_for_technician(user.community_id)
+            if selected_community_id is None:
+                return []
+            comm = selected_community_id
         else:
-            return self.alert_service.get_alerts_for_community(user.community_id)
+            comm = user.community_id
+        
+        return self.alert_service.get_alerts_for_community(comm)
 

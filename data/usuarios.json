@@ -13,7 +13,7 @@
         "id": "c7ae94d4-fc00-4d0a-bd0e-3cdf44e45bc9",
         "community_id": 1,
         "name": "Tech Support Comunidad 1",
-        "email": "tech@test.com",
+        "email": "tech1@test.com",
         "password_hash": "fe9bbd400bb6cb314531e3462507661401959afc69aae96bc6aec2c213b83bc1",
         "role": "TECHNICIAN",
         "picture_path": "",
@@ -23,30 +23,30 @@
         "id": "c7ae94d4-fc00-4d0a-bd0e-3cdf44e45bc9",
         "community_id": 2,
         "name": "Tech Support Comunidad 2",
-        "email": "tech@test.com",
+        "email": "tech2@test.com",
         "password_hash": "fe9bbd400bb6cb314531e3462507661401959afc69aae96bc6aec2c213b83bc1",
         "role": "TECHNICIAN",
         "picture_path": "",
         "picture_url": "https://images.pexels.com/photos/346529/pexels-photo-346529.jpeg"
-    },    
-    {
-        "id": "c8d42925-001f-476c-9929-82558cf97ab9",
-        "community_id": 1,
-        "name": "Juan",
-        "email": "juan@juan.com",
-        "password_hash": "ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca",
-        "role": "NEIGHBOR",
-        "picture_path": "",
-        "picture_url": "https://images.pexels.com/photos/1819483/pexels-photo-1819483.jpeg"
     },
     {
         "id": "e5227768-8dd8-4302-883b-bda3c14819c5",
-        "community_id": 2,
+        "community_id": 1,
         "name": "AureaTech",
         "email": "aurea@tech.com",
         "password_hash": "494aea83574267c4173aacdbb7768d0b3d4935eed2f7879f5e558f2198865fb5",
         "role": "NEIGHBOR",
         "picture_path": "",
         "picture_url": "https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg"
+    },
+    {
+        "id": "7f3f2adc-adac-4d7d-a88d-ad7b7ae1c1b9",
+        "community_id": 2,
+        "name": "Juan",
+        "email": "juan@juan.com",
+        "password_hash": "ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca",
+        "role": "NEIGHBOR",
+        "picture_path": "",
+        "picture_url": "https://images.pexels.com/photos/1819483/pexels-photo-1819483.jpeg"
     }
 ]

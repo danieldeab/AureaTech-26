@@ -26,7 +26,7 @@ class SensorService:
     # -----------------------------------------------------------
 
     def get_sensors_in_community(self, community_id: int) -> List[Sensor]:
-        sensors = self.sensor_repo.findAll()
+        sensors = self.sensor_repo.get_all()
         return [s for s in sensors if s.community_id == community_id]
 
     def get_sensor(self, sensor_id: str | UUID) -> Optional[Sensor]:
