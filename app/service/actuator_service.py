@@ -3,10 +3,13 @@
 from __future__ import annotations
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime
 
 from app.model.actuator import Actuator
+from app.model.log_entry import LogEntry
 from app.model.enums import RoleEnum
 from app.repository.actuator_repository import ActuatorRepository
+from app.repository.log_repository import LogRepository
 
 
 class ActuatorService:
@@ -22,6 +25,7 @@ class ActuatorService:
 
     def __init__(self, actuator_repo: ActuatorRepository):
         self.repo = actuator_repo
+        self.log_repo = LogRepository()
 
     # ---------------------------------------------------------
     # Query API
@@ -65,6 +69,17 @@ class ActuatorService:
         
         # Perform toggle
         act.toggle()
+
+        log = LogEntry(
+            id=uuid4(),
+            timestamp=datetime.utcnow(),
+            message=f"Actuator {actuator.id} set to {actuator.state}",
+            community_id=actuator.community_id,
+            actuator_id=actuator.id,
+        )
+
+        self.log_repo.add(log)
+        self.log_repo.save()
 
         # Persist change
         self.repo.save(act)

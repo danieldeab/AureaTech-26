@@ -35,7 +35,7 @@ class AuthController:
     def _log(self, action, email, role):
         self.log_repo.add({
             "action": action,
-            "community_id": self.session.current_community_id,
+            "community_id": self.session.selected_community_id,
             "email": email,
             "role": role,
         })
@@ -102,18 +102,17 @@ class AuthController:
         # Create proper domain User
         # --------------------------------------
         new_user = User.new(
-            id=uuid4(),
             name=name,
-            community_id=community_id,
+            community_id=int(community_id),
             email=email.lower(),
             password_hash=hashed,
             role=RoleEnum.NEIGHBOR,
+            dob=dob,
         )
 
         # Attach optional fields
         new_user.picture_path = final_picture_path
         new_user.picture_url = None
-        new_user.dob = dob if hasattr(new_user, "dob") else None  # safe fallback
 
         self.repo.add_user(new_user)
         self.repo.save()

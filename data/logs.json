@@ -1596,6 +1596,22 @@
       "role": "TECHNICIAN",
       "id": "220a1fdc-7d98-4c14-95b3-a098ed8499b4",
       "ts": 1765583853
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "f840d927-0b14-4c1b-ab52-90cf5978525c",
+      "ts": 1765717796
+    },
+    {
+      "action": "login_ok",
+      "community_id": 0,
+      "email": "admin@test.com",
+      "role": "ADMIN",
+      "id": "489a391a-7658-4d82-8d46-ce484abd6556",
+      "ts": 1765717907
     }
   ]
 }

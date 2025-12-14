@@ -1,6 +1,7 @@
 # app/view/components/alerts_view.py
 
 import flet as ft
+from app.model.enums import SeverityEnum
 from app.view.theme import (
     PRIMARY_GREEN,
     LIGHT_GREEN,
@@ -82,16 +83,14 @@ class AlertsList(ft.UserControl):
         for a in self.alerts:
             # For now, we assume each alert has: message, type
             # Later you can enhance it with timestamps, severity, icons, etc.
-            severity = getattr(a, "severity", "info")
+            severity = getattr(a, "severity", SeverityEnum.INFO)
             message = getattr(a, "message", "Alerta")
 
-            if severity == "error":
+            if severity == SeverityEnum.CRIT:
                 card = AlertBox(message, ERROR_RED, WHITE)
-            elif severity == "warning":
+            elif severity == SeverityEnum.WARN:
                 card = AlertBox(message, WARNING_YELLOW, PRIMARY_GREEN)
-            elif severity == "success":
-                card = AlertBox(message, LIGHT_GREEN, PRIMARY_GREEN)
-            else:
+            elif severity == SeverityEnum.INFO:
                 card = AlertBox(message, INFO_BLUE, PRIMARY_GREEN)
 
             alert_cards.append(card)

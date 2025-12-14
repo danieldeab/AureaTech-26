@@ -157,7 +157,7 @@ class SignupView(ViewBaseAuth):
             focused_border_color=PRIMARY_GREEN,
             focused_border_width=2,
             focused_color=FULL_BLACK,
-            on_change=lambda e: self.email_field.focus(),
+            on_change=lambda e: self.password_field.focus(),
             on_focus=self._open_dropdown,
         )
 

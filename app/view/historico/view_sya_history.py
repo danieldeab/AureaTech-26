@@ -81,7 +81,7 @@ class HistoryView(BaseDashboardView):
     # Tiles
     # ============================================================
     def _sensor_entry_tile(self, entry, sensor):
-        if entry.isnumeric():
+        if isinstance(entry.value, float):
             value = round(entry.value, 2)
         else:
             value = entry.value
