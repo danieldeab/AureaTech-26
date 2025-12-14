@@ -3,7 +3,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from .enums import ActuatorTypeEnum
 
 
@@ -21,13 +21,13 @@ class Actuator:
             id=uuid4(),
             type=type,
             state=state,
-            lastChangedAt=datetime.utcnow(),
+            lastChangedAt=datetime.now(timezone.utc),
             community_id=community_id
         )
 
     def toggle(self):
         self.state = not self.state
-        self.lastChangedAt = datetime.utcnow()
+        self.lastChangedAt = datetime.now(timezone.utc)
 
     def to_dict(self) -> dict:
         d = asdict(self)

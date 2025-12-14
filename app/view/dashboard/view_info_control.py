@@ -135,6 +135,7 @@ class InfoControlView(BaseDashboardView):
 
         updated = self.actuator_service.toggle_actuator(
             actuator_id=actuator_id,
+            user_id=self.user.id,
             user_community=self.user.community_id,
             user_role=role_enum,
         )

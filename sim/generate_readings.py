@@ -1,7 +1,7 @@
 import argparse
 import math
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Iterable, Tuple, Dict
 
 from app.model.reading import Reading

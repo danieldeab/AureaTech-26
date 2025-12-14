@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from .enums import RoleEnum
 
 @dataclass(slots=True)
@@ -18,7 +18,7 @@ class LogEntry:
     def new(actor_id: UUID, actor_role: RoleEnum, category: str, action: str, details: str = "") -> "LogEntry":
         return LogEntry(
             id=uuid4(),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             actor_id=actor_id,
             actor_role=actor_role,
             category=category,

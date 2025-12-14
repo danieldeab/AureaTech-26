@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from .enums import SeverityEnum
 
 @dataclass(slots=True)
@@ -22,7 +22,7 @@ class Alert:
             severity=severity,
             message=message,
             target_user_id=target_user_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             read_status=False,
         )
 
@@ -36,7 +36,7 @@ class Alert:
 
     @staticmethod
     def from_dict(d: dict) -> "Alert":
-        from datetime import datetime
+        from datetime import datetime, timezone
         return Alert(
             id=UUID(d["id"]),
             type=d["type"],

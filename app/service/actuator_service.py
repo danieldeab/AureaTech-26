@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 from typing import List, Optional
-from uuid import UUID
-from datetime import datetime
+from uuid import UUID, uuid4
+from datetime import datetime, timezone
 
 from app.model.actuator import Actuator
 from app.model.log_entry import LogEntry
@@ -44,7 +44,7 @@ class ActuatorService:
     # Mutation API
     # ---------------------------------------------------------
 
-    def toggle_actuator(self, actuator_id: str | UUID, *, user_community: int, user_role: RoleEnum, ) -> Optional[Actuator]:
+    def toggle_actuator(self, actuator_id: str | UUID, *, user_id: UUID, user_community: int, user_role: RoleEnum, ) -> Optional[Actuator]:
         """
         Toggle actuator state if the user has access.
 
@@ -70,12 +70,12 @@ class ActuatorService:
         # Perform toggle
         act.toggle()
 
-        log = LogEntry(
-            id=uuid4(),
-            timestamp=datetime.utcnow(),
-            message=f"Actuator {actuator.id} set to {actuator.state}",
-            community_id=actuator.community_id,
-            actuator_id=actuator.id,
+        log = LogEntry.new(
+            actor_id=user_id,
+            actor_role=user_role,
+            category="ACTUATOR",
+            action="TOGGLE",
+            details=f"Actuator {act.id} set to {'ON' if act.state else 'OFF'} (community {act.community_id})",
         )
 
         self.log_repo.add(log)

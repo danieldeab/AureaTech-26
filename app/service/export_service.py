@@ -4,7 +4,7 @@ from __future__ import annotations
 import csv
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Iterable, Set
 
 from app.model.user import User

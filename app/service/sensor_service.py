@@ -3,7 +3,7 @@
 from __future__ import annotations
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.model.sensor import Sensor
 from app.model.reading import Reading

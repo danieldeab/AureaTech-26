@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from uuid import UUID, uuid4
 from typing import Dict, List
-from datetime import datetime
+from datetime import datetime, timezone
 from .enums import SensorTypeEnum
 from .reading import Reading
 

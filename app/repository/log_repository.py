@@ -1,5 +1,5 @@
 import json, uuid, os
-from datetime import datetime
+from datetime import datetime, timezone
 from app.repository.interfaces.log_repository_interface import ILogRepository
 
 # Resolve data path to package root, not CWD
