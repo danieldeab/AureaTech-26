@@ -3,15 +3,15 @@
 import json
 import os
 from typing import List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from datetime import datetime, timezone
 
 from app.model.actuator import Actuator
 from app.repository.interfaces.actuator_repository_interface import IActuatorRepository
 
-
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
 ACTUATORS_PATH = os.path.join(DATA_DIR, "actuators.json")
 
 
@@ -61,7 +61,7 @@ class ActuatorRepository(IActuatorRepository):
         """Add new actuator and persist."""
         # Ensure valid ID
         if not getattr(actuator, "id", None):
-            actuator.id = uuid.uuid4()
+            actuator.id = uuid4()
 
         # Ensure timestamp is timezone-aware
         if not actuator.lastChangedAt:

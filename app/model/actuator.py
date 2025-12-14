@@ -10,15 +10,19 @@ from .enums import ActuatorTypeEnum
 @dataclass(slots=True)
 class Actuator:
     id: UUID
+    name: str
     type: str                     # accept raw string or enum
     state: bool
     lastChangedAt: datetime
     community_id: int
+    # Automation-related fields can be added here in the future
+    # Sensor-bindings can also be added here in the future
 
     @staticmethod
-    def new(type: str, community_id: int, state: bool = False) -> "Actuator":
+    def new(name: str, type: str, community_id: int, state: bool = False) -> "Actuator":
         return Actuator(
             id=uuid4(),
+            name=name,
             type=type,
             state=state,
             lastChangedAt=datetime.now(timezone.utc),
@@ -39,6 +43,7 @@ class Actuator:
     def from_dict(d: dict) -> "Actuator":
         return Actuator(
             id=UUID(d["id"]),
+            name=d["name"],
             type=d["type"],
             state=bool(d["state"]),
             lastChangedAt=datetime.fromisoformat(d["lastChangedAt"]),

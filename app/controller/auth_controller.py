@@ -4,6 +4,7 @@ from app.model.user import User
 from app.utils.session import Session
 from app.repository.interfaces.user_repository_interface import IUserRepository
 from app.repository.interfaces.log_repository_interface import ILogRepository
+from app.model.log_entry import LogEntry
 from app.model.enums import RoleEnum
 
 import hashlib
@@ -11,6 +12,7 @@ import os
 import shutil
 import re
 from uuid import uuid4
+from datetime import datetime, timezone
 
 
 class AuthController:
@@ -32,13 +34,23 @@ class AuthController:
     def _valid_email(self, correo):
         return re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", correo) is not None
 
-    def _log(self, action, email, role):
-        self.log_repo.add({
-            "action": action,
-            "community_id": self.session.selected_community_id,
-            "email": email,
-            "role": role,
-        })
+    def _log(self, action, details: str):
+        if self.session.current_user:
+            actor_id = self.session.current_user.id
+            actor_role = self.session.current_user.role
+        else:
+            actor_id = uuid4()
+            actor_role = RoleEnum.NEIGHBOR
+
+        log = LogEntry.new(
+            actor_id=actor_id,
+            actor_role=actor_role,
+            category="AUTH",
+            action=action,
+            details=details,
+        )
+
+        self.log_repo.add(log)
 
     # ==========================================
     # LOGIN
@@ -62,7 +74,7 @@ class AuthController:
         self.session.set_current_user(user)
         self.session.current_community_id = user.community_id
 
-        self._log("login_ok", correo, user.role.value)
+        self._log(action="login_ok", details=correo)
 
         return True, "Login successful.", user
 
@@ -117,7 +129,7 @@ class AuthController:
         self.repo.add_user(new_user)
         self.repo.save()
 
-        self._log("signup_ok", email, new_user.role.value)
+        self._log(action="signup_ok", details=email)
         return True
 
     # ==========================================
@@ -133,9 +145,8 @@ class AuthController:
         user = self.repo.find_by_email(email)
 
         self._log(
-            "recover_request",
-            email,
-            user.role.value if user else "unknown"
+            action="recover_request",
+            details=email
         )
 
         if not user:
@@ -156,7 +167,7 @@ class AuthController:
 
         email = self.session.reset_email
         if not email:
-            self._log("reset_attempt_no_session", "unknown", "unknown")
+            self._log(action="reset_attempt_no_session", details="unknown")
             return "Sesión expirada."
 
         user = self.repo.find_by_email(email)
@@ -167,7 +178,7 @@ class AuthController:
         user.password_hash = self._hash(pass1)
         self.repo.save()
 
-        self._log("reset_success", user.email, user.role.value)
+        self._log(action="reset_success", details=user.email)
 
         # End reset session
         self.session.clear_reset()

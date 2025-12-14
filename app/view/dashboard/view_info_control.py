@@ -87,7 +87,7 @@ class InfoControlView(BaseDashboardView):
         """
         Card with actuator info and ON/OFF toggle.
         """
-        title = f"{actuator.type} (Comunidad {actuator.community_id})"
+        title = f"{actuator.name} (Comunidad {actuator.community_id})"
 
         def _on_toggle(e: ft.ControlEvent):
             new_state = e.control.value
@@ -96,6 +96,7 @@ class InfoControlView(BaseDashboardView):
 
         switch = ft.Switch(
             value=actuator.state,
+            active_color=PRIMARY_GREEN,
             on_change=_on_toggle,
         )
 

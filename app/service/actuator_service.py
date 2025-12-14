@@ -79,7 +79,6 @@ class ActuatorService:
         )
 
         self.log_repo.add(log)
-        self.log_repo.save()
 
         # Persist change
         self.repo.save(act)
