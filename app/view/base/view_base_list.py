@@ -2,7 +2,7 @@
 
 import flet as ft
 from app.view.base.view_base_dashboard import BaseDashboardView
-
+from app.view.theme import PRIMARY_GREEN
 
 class BaseListView(BaseDashboardView):
     
@@ -52,7 +52,7 @@ class BaseListView(BaseDashboardView):
                     self.title,
                     size=20,
                     weight=ft.FontWeight.BOLD,
-                    color=None,
+                    color=PRIMARY_GREEN,
                 )
             )
 

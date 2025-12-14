@@ -31,8 +31,10 @@ class LogRepository(ILogRepository):
         with open(self.path, "w", encoding="utf-8") as f:
             json.dump(db, f, indent=2)
 
-    def all(self):
+    def get_all(self):
         with open(self.path, "r", encoding="utf-8") as f:
             db = json.load(f)
-
         return db.get("eventos", [])
+
+    def all(self):
+        return self.get_all()

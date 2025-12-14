@@ -6,11 +6,11 @@ from .enums import SeverityEnum
 
 @dataclass(slots=True)
 class Alert:
-    id: UUID
+    id: str
     type: str
     severity: SeverityEnum
     message: str
-    target_user_id: UUID
+    target_user_id: str
     timestamp: datetime
     read_status: bool = False
 
@@ -35,14 +35,14 @@ class Alert:
         return d
 
     @staticmethod
-    def from_dict(d: dict) -> "Alert":
-        from datetime import datetime, timezone
+    def from_dict(data: dict) -> "Alert":
         return Alert(
-            id=UUID(d["id"]),
-            type=d["type"],
-            severity=SeverityEnum(d["severity"]),
-            message=d["message"],
-            target_user_id=UUID(d["target_user_id"]),
-            timestamp=datetime.fromisoformat(d["timestamp"]),
-            read_status=bool(d.get("read_status", False)),
+            id=str(data["id"]),                     # keep as string
+            type=data["type"],
+            severity=SeverityEnum[data["severity"]],
+            message=data["message"],
+            target_user_id=str(data["target_user_id"]),  # community id
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            read_status=data.get("read_status", False),
         )
+

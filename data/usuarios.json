@@ -56,7 +56,7 @@
     },
     {
         "id": "5408b480-dfd7-4701-9052-d8bf01ed9ab2",
-        "community_id": "2",
+        "community_id": 2,
         "name": "Pepe Pérez",
         "email": "pepe@perez.com",
         "password_hash": "7c9e7c1494b2684ab7c19d6aff737e460fa9e98d5a234da1310c97ddf5691834",

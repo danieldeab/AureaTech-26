@@ -3,8 +3,8 @@
     "id": "6835ba9a-43b7-4956-9376-1be12ea15451",
     "name": "Streetlight 1A",
     "type": "STREETLIGHT",
-    "state": false,
-    "lastChangedAt": "2025-12-14T15:45:45.012984+00:00",
+    "state": true,
+    "lastChangedAt": "2025-12-14T20:51:37.434902+00:00",
     "community_id": 1
   },
   {
@@ -12,7 +12,7 @@
     "name": "Streetlight 1B",
     "type": "STREETLIGHT",
     "state": false,
-    "lastChangedAt": "2025-12-14T15:45:45.012984+00:00",
+    "lastChangedAt": "2025-12-14T21:15:57.559994+00:00",
     "community_id": 1
   },
   {
@@ -28,7 +28,7 @@
     "name": "Streetlight 2B",
     "type": "STREETLIGHT",
     "state": false,
-    "lastChangedAt": "2025-12-14T16:23:01.462612+00:00",
+    "lastChangedAt": "2025-12-14T21:25:43.542705+00:00",
     "community_id": 2
   },
   {

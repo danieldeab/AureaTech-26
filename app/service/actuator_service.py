@@ -35,6 +35,10 @@ class ActuatorService:
         """Return all actuators belonging to a community."""
         all_acts = self.repo.findAll()
         return [a for a in all_acts if a.community_id == community_id]
+    
+    def get_all_actuators(self) -> List[Actuator]:
+        """Return all actuators."""
+        return self.repo.findAll()
 
     def get_actuator(self, actuator_id: str | UUID) -> Optional[Actuator]:
         """Return a single actuator by ID."""
@@ -83,3 +87,26 @@ class ActuatorService:
         # Persist change
         self.repo.save(act)
         return act
+    
+    def apply_streetlight_decision(self, decision: dict):
+
+        community_id = decision["community_id"]
+        desired = decision["streetlights_on"]
+
+        actuators = self.repo.findAll()
+
+        for act in actuators:
+            if act.type == "STREETLIGHT" and act.community_id == community_id:
+                if act.state != desired:
+                    act.state = desired
+                    self.repo.save()
+
+                    log = LogEntry.new(
+                        actor_id=act.id,
+                        actor_role=RoleEnum.ADMIN,
+                        category="AUTOMATION",
+                        action="AUTO_TOGGLE",
+                        details=f"Streetlight {'ON' if desired else 'OFF'} due to sensors",
+                    )
+                    self.log_repo.add(log)
+

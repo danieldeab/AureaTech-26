@@ -2,7 +2,7 @@
 
 import flet as ft
 from app.view.base.view_base_dashboard import BaseDashboardView
-from app.view.theme import PRIMARY_GREEN, WHITE
+from app.view.theme import PRIMARY_GREEN, WHITE, BRAND_ACCENT_BLUE, BRAND_LIGHT_GREY, TEXT_SECONDARY
 
 
 class AdminDashboardView(BaseDashboardView):
@@ -40,16 +40,111 @@ class AdminDashboardView(BaseDashboardView):
             on_back=None,
         )
 
+    def _build_kpis(self):
+        
+        kpis = self.controller.get_kpis()
+        streetlights_on = kpis["streetlights_on"]
+        streetlights_total = kpis["streetlights_total"]
+        
+        progress = (
+            streetlights_on / streetlights_total
+            if streetlights_total > 0 else 0
+        )
+
+        active_alerts = kpis["active_alerts"]
+        automation_events = kpis["automation_events"]
+        last_event_ts = kpis["last_event"] or "N/A"
+
+        return ft.Column(
+            controls=[
+                ft.Text(
+                    "System Overview",
+                    size=20,
+                    weight="bold",
+                    color=PRIMARY_GREEN,
+                ),
+
+                ft.Row(
+                    spacing=24,
+                    controls=[
+                        # LEFT HALF — Streetlights
+                        ft.Container(
+                            expand=1,
+                            content=ft.Column(
+                                spacing=8,
+                                controls=[
+                                    ft.Text("Streetlights ON", color=PRIMARY_GREEN),
+                                    ft.ProgressBar(
+                                        value=progress,
+                                        height=6,
+                                        bgcolor=BRAND_LIGHT_GREY,
+                                        color=BRAND_ACCENT_BLUE,
+                                    ),
+                                    ft.Text(f"{streetlights_on} / {streetlights_total}", color=BRAND_ACCENT_BLUE),
+                                ],
+                            ),
+                        ),
+
+                        # RIGHT HALF — Alerts + Automation
+                        ft.Container(
+                            expand=1,
+                            content=ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                                spacing=12,
+                                controls=[
+                                    ft.Column(
+                                        controls=[
+                                            ft.Text("Active Alerts", color=PRIMARY_GREEN),
+                                            ft.Text(
+                                                str(active_alerts),
+                                                size=24,
+                                                weight="bold",
+                                                color=BRAND_ACCENT_BLUE,
+                                            ),
+                                        ]
+                                    ),
+                                    ft.Column(
+                                        controls=[
+                                            ft.Text("Automation Events", color=PRIMARY_GREEN),
+                                            ft.Text(
+                                                str(automation_events),
+                                                size=24,
+                                                weight="bold",
+                                                color=BRAND_ACCENT_BLUE,
+                                            ),
+                                        ]
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+
+                ft.Text(
+                    f"Last system event: {last_event_ts}",
+                    size=12,
+                    color=TEXT_SECONDARY,
+                ),
+            ]
+        )
+
+
     def build_body(self) -> ft.Control:
 
         # community selection dropdown
         # Discover existing communities from summary
         communities = self.summary.get("available_communities", [])
 
+        if self.community_id is None and communities:
+            self.community_id = communities[0]
+
+
         # Dropdown should reflect current selection
         dropdown = ft.Dropdown(
             label="Seleccionar comunidad",
             width=300,
+            color=PRIMARY_GREEN,
+            focused_color=WHITE,
             options=[ft.dropdown.Option(str(c)) for c in communities],
             value=str(self.community_id) if self.community_id is not None else None,
             on_change=lambda e: self.controller.set_selected_community(int(e.control.value))
@@ -93,6 +188,7 @@ class AdminDashboardView(BaseDashboardView):
         return ft.Column(
             spacing=16,
             controls=[
+                self._build_kpis(),
                 ft.Text(
                     f"Panel de administración – Comunidad {self.community_id}",
                     size=18,

@@ -29,6 +29,8 @@ from app.repository.reading_repository import ReadingRepository
 # Service imports
 from app.service.alert_service import AlertService
 from app.service.dashboard_service import DashboardService
+from app.service.monitoring_service import MonitoringService
+from app.service.actuator_service import ActuatorService
 
 # Theme imports
 from app.view.theme import (
@@ -63,13 +65,26 @@ class UIController:
         # Alerts
         self.alert_repo = AlertRepository()
         self.alert_service = AlertService(self.alert_repo)
-        
+
         # Dashboard summary
-        self.dashboard = DashboardController(self.alert_service)
         self.sensor_repo = SensorRepository()
         self.actuator_repo = ActuatorRepository()
         self.log_repo = LogRepository()
         self.reading_repo = ReadingRepository()
+        self.actuator_service = ActuatorService(self.actuator_repo)
+        self.monitoring_service = MonitoringService(
+            self.sensor_repo,
+            self.reading_repo,
+            self.alert_repo,
+            self.log_repo,
+        )
+        self.dashboard = DashboardController(
+            self.alert_service, 
+            self.monitoring_service, 
+            session, 
+            self.actuator_service,
+            self.log_repo
+        )
         self.dashboard_service = DashboardService(
             self.sensor_repo,
             self.actuator_repo,
@@ -444,6 +459,35 @@ class UIController:
 
         self._replace("settings", view)
 
+    def show_actuator_history(self, actuator_id: int):
+        logs = self.log_repo.all()
+
+        actuator_logs = [
+            l for l in logs
+            if l.get("category") == "ACTUATOR"
+            and str(l.get("target_id")) == str(actuator_id)
+        ]
+
+        view = AlertsDashboardView(
+            page=self.page,
+            controller=self,
+            user=self.session.current_user,
+            role=self.session.current_user.role,
+            alerts=actuator_logs,  # reuse alerts-style list
+            on_dashboard=self.show_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+            on_back=self.show_info_control,
+        )
+
+        self._replace("actuator_history", view)
+
+
+    def get_kpis(self) -> dict:
+        """
+        Delegates KPI computation to DashboardController.
+        """
+        return self.dashboard.get_kpis()
 
     # ======================================================
     # View Callbacks (delegations to AuthController)

@@ -3,7 +3,7 @@
 import flet as ft
 
 from app.view.base.view_base_dashboard import BaseDashboardView
-from app.view.theme import PRIMARY_GREEN, WHITE, BG_CARD_PRIMARY, FULL_BLACK
+from app.view.theme import BRAND_ACCENT_BLUE, PRIMARY_GREEN, WHITE, BG_CARD_PRIMARY, FULL_BLACK, BRAND_LIGHT_GREY
 
 from app.service.sensor_service import SensorService
 from app.service.actuator_service import ActuatorService
@@ -96,7 +96,7 @@ class InfoControlView(BaseDashboardView):
 
         switch = ft.Switch(
             value=actuator.state,
-            active_color=PRIMARY_GREEN,
+            active_color=BRAND_ACCENT_BLUE,
             on_change=_on_toggle,
         )
 
@@ -165,7 +165,6 @@ class InfoControlView(BaseDashboardView):
 
         sensors_column = ft.Column(
             spacing=10,
-            scroll=ft.ScrollMode.ALWAYS,
             controls=[
                 ft.Text(
                     "Sensores y su información",
@@ -173,9 +172,14 @@ class InfoControlView(BaseDashboardView):
                     weight=ft.FontWeight.BOLD,
                     color=PRIMARY_GREEN,
                 ),
-                *sensor_tiles,
+                ft.Column(
+                    spacing=10,
+                    scroll=ft.ScrollMode.ALWAYS,
+                    controls=sensor_tiles,
+                ),
             ],
         )
+
 
         actuator_tiles = [self._actuator_tile(a) for a in actuators]
         if not actuator_tiles:
@@ -185,7 +189,6 @@ class InfoControlView(BaseDashboardView):
 
         actuators_column = ft.Column(
             spacing=10,
-            scroll=ft.ScrollMode.ALWAYS,
             controls=[
                 ft.Text(
                     "Actuadores / control remoto",
@@ -193,9 +196,14 @@ class InfoControlView(BaseDashboardView):
                     weight=ft.FontWeight.BOLD,
                     color=PRIMARY_GREEN,
                 ),
-                *actuator_tiles,
+                ft.Column(
+                    spacing=10,
+                    scroll=ft.ScrollMode.ALWAYS,
+                    controls=actuator_tiles,
+                ),
             ],
         )
+
 
 
         # Layout B: about 60/40 → expand factors 3 and 2
@@ -203,6 +211,7 @@ class InfoControlView(BaseDashboardView):
             spacing=16,
             controls=[
                 ft.Container(
+                    alignment=ft.alignment.top_center,
                     expand=3,
                     bgcolor=BG_CARD_PRIMARY,
                     border_radius=16,
@@ -210,6 +219,7 @@ class InfoControlView(BaseDashboardView):
                     content=sensors_column,
                 ),
                 ft.Container(
+                    alignment=ft.alignment.top_center,
                     expand=2,
                     bgcolor=BG_CARD_PRIMARY,
                     border_radius=16,

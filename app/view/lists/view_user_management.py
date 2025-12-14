@@ -133,6 +133,7 @@ class UserManagementView(BaseListView):
         role_dropdown = ft.Dropdown(
             width=160,
             value=role_text,
+            color=PRIMARY_GREEN,
             options=[ft.dropdown.Option(r.value) for r in RoleEnum],
             on_change=lambda e: self._update_role(u.id, e.control.value),
         )
@@ -141,6 +142,8 @@ class UserManagementView(BaseListView):
         comm_field = ft.Dropdown(
             value=str(u.community_id),
             width=80,
+            color=PRIMARY_GREEN,
+            focused_color=WHITE,
             options=[ft.dropdown.Option(str(c)) for c in comm],
             on_change=lambda e: self._update_community(u.id, e.control.value),
         )

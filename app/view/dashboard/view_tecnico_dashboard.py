@@ -2,7 +2,7 @@
 
 import flet as ft
 from app.view.base.view_base_dashboard import BaseDashboardView
-from app.view.theme import PRIMARY_GREEN, WHITE
+from app.view.theme import PRIMARY_GREEN, WHITE, BRAND_ACCENT_BLUE, BRAND_LIGHT_GREY, TEXT_SECONDARY
 
 
 class TechnicianDashboardView(BaseDashboardView):
@@ -39,6 +39,61 @@ class TechnicianDashboardView(BaseDashboardView):
             on_logout=on_logout,
         )
 
+
+    def _build_kpis(self):
+        
+        kpis = self.controller.get_kpis()
+
+        active_alerts = kpis["active_alerts"]
+        automation_events = kpis["automation_events"]
+        last_event_ts = kpis["last_event"] or "N/A"
+
+        return ft.Column(
+            controls=[
+                ft.Text(
+                    "System Overview",
+                    size=20,
+                    weight="bold",
+                    color=PRIMARY_GREEN,
+                ),
+
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                    spacing=12,
+                    controls=[
+                        ft.Column(
+                            controls=[
+                                ft.Text("Active Alerts", color=PRIMARY_GREEN),
+                                ft.Text(
+                                    str(active_alerts),
+                                    size=24,
+                                    weight="bold",
+                                    color=BRAND_ACCENT_BLUE,
+                                ),
+                            ]
+                        ),
+                        ft.Column(
+                            controls=[
+                                ft.Text("Automation Events", color=PRIMARY_GREEN),
+                                ft.Text(
+                                    str(automation_events),
+                                    size=24,
+                                    weight="bold",
+                                    color=BRAND_ACCENT_BLUE,
+                                ),
+                            ]
+                        ),
+                    ]
+                ),
+                ft.Text(
+                    f"Last system event: {last_event_ts}",
+                    size=12,
+                    color=TEXT_SECONDARY,
+                ),
+            ]
+        )
+
+
     def build_body(self) -> ft.Control:
         sensors = self.summary.get("sensors_summary", {}) or {}
         alerts = self.summary.get("alerts_summary", {}) or {}
@@ -62,6 +117,7 @@ class TechnicianDashboardView(BaseDashboardView):
         return ft.Column(
             spacing=16,
             controls=[
+                self._build_kpis(),
                 ft.Text(
                     f"Panel técnico – Comunidad {self.community_id}",
                     size=18,
