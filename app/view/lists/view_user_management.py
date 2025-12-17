@@ -206,7 +206,7 @@ class UserManagementView(BaseListView):
         self._refresh_list()
 
     def _delete_user(self, user_id):
-        self.user_repo.delete(user_id)
+        self.user_repo.delete_user(user_id)
         self.controller._notify("Usuario eliminado.")
         self._refresh_list()
 
