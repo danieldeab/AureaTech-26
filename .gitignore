@@ -1,7 +1,7 @@
 ############################################
 # PYTHON BASICS
 ############################################
-_pycache_/
+__pycache__/
 *.py[cod]
 *$py.class
 
@@ -27,6 +27,7 @@ pip-wheel-metadata/
 .cache/
 .python_history
 ipynb_checkpoints/
+.pytest_cache/
 
 
 ############################################

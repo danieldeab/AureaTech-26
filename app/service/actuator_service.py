@@ -1,71 +1,112 @@
 # app/service/actuator_service.py
-import json
-import os
-from datetime import datetime, timezone
+
+from __future__ import annotations
 from typing import List, Optional
+from uuid import UUID, uuid4
+from datetime import datetime, timezone
+
 from app.model.actuator import Actuator
-from app.models.user import User
+from app.model.log_entry import LogEntry
+from app.model.enums import RoleEnum
+from app.repository.actuator_repository import ActuatorRepository
+from app.repository.log_repository import LogRepository
 
-# Define rutas relativas
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-ACTUATORS_PATH = os.path.join(DATA_DIR, "actuators.json")
 
-def _safe_read(path, default):
-    """Lee archivo JSON de forma segura, creándolo si no existe."""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    if not os.path.exists(path):
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(default, f, ensure_ascii=False, indent=2)
-        return default
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except json.JSONDecodeError:
-        return default
-
-def _save_actuators(actuators_list: List[dict]):
-    """Guarda la lista de actuadores en el archivo JSON."""
-    data = {"actuators": actuators_list}
-    with open(ACTUATORS_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-def toggleActuator(actuatorId: str, user: User) -> Optional[Actuator]:
+class ActuatorService:
     """
-    Cambia el estado de un actuador (True/False).
-    Retorna el actuador actualizado o None si no se encuentra.
-    """
-    data = _safe_read(ACTUATORS_PATH, {"actuators": []})
-    actuators_list = data.get("actuators", [])
-    
-    for act_dict in actuators_list:
-        if act_dict.get("_id") == actuatorId:
-            # Toggle el estado
-            act_dict["_state"] = not act_dict.get("_state", False)
-            act_dict["_lastChangedAt"] = datetime.now(timezone.utc).isoformat()
-            
-            # Guardar cambios
-            _save_actuators(actuators_list)
-            
-            # Retornar objeto Actuator
-            actuator = Actuator(type=act_dict["_type"], state=act_dict["_state"])
-            actuator._id = act_dict["_id"]
-            actuator._lastChangedAt = datetime.fromisoformat(act_dict["_lastChangedAt"])
-            return actuator
-    
-    return None
+    Application-level service for actuators.
 
-def getActuatorStates() -> List[Actuator]:
+    Responsibilities:
+        - Retrieve actuators (optionally filtered by community)
+        - Toggle actuator state
+        - Enforce community-based visibility rules
+        - Persist updated actuator state
     """
-    Retorna una lista con todos los actuadores y sus estados actuales.
-    """
-    data = _safe_read(ACTUATORS_PATH, {"actuators": []})
-    actuators_list = data.get("actuators", [])
+
+    def __init__(self, actuator_repo: ActuatorRepository):
+        self.repo = actuator_repo
+        self.log_repo = LogRepository()
+
+    # ---------------------------------------------------------
+    # Query API
+    # ---------------------------------------------------------
+
+    def get_actuators_in_community(self, community_id: int) -> List[Actuator]:
+        """Return all actuators belonging to a community."""
+        all_acts = self.repo.findAll()
+        return [a for a in all_acts if a.community_id == community_id]
     
-    result = []
-    for act_dict in actuators_list:
-        actuator = Actuator(type=act_dict["_type"], state=act_dict.get("_state", False))
-        actuator._id = act_dict["_id"]
-        actuator._lastChangedAt = datetime.fromisoformat(act_dict["_lastChangedAt"])
-        result.append(actuator)
+    def get_all_actuators(self) -> List[Actuator]:
+        """Return all actuators."""
+        return self.repo.findAll()
+
+    def get_actuator(self, actuator_id: str | UUID) -> Optional[Actuator]:
+        """Return a single actuator by ID."""
+        return self.repo.findById(str(actuator_id))
+
+    # ---------------------------------------------------------
+    # Mutation API
+    # ---------------------------------------------------------
+
+    def toggle_actuator(self, actuator_id: str | UUID, *, user_id: UUID, user_community: int, user_role: RoleEnum, ) -> Optional[Actuator]:
+        """
+        Toggle actuator state if the user has access.
+
+        Rules:
+        - Admin can toggle any actuator
+        - Technician can toggle only actuators in their own community
+        - Neighbors cannot toggle actuators
+        """
+        act = self.repo.findById(str(actuator_id))
+        if not act:
+            return None
+
+        # Permission logic
+        # admin can toggle any actuator
+        if user_role == RoleEnum.ADMIN:
+            pass
+        elif user_role == RoleEnum.TECHNICIAN:
+            if act.community_id != user_community:
+                return None # no permission
+        else:
+            return None # no permission
+        
+        # Perform toggle
+        act.toggle()
+
+        log = LogEntry.new(
+            actor_id=user_id,
+            actor_role=user_role,
+            category="ACTUATOR",
+            action="TOGGLE",
+            details=f"Actuator {act.id} set to {'ON' if act.state else 'OFF'} (community {act.community_id})",
+        )
+
+        self.log_repo.add(log)
+
+        # Persist change
+        self.repo.save(act)
+        return act
     
-    return result
+    def apply_streetlight_decision(self, decision: dict):
+
+        community_id = decision["community_id"]
+        desired = decision["streetlights_on"]
+
+        actuators = self.repo.findAll()
+
+        for act in actuators:
+            if act.type == "STREETLIGHT" and act.community_id == community_id:
+                if act.state != desired:
+                    act.state = desired
+                    self.repo.save()
+
+                    log = LogEntry.new(
+                        actor_id=act.id,
+                        actor_role=RoleEnum.ADMIN,
+                        category="AUTOMATION",
+                        action="AUTO_TOGGLE",
+                        details=f"Streetlight {'ON' if desired else 'OFF'} due to sensors",
+                    )
+                    self.log_repo.add(log)
+

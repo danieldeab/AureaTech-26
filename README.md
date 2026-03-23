@@ -1,97 +1,229 @@
-﻿#pii25-aureatech
+# 🏙️ AureaTech — Zona Residencial Simulada
 
-# 🌿 AureaTech - Sistema de Login en Flet (MVC)
+**AureaTech** is an academic software engineering project that simulates a **smart residential area** using an **IoT-inspired architecture**, a **Python backend**, and a **graphical interface built with Flet**.
+The system allows different user roles to monitor sensors, control actuators, and inspect historical data, all persisted using **JSON files** and structured under the **Model–View–Controller (MVC)** pattern.
 
-Este proyecto implementa una interfaz gráfica moderna en **Flet (Python)** organizada bajo el patrón **MVC** *(Modelo - Vista - Controlador)*.  
-Incluye autenticación básica con un usuario de prueba, manejo visual de alertas y navegación entre pantallas (Menú → Login → Home → Logout).
+This project has been developed following **SCRUM methodology** as part of *Proyecto de Informática I (PII1)* in the **Bachelor’s Degree in Computer Science Engineering** at **Universidad Europea de Madrid**.
 
-## 📁 Estructura del proyecto
+---
 
-pii25-aureatech/
-├── Assets/
-│ ├── logo.png
-│ ├── sol.png
-│ ├── parte_inferior.png
-│ └── back.png
-│
-├── modelo/
-│ ├── models.py
-│ └── auth.py
-│
-├── controlador/
-│ └── ui_controller.py
-│
-├── vista/
-│ ├── AlertasLoggin.py
-│ ├── views.py
-│ └── login.py
-│
-└── pycache/ ← (carpeta generada automáticamente por Python)
+## 📌 Project Objectives
 
+The main goal is to design and implement a **functional, modular, and extensible monitoring system** that:
 
-Ejecución
+* Simulates data acquisition from multiple sensors
+* Differentiates access and views according to **user roles**
+* Stores all information using **JSON persistence**
+* Provides a **responsive graphical interface**
+* Follows **software engineering best practices**
 
-1. Abrí la terminal en la carpeta del proyecto:
-C:\Users\ZMMRF\OneDrive\Desktop\AureaTech\pii25-aureatech
+The system is intentionally designed to be **educational**, **portable**, and **demonstrable**, while remaining close to real IoT architectures.
 
-bash
-Copiar código
+---
 
-2. Ejecutá el siguiente comando:
-bash
-python vista/login.py
-💡 También podés abrir vista/login.py en Visual Studio Code y presionar Run ▶️ para ejecutarlo.
+## 👥 User Roles
 
-👤 Usuario de prueba
-Para acceder y probar el flujo completo de inicio/cierre de sesión:
+The application supports **three distinct roles**, all accessed through a **single application and login system**:
 
-Campo	Valor
-Email:	test@demo.com
-Contraseña:	123456
+| Role              | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| **Administrator** | Manages users, sensors, actuators, and system configuration |
+| **Technician**    | Monitors sensor readings, logs, and system behavior         |
+| **Neighbor**      | Views simplified sensor data and personal alerts            |
 
-Flujo:
-Ingresás las credenciales.
+Each role is automatically redirected to a **different dashboard** after login.
 
-Aparece un mensaje verde: “Inicio correcto. Bienvenido, Usuario Demo.”
+---
 
-Después de un segundo, la vista cambia automáticamente a la pantalla Home.
+## 🧠 System Architecture
 
-En Home podés pulsar Cerrar sesión, lo que te devuelve al Menú principal.
+The project strictly follows the **Model–View–Controller (MVC)** pattern:
 
-🧠 Arquitectura
-El proyecto sigue el patrón MVC:
+```
+app/
+├── model/          # Domain entities (User, Sensor, Reading, Actuator, Alert, LogEntry)
+├── repository/     # Interfaces + JSON-based implementations
+├── service/        # Business logic and use cases
+├── controller/     # UI controllers (event handling, navigation)
+├── view/           # Flet UI components and views
+├── infrastructure/ # JSON persistence, configuration, adapters
+```
 
-Modelo (modelo/) → Maneja los datos (User, Session, AuthController).
+### Key Design Decisions
 
-Vista (vista/) → Contiene las pantallas (views.py, AlertasLoggin.py).
+* **MVC** for separation of concerns and maintainability
+* **Repositories + interfaces** to decouple storage from logic
+* **JSON files** as a lightweight, transparent persistence layer
+* **Service layer** to centralize business rules
+* **Role-based navigation** enforced at controller level
 
-Controlador (controlador/) → Gestiona la lógica de navegación y alertas (ui_controller.py).
+---
 
-Además, se aplican principios SOLID, especialmente:
+## 🧪 Sensors & Actuators (Simulated)
 
-SRP: Cada módulo tiene una única responsabilidad.
+The system simulates realistic behavior for common IoT devices:
 
-DIP: Los controladores dependen de abstracciones, no de implementaciones concretas.
+### Sensors
 
-⚙️ Requisitos
-Python 3.10 o superior
+* **DHT22** — Temperature & humidity
+* **LDR** — Ambient light
+* **HC-SR04** — Distance / proximity
 
-Librería Flet
+### Actuators
 
-Instalación rápida:
+* Street lighting (ON/OFF)
+* Alarm indicators
+* Additional simulated actuators
 
-bash
-Copiar código:
+Sensor readings are generated **periodically**, stored with timestamps, and visualized in real time.
+
+---
+
+## 💾 Data Persistence
+
+All data is stored in **JSON files**, ensuring portability and easy inspection:
+
+```
+data/
+├── users.json
+├── sensors.json
+├── readings.json
+├── actuators.json
+├── alerts.json
+├── logs.json
+```
+
+Features include:
+
+* Historical records
+* Log rotation / size control
+* Error handling for corrupted or missing files
+* Export functionality (JSON)
+
+---
+
+## 🖥️ User Interface
+
+* Built with **Flet (Python)**
+* Responsive layout (desktop-first)
+* Corporate visual identity (**AureaTech** palette & typography)
+* Dynamic dashboards with live updates
+* Clear feedback (alerts, errors, confirmations)
+
+---
+
+## 🚀 Installation & Execution
+
+### 1️⃣ Requirements
+
+* **Python 3.10+**
+* **pip**
+* Recommended IDE: **PyCharm**
+
+### 2️⃣ Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+If `requirements.txt` is missing, install manually:
+
+```bash
 pip install flet
+```
 
-🧩 Notas técnicas
+(Additional standard libraries are part of Python)
 
-La carpeta __pycache__ (que ves con archivos .pyc) es generada automáticamente por Python.
-Sirve para acelerar la carga de módulos. Podés ignorarla o borrarla sin riesgo.
+### 3️⃣ Run the application
 
-Las imágenes se cargan desde la carpeta Assets/ mediante rutas absolutas configuradas en ASSETS_DIR.
+From the **project root**:
 
-El sistema de alertas usa page.overlay para mostrar notificaciones sin interferir con la UI.
+```bash
+flet run app.py
+```
 
-El AuthController usa un usuario de prueba en memoria, pero se puede conectar fácilmente a una base de datos real.
+> ⚠️ Important: Run the project from the root directory so that **relative paths** work correctly.
 
+---
+
+## 🔐 Authentication
+
+* Unified login & registration system
+* Role-based redirection
+* Password hashing
+* Basic protection against repeated failed attempts
+* Session handling at application level
+
+---
+
+## 🧪 Testing Strategy
+
+Testing is **continuous and incremental**, covering:
+
+* **Unit tests** (repositories, services)
+* **Integration tests** (MVC flow)
+* **Functional tests** (user scenarios per role)
+* **Regression tests**
+* **Performance simulations** (long-running sensor updates)
+
+Tools used:
+
+* `pytest`
+* Manual UI validation
+* Automated scripts for core flows
+
+---
+
+## 🧭 Development Methodology
+
+* **SCRUM**
+* Iterative development across **4 sprints**
+* Product Backlog + Sprint Backlogs
+* Daily SCRUMs
+* Sprint Reviews & Retrospectives
+* Full traceability via actas and documentation
+
+---
+
+## 👨‍💻 Team
+
+**AureaTech – Group 1**
+
+* Daniel de Abajo Nacarino
+* Paula Gómez Lucas
+* Franco Nahuel Zimmermann
+* Pablo Serrano Tirado
+
+---
+
+## 📄 Documentation
+
+The repository is accompanied by:
+
+* Anteproyecto
+* Sprint planning & actas
+* UML class diagrams
+* BPMN test flow
+* Corporate identity guide
+* Prototype designs (Figma)
+* Test plan & validation reports
+
+---
+
+## 🔮 Future Improvements
+
+Planned or optional extensions include:
+
+* Real sensor integration (ESP32 / Arduino)
+* Database backend (SQL)
+* Fire detection system
+* Automatic garage access with license-plate recognition
+* Predictive analytics (regression models)
+* Mobile deployment
+
+---
+
+## 📜 License
+
+This project is developed **for academic purposes only** as part of *Proyecto de Informática I*.
+Reuse for educational purposes is permitted with attribution.

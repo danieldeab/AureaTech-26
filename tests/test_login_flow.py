@@ -3,8 +3,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.models.auth_service import read_users, save_user, _safe_read, LOGS_PATH
 from app.models.auth import UserRepository, AuthController
-from app.models.user import User as Usuario
-from app.models.models import Session
+from app.model.user import User as Usuario
+from app.utils.session import Session
 
 DATA_PATH = os.path.join("app", "data", "usuarios.json")
 
