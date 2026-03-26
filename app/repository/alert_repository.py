@@ -5,20 +5,29 @@ import uuid
 from typing import List, Optional
 from datetime import datetime, timezone
 
+import mariadb
+
 from app.model.alert import Alert
 from app.repository.interfaces.alert_repository_interface import IAlertRepository
 
 # Resolve data path relative to the package root (project-level data dir)
+"""""
 _PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
 ALERTS_PATH = os.path.join(DATA_DIR, "alerts.json")
+"""""
+
 
 class AlertRepository(IAlertRepository):
+
 
     def __init__(self):
         os.makedirs(DATA_DIR, exist_ok=True)
         self.alerts: List[Alert] = self._load()
 
+
+
+    """"
     def _load(self) -> List[Alert]:
         if not os.path.exists(ALERTS_PATH):
             return []
@@ -37,12 +46,14 @@ class AlertRepository(IAlertRepository):
                 print(f"[AlertRepository] Error loading alert: {e}\nAlert data: {a}")
 
         return alerts
+    """""
     
+    """""
     def _write_file(self):
         json_data = [a.to_dict() for a in self.alerts]
         with open(ALERTS_PATH, "w", encoding="utf-8") as f:
             json.dump(json_data, f, ensure_ascii=False, indent=2)
-
+    """""
 
     def add_alert(self, alert: Alert) -> None:
         
@@ -65,9 +76,15 @@ class AlertRepository(IAlertRepository):
             if str(a.id) == str(alert_id):
                 return a
         return None
-
+    
+    """""
     def get_all(self) -> List[Alert]:
         return list(self.alerts)
+    """""
+
+    def get_all(self) -> List[Alert]:
+        rows = bbdd.select("*", "alerts")
+        return rows
 
     def save(self) -> None:
         # Force write to file
