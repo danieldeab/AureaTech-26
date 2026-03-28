@@ -1,84 +1,28 @@
-import json
-import os
-from typing import List
-from uuid import uuid4, UUID
+def _row_to_sensor(self, row) -> Sensor:
+    """Evita duplicar la lógica de mapeo en cada método."""
+    return Sensor(
+        sensor_id=row[0],
+        from_community_id=row[1],
+        type=row[2],
+        location=row[3],
+        is_enabled=bool(row[4]),
+        created_at=row[5],  # TIMESTAMP ya viene como datetime desde la BD
+    )
 
-from app.repository.interfaces.sensor_repository_interface import ISensorRepository
-from app.model.sensor import Sensor
+def add_sensor(self, sensor: Sensor) -> None:
+    self.db.insert("sensors", sensor.to_row())  # sensor_id lo genera la BD
 
-# Resolve to package root data directory regardless of CWD
-_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
-SENSORS_PATH = os.path.join(DATA_DIR, "sensores.json")
+def get_all(self) -> List[Sensor]:
+    data = self.db.select("sensors", "*", "*")
+    return [self._row_to_sensor(row) for row in data]
 
-class SensorRepository(ISensorRepository):
+def find_by_id(self, sensor_id: int) -> Optional[Sensor]:
+    response = self.db.select("sensors", "sensor_id", sensor_id)
+    return self._row_to_sensor(response[0]) if response else None
 
-    """
-    JSON-backed repository for Sensor entities.
-
-    - Loads from data/sensores.json if it exists.
-    - Exposes add_sensor / find_by_id / get_all / save.
-    """
-
-    def __init__(self, path: str = SENSORS_PATH):
-        self.path = path
-        self.sensors: List[Sensor] = self._load()
-
-    # --------------------------------------------------
-    # Internal loading
-    # --------------------------------------------------
-    def _load(self) -> List[Sensor]:
-        if not os.path.exists(self.path):
-            return []
-
-        with open(self.path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        # Admitimos tanto lista simple como objeto con clave "sensores"
-        if isinstance(data, dict) and "sensores" in data:
-            data = data["sensores"]
-        if not isinstance(data, list):
-            data = []
-
-        loaded: List[Sensor] = []
-        for s in data:
-            try:
-                loaded.append(Sensor.from_dict(s))
-            except Exception as e:
-                print(f"[SensorRepository] Error loading sensor: {e}\nData: {s}")
-        return loaded
-
-    def add_sensor(self, sensor: Sensor) -> None:
-        # Simplemente añadimos la entidad; la factoría del modelo ya genera el id
-        # Ensure it has an id
-        if getattr(sensor, "id", None) is None:
-            sensor.id = uuid4()
-        self.sensors.append(sensor)
-
-    def find_by_id(self, sensor_id: str):
-        # Permite buscar con str o UUID
-        for s in self.sensors:
-            sid = str(s.id) if isinstance(s.id, (UUID,)) else s.id
-            if sid == str(sensor_id):
-                return s
-        return None
-
-    def get_all(self):
-        return self.sensors
-
-    def save(self) -> None:
-        """
-        Persist all sensors to JSON in an atomic way to avoid file corruption.
-        """
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        tmp_path = self.path + ".tmp"
-
-        with open(tmp_path, "w", encoding="utf-8") as f:
-            json.dump(
-                [s.to_dict() for s in self.sensors],
-                f,
-                ensure_ascii=False,
-                indent=4,
-            )
-
-        os.replace(tmp_path, self.path)
+def save(self, sensor: Sensor) -> None:
+    existing = self.db.select("sensors", "sensor_id", sensor.sensor_id)
+    if existing:
+        self.db.update("sensors", "sensor_id", sensor.sensor_id, sensor.to_row())
+    else:
+        self.db.insert("sensors", sensor.to_row())

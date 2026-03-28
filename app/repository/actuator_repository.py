@@ -1,5 +1,3 @@
-# app/repository/actuator_repository.py
-
 import json
 import os
 from typing import List, Optional
@@ -30,35 +28,27 @@ class ActuatorRepository(IActuatorRepository):
     # ---------------------------------------------------
 
     def _load(self) -> List[Actuator]:
-        if not os.path.exists(ACTUATORS_PATH):
-            return []
+        #Descomentar código debajo tras revisión, parte de migración a bbdd
+        """
+        data = self.db.select("actuators",  "*", "*") #Parte nueva tras migración
+        for row in data:
+            return [Actuator(data[0], data[1], data[2], data[3], data[4])]
 
-        try:
-            with open(ACTUATORS_PATH, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-        except json.JSONDecodeError:
-            return []
+        """
 
-        cleaned: List[Actuator] = []
-        for a in raw:
-            try:
-                cleaned.append(Actuator.from_dict(a))
-            except Exception:
-                pass
-
-        return cleaned
-
+    #Este método ya no tiene sentido tras la migración
+    """ 
     def write_all(self) -> None:
-        """Force write all actuators to disk."""
+        #Force write all actuators to disk.
         with open(ACTUATORS_PATH, "w", encoding="utf-8") as f:
             json.dump([a.to_dict() for a in self.actuators], f, indent=2)
+            
+    """
 
-    # ---------------------------------------------------
-    # Interface Implementations
-    # ---------------------------------------------------
+
 
     def add(self, actuator: Actuator) -> None:
-        """Add new actuator and persist."""
+        # Add new actuator and persist.
         # Ensure valid ID
         if not getattr(actuator, "id", None):
             actuator.id = uuid4()
@@ -69,25 +59,63 @@ class ActuatorRepository(IActuatorRepository):
         elif isinstance(actuator.lastChangedAt, str):
             actuator.lastChangedAt = datetime.fromisoformat(actuator.lastChangedAt)
 
-        self.actuators.append(actuator)
-        self.write_all()
+        #Descomentar debajo tras revisar, migración a bbdd
+        # data = [actuator.id, actuator.name, actuator.type, actuator.state, actuator.lastChangedAt]
+        # self.db.add(data)
 
-    def findAll(self) -> List[Actuator]:
-        """Return all actuators."""
-        return list(self.actuators)
 
-    def findById(self, actuator_id: str | UUID) -> Optional[Actuator]:
-        """Find actuator by its ID."""
-        aid = str(actuator_id)
-        for a in self.actuators:
-            if str(a.id) == aid:
-                return a
+def findAll(self) -> List[Actuator]:
+    """
+    #Return all actuators.
+
+    return list(self.actuators)"""
+
+    #Descomentar debajo tras revisión, nuevo código migración a bbdd
+
+    """
+    actuators: list[Actuator] = []
+    data = self.db.select("actuators", "*", "*")
+
+    for row in data:
+        actuators.append(Actuator(row[0], row[1], row[2], row[3], row[4]))
+        
+    """
+
+
+def findById(self, actuator_id: int | UUID) -> Optional[Actuator]:
+    """#Find actuator by its ID.
+    aid = str(actuator_id)
+    for a in self.actuators:
+        if str(a.id) == aid:
+            return a
+    return None"""
+
+    #Descomentar debajo tras revisión, nuevo código migración a bbdd
+    """
+    response = db.select("actuators", "actuator_id", actuator_id) // nombre tabla, columna a la que accede, fila a la que accede
+    if response.size() != 0:
+        return Actuator(response.get(0), response.get(1), response.get(2), response.get(3), response.get(4))
+    else:
         return None
+        
+    """
 
-    def save(self, actuator: Actuator) -> None:
-        """Persist a single actuator update."""
-        for idx, stored in enumerate(self.actuators):
-            if str(stored.id) == str(actuator.id):
-                self.actuators[idx] = actuator
-                break
-        self.write_all()
+
+def save(self, actuator: Actuator) -> None:
+
+    """Persist a single actuator update."""
+    """
+    for idx, stored in enumerate(self.actuators):
+        if str(stored.id) == str(actuator.id):
+            self.actuators[idx] = actuator
+            break
+    self.write_all()
+    
+    #Descomentar debajo tras revisión, nuevo código migración a bbdd
+    """
+    existing = self.db.select("actuators", "id", str(actuator.id))
+
+    if existing:
+        self.db.update("actuators", "id", str(actuator.id), actuator.to_row())
+    else:
+        self.db.insert("actuators", actuator.to_row())
