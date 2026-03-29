@@ -10,7 +10,7 @@ class LogEntry:
     timestamp: datetime
     actor_id: UUID
     actor_role: RoleEnum
-    category: str
+    category: str       # 15 chars o menos (AUTH, AUTOMATION, ACTUATOR, DELETEUSER, MODPASSWD, )
     action: str
     details: str
 

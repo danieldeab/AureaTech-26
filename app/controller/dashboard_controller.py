@@ -1,18 +1,23 @@
 # app/controller/dashboard_controller.py
 from app.model.enums import RoleEnum
+from app.view.lists.view_faqs import FaqItem
+from app.view.chats.view_chat_messages import ChatMessageItem
+from app.view.lists.view_chat_thread_list import ChatThreadItem
 
 class DashboardController:
     """
     Orchestrates dashboard-related operations.
     """
 
-    def __init__(self, alert_service, monitoring_service, session, actuator_service, log_repo):
+    def __init__(self, alert_service, monitoring_service, session, actuator_service, log_repo, user_repository, faq_repository, chat_repository):
         self.alert_service = alert_service
         self.monitoring_service = monitoring_service
         self.session = session
         self.actuator_service = actuator_service
         self.log_repo = log_repo
-
+        self.user_repository = user_repository
+        self.faq_repository = faq_repository
+        self.chat_repository = chat_repository
 
     # --------------------------------------
     # HELPER METHODS
@@ -75,3 +80,72 @@ class DashboardController:
         
         return self.alert_service.get_alerts_for_community(comm)
 
+    def get_faqs_for_community(self, community_id: str):
+        rows = self.faq_repository.find_by_community_id(community_id)
+        return [
+            FaqItem(
+                id=r["id"],
+                question=r["question"],
+                answer=r["answer"],
+            )
+            for r in rows
+        ]
+    
+    def get_chat_threads_for_technician(self, technician_id: str):
+        rows = self.chat_repository.get_threads_for_technician(technician_id)
+        return [
+            ChatThreadItem(
+                chat_id=r["id"],
+                title=r["title"],
+                neighbor_name=r.get("neighbor_id", "Unknown neighbor"),
+                status=r["status"],
+                last_message_preview="Open chat to see latest message",
+                last_updated=r.get("resolved_at") or r.get("created_at", ""),
+            )
+            for r in rows
+        ]
+        
+    def get_chat_by_id(self, chat_id: str):
+        return self.chat_repository.get_chat_by_id(chat_id) 
+    
+    def get_chat_messages(self, chat_id: str):
+        rows = self.chat_repository.get_messages(chat_id)
+        return [
+            ChatMessageItem(
+                sender_name=r["sender_role"].capitalize(),
+                sender_role=r["sender_role"],
+                text=r["text"],
+                timestamp=r["timestamp"],
+            )
+            for r in rows
+        ]
+
+    def open_chat_from_faq(self, neighbor_id, community_id, faq_id, faq_question):
+        technicians = self.user_repository.find_by_community_id_and_role(
+            community_id=community_id,
+            role="technician",
+        )
+        if not technicians:
+            raise ValueError("No technician found for this community.")
+
+        technician = technicians[0]   # deterministic fallback for now
+        chat_id = self.chat_repository.create_chat(
+            community_id=community_id,
+            faq_id=faq_id,
+            title=faq_question,
+            neighbor_id=neighbor_id,
+            technician_id=technician.id,
+        )
+        self.chat_repository.add_message(
+            chat_id=chat_id,
+            sender_id=neighbor_id,
+            sender_role="neighbor",
+            text=f"FAQ origin: {faq_question}",
+        )
+        return chat_id  
+
+    def send_chat_message(self, chat_id, sender_id, sender_role, text):
+        self.chat_repository.add_message(chat_id, sender_id, sender_role, text)
+
+    def resolve_chat(self, chat_id, technician_id):
+        self.chat_repository.resolve_chat(chat_id)

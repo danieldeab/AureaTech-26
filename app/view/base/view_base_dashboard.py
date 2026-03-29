@@ -177,9 +177,22 @@ class BaseDashboardView(ft.UserControl):
             on_click=lambda e: self.controller.show_user_management(),
         )
 
+        faq_btn = ft.IconButton(
+            icon=ft.cupertino_icons.QUESTION_CIRCLE,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.controller.show_faqs(),
+        )
+
+        chats_btn = ft.IconButton(
+            icon=ft.cupertino_icons.CHAT_BUBBLE,
+            icon_color=FULL_BLACK,
+            on_click=lambda e: self.controller.show_chat_thread_list(),
+        )
+
         # Build bar according to role
         if role == "neighbor":
             controls = [
+                faq_btn,
                 dashboard_btn,
                 alerts_btn,
                 logout_btn,
@@ -188,6 +201,7 @@ class BaseDashboardView(ft.UserControl):
         elif role == "technician":
             controls = [
                 dashboard_btn,
+                chats_btn,
                 info_btn,
                 alerts_btn,
                 history_btn,

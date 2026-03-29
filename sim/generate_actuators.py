@@ -30,7 +30,7 @@ def generate_actuators() -> None:
         Actuator(
             id=uuid4(),
             name="Streetlight 1A",
-            type="STREETLIGHT",
+            type="LED",
             state=False,
             community_id=1,
             lastChangedAt=now,
@@ -38,7 +38,7 @@ def generate_actuators() -> None:
         Actuator(
             id=uuid4(),
             name="Streetlight 1B",
-            type="STREETLIGHT",
+            type="LED",
             state=False,
             community_id=1,
             lastChangedAt=now,
@@ -46,7 +46,7 @@ def generate_actuators() -> None:
         Actuator(
             id=uuid4(),
             name="Streetlight 2A",
-            type="STREETLIGHT",
+            type="LED",
             state=False,
             community_id=2,
             lastChangedAt=now,
@@ -54,7 +54,7 @@ def generate_actuators() -> None:
         Actuator(
             id=uuid4(),
             name="Streetlight 2B",
-            type="STREETLIGHT",
+            type="LED",
             state=False,
             community_id=2,
             lastChangedAt=now,
@@ -66,7 +66,7 @@ def generate_actuators() -> None:
         Actuator(
             id=uuid4(),
             name="Fire Alarm 1A",
-            type="FIRE_ALARM",
+            type="BUZZER",
             state=False,
             community_id=1,
             lastChangedAt=now,
@@ -74,7 +74,7 @@ def generate_actuators() -> None:
         Actuator(
             id=uuid4(),
             name="Garage Door 2A",
-            type="GARAGE_DOOR",
+            type="SERVOMOTOR",
             state=False,
             community_id=2,
             lastChangedAt=now,

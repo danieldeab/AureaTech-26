@@ -75,6 +75,13 @@ class UserRepository(IUserRepository):
             if u.community_id == community_id:
                 users.append(u)
         return users
+    
+    def find_by_community_id_and_role(self, community_id: str, role: str):
+        users = []
+        for u in self.users:
+            if u.community_id == community_id and u.role.value == role:
+                users.append(u)
+        return users
 
     def get_all(self):
         return self.users
