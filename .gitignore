@@ -1,7 +1,11 @@
 ############################################
 # PYTHON BASICS
 ############################################
+<<<<<<< HEAD
 __pycache__/
+=======
+_pycache_/
+>>>>>>> daniel
 *.py[cod]
 *$py.class
 
@@ -91,8 +95,9 @@ logs/
 exported_logs/
 temp_logs/
 
-# JSON database files (optional — uncomment if needed)
-# data/*.json
+JSON database files (optional — uncomment if needed)
+data/*.json
+data/*.txt
 
 # Cached simulation data
 sim_cache/

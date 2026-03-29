@@ -16,8 +16,10 @@ class SensorTypeEnum(str, Enum):
     HUMIDITY = "HUMIDITY"
     LIGHT = "LIGHT"
     MOTION = "MOTION"
+    CAMERA = "CAMERA"
+    SMOKE = "SMOKE"
 
 class ActuatorTypeEnum(str, Enum):
-    LIGHT_SWITCH = "LIGHT_SWITCH"
-    THERMOSTAT = "THERMOSTAT"
-    DOOR_LOCK = "DOOR_LOCK"
+    LED = "LED"
+    BUZZER = "BUZZER"
+    SERVOMOTOR = "SERVOMOTOR"

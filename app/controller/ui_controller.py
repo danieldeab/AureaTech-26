@@ -12,6 +12,9 @@ from app.view.auth.view_recover import RecoverPasswordView
 from app.view.auth.view_reset_password import ResetPasswordView
 from app.view.lists.view_alerts_dashboard import AlertsDashboardView
 from app.view.lists.view_user_management import UserManagementView
+from app.view.lists.view_faqs import FaqsView
+from app.view.lists.view_chat_thread_list import ChatThreadListView
+from app.view.chats.view_chat_messages import ChatMessagesView
 from app.view.dashboard.view_user_dashboard import UserDashboardView
 from app.view.dashboard.view_admin_dashboard import AdminDashboardView
 from app.view.dashboard.view_tecnico_dashboard import TechnicianDashboardView
@@ -25,6 +28,8 @@ from app.repository.sensor_repository import SensorRepository
 from app.repository.actuator_repository import ActuatorRepository
 from app.repository.log_repository import LogRepository
 from app.repository.reading_repository import ReadingRepository
+from app.repository.faq_repository import FAQRepository
+from app.repository.chat_repository import ChatRepository
 
 # Service imports
 from app.service.alert_service import AlertService
@@ -78,12 +83,17 @@ class UIController:
             self.alert_repo,
             self.log_repo,
         )
+        self.faq_repo = FAQRepository()
+        self.chat_repo = ChatRepository()
         self.dashboard = DashboardController(
             self.alert_service, 
             self.monitoring_service, 
             session, 
             self.actuator_service,
-            self.log_repo
+            self.log_repo,
+            user_repository=auth_controller.repo,
+            faq_repository=self.faq_repo,          # to be implemented
+            chat_repository=self.chat_repo,         # to be implemented
         )
         self.dashboard_service = DashboardService(
             self.sensor_repo,
@@ -482,7 +492,123 @@ class UIController:
 
         self._replace("actuator_history", view)
 
+    def show_faqs(self):
+        user = self.session.current_user
+        if not user or user.role.value.lower() != "neighbor":
+            return
 
+        faqs = self.dashboard.get_faqs_for_community(user.community_id)
+
+        view = FaqsView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            on_dashboard=self.show_user_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+            on_settings=self.show_settings,
+            faqs=faqs,
+            on_open_chat_from_faq=self.open_chat_from_faq,
+        )
+        self._replace("faqs", view)
+
+    def show_chat_thread_list(self):
+        user = self.session.current_user
+        if not user or user.role.value.lower() != "technician":
+            return
+
+        threads = self.dashboard.get_chat_threads_for_technician(user.id)
+
+        view = ChatThreadListView(
+            page=self.page,
+            controller=self,
+            user=user,
+            role=user.role.value,
+            on_dashboard=self.show_tecnico_dashboard,
+            on_alerts=self.show_alerts,
+            on_logout=self.logout,
+            on_back=self.show_tecnico_dashboard,
+            on_settings=self.show_settings,
+            threads=threads,
+            on_open_chat=self.show_chat_messages,
+            on_resolve_chat=self.resolve_chat,
+        )
+        self._replace("chat_threads", view)
+
+    def show_chat_messages(self, chat_id: str):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        chat = self.dashboard.get_chat_by_id(chat_id)
+        if not chat:
+            return self._notify("Chat no encontrado.")
+
+        messages = self.dashboard.get_chat_messages(chat_id)
+
+        # Back target depends on role
+        if user.role.value.lower() == "technician":
+            back_fn = self.show_chat_thread_list
+        else:
+            back_fn = self.show_faqs
+
+        view = ChatMessagesView(
+            page=self.page,
+            chat_id=chat_id,
+            current_user_role=user.role.value,
+            title=chat.get("title", "Chat"),
+            messages=messages,
+            on_back=back_fn,
+            on_send=lambda text: self.send_chat_message(chat_id, text),
+            on_resolve=(lambda: self.resolve_chat(chat_id)) if user.role.value.lower() == "technician" else None,
+        )
+
+        self._replace("chat_messages", view)
+    
+    def open_chat_from_faq(self, faq_item):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        try:
+            chat_id = self.dashboard.open_chat_from_faq(
+                neighbor_id=user.id,
+                community_id=user.community_id,
+                faq_id=faq_item.id,
+                faq_question=faq_item.question,
+            )
+        except ValueError as e:
+            return self._notify(str(e))
+
+        self.show_chat_messages(chat_id)
+    
+    def send_chat_message(self, chat_id: str, text: str):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        self.dashboard.send_chat_message(
+            chat_id=chat_id,
+            sender_id=user.id,
+            sender_role=user.role.value.lower(),
+            text=text,
+        )
+
+        self.show_chat_messages(chat_id)
+    
+    def resolve_chat(self, chat_id: str):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+
+        if user.role.value.lower() != "technician":
+            return self._notify("Solo un técnico puede resolver chats.")
+
+        self.dashboard.resolve_chat(chat_id, technician_id=user.id)
+        self._notify("Chat resuelto correctamente.")
+        self.show_chat_thread_list()  
+   
     def get_kpis(self) -> dict:
         """
         Delegates KPI computation to DashboardController.
