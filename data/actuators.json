@@ -2,7 +2,7 @@
   {
     "id": "6835ba9a-43b7-4956-9376-1be12ea15451",
     "name": "Streetlight 1A",
-    "type": "STREETLIGHT",
+    "type": "LED",
     "state": true,
     "lastChangedAt": "2025-12-14T20:51:37.434902+00:00",
     "community_id": 1
@@ -10,7 +10,7 @@
   {
     "id": "b174e4d7-d842-40f9-890b-cb6fbfb1802a",
     "name": "Streetlight 1B",
-    "type": "STREETLIGHT",
+    "type": "LED",
     "state": false,
     "lastChangedAt": "2025-12-14T21:15:57.559994+00:00",
     "community_id": 1
@@ -18,7 +18,7 @@
   {
     "id": "5abaf262-c507-4f4c-8cc0-091abba3521c",
     "name": "Streetlight 2A",
-    "type": "STREETLIGHT",
+    "type": "LED",
     "state": true,
     "lastChangedAt": "2025-12-14T16:22:34.478296+00:00",
     "community_id": 2
@@ -26,7 +26,7 @@
   {
     "id": "7eeed2f3-417a-4b56-80f3-91243add3ed3",
     "name": "Streetlight 2B",
-    "type": "STREETLIGHT",
+    "type": "LED",
     "state": false,
     "lastChangedAt": "2025-12-14T21:25:43.542705+00:00",
     "community_id": 2
@@ -34,7 +34,7 @@
   {
     "id": "a7c7e184-604a-4b2c-8da1-0539827bd09c",
     "name": "Fire Alarm 1A",
-    "type": "FIRE_ALARM",
+    "type": "BUZZER",
     "state": false,
     "lastChangedAt": "2025-12-14T15:45:45.012984+00:00",
     "community_id": 1
@@ -42,7 +42,7 @@
   {
     "id": "a71925c5-3cf7-4ff1-b2db-15de73df9a19",
     "name": "Garage Door 2A",
-    "type": "GARAGE_DOOR",
+    "type": "SERVOMOTOR",
     "state": true,
     "lastChangedAt": "2025-12-14T16:22:54.094276+00:00",
     "community_id": 2
