@@ -71,38 +71,42 @@ class UIController:
         self.alert_repo = AlertRepository()
         self.alert_service = AlertService(self.alert_repo)
 
-        # Dashboard summary
+        # Dashboard summary / infra
         self.sensor_repo = SensorRepository()
         self.actuator_repo = ActuatorRepository()
         self.log_repo = LogRepository()
         self.reading_repo = ReadingRepository()
+
         self.actuator_service = ActuatorService(self.actuator_repo)
+
         self.monitoring_service = MonitoringService(
             self.sensor_repo,
             self.reading_repo,
-            self.alert_repo,
+            self.alert_service,
             self.log_repo,
         )
+
         self.faq_repo = FAQRepository()
         self.chat_repo = ChatRepository()
+
         self.dashboard = DashboardController(
-            self.alert_service, 
-            self.monitoring_service, 
-            session, 
+            self.alert_service,
+            self.monitoring_service,
+            session,
             self.actuator_service,
             self.log_repo,
             user_repository=auth_controller.repo,
-            faq_repository=self.faq_repo,          # to be implemented
-            chat_repository=self.chat_repo,         # to be implemented
+            faq_repository=self.faq_repo,
+            chat_repository=self.chat_repo,
         )
+
         self.dashboard_service = DashboardService(
             self.sensor_repo,
             self.actuator_repo,
-            self.alert_repo,
+            self.alert_service,
             self.log_repo,
             self.reading_repo,
         )
-
         self.session = session
 
         self.history = []             # navigation stack
@@ -715,17 +719,16 @@ class UIController:
         if "@" not in email or "." not in email:
             return False, "Formato de correo no válido."
 
-        # Check if another user already has this email
         existing = self.auth.repo.find_by_email(email)
         if existing and getattr(existing, "id", None) != getattr(user, "id", None):
             return False, "Ya existe un usuario con ese correo."
 
-        # Update the current user
         user.name = name
         user.email = email
 
-        # Persist changes
-        self.auth.repo.save()
+        save_fn = getattr(self.auth.repo, "save", None)
+        if callable(save_fn):
+            save_fn(user)
 
         return True, "Perfil actualizado correctamente."
   

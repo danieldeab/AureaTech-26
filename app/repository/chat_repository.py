@@ -1,74 +1,128 @@
-import json
-import uuid
-from pathlib import Path
+from __future__ import annotations
+
 from datetime import datetime
+from typing import List, Dict, Any, Optional
+
+from app.infraestructure.db import get_db
+
 
 class ChatRepository:
-    def __init__(
-        self,
-        chats_path="data/chats.json",
-        messages_path="data/chat_messages.json",
-    ):
-        self.chats_path = Path(chats_path)
-        self.messages_path = Path(messages_path)
+    """
+    MariaDB-backed chat repository.
 
-    def _read_json(self, path: Path) -> list:
-        if not path.exists():
-            return []
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
+    DB source of truth:
+    - chat_thread
+    - chat_message
 
-    def _write_json(self, path: Path, data: list) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+    Returns compatibility dicts expected by current controllers/views.
+    """
 
-    def get_threads_for_technician(self, technician_id: str) -> list[dict]:
-        chats = self._read_json(self.chats_path)
-        return [c for c in chats if c.get("technician_id") == technician_id]
+    def __init__(self):
+        self.db = get_db()
 
-    def get_chat_by_id(self, chat_id: str) -> dict | None:
-        chats = self._read_json(self.chats_path)
-        return next((c for c in chats if c.get("id") == chat_id), None)
+    def _row_to_thread_dict(self, row: dict) -> Dict[str, Any]:
+        return {
+            "id": row["thread_id"],
+            "community_id": row["community_id"],
+            "created_by_user_id": row["created_by_user_id"],
+            "assigned_user_id": row["assigned_user_id"],
+            "title": row["subject"],
+            "status": row["status"],
+            "created_at": row["created_at"],
+            "resolved_at": row["closed_at"],
+            "neighbor_id": row["created_by_user_id"],
+            "technician_id": row["assigned_user_id"],
+            "neighbor_name": row.get("neighbor_name", "Unknown neighbor"),
+        }
 
-    def get_messages(self, chat_id: str) -> list[dict]:
-        msgs = self._read_json(self.messages_path)
-        return [m for m in msgs if m.get("chat_id") == chat_id]
+    def _row_to_message_dict(self, row: dict) -> Dict[str, Any]:
+        return {
+            "id": row["message_id"],
+            "chat_id": row["thread_id"],
+            "sender_id": row["sender_user_id"],
+            "sender_role": row["sender_role"],
+            "text": row["content"],
+            "timestamp": row["sent_at"],
+        }
+
+    def get_threads_for_technician(self, technician_id: int | str) -> List[Dict[str, Any]]:
+        sql = """
+            SELECT
+                ct.thread_id,
+                ct.community_id,
+                ct.created_by_user_id,
+                ct.assigned_user_id,
+                ct.subject,
+                ct.status,
+                ct.created_at,
+                ct.closed_at,
+                u.full_name AS neighbor_name
+            FROM chat_thread ct
+            INNER JOIN user u
+                ON u.user_id = ct.created_by_user_id
+            WHERE ct.assigned_user_id = %s
+            ORDER BY COALESCE(ct.closed_at, ct.created_at) DESC, ct.thread_id DESC
+        """
+        rows = self.db.execute(sql, (int(technician_id),))
+        return [self._row_to_thread_dict(row) for row in rows]
+
+    def get_chat_by_id(self, chat_id: int | str) -> Optional[Dict[str, Any]]:
+        row = self.db.fetch_one(
+            table="chat_thread",
+            where={"thread_id": int(chat_id)},
+        )
+        return self._row_to_thread_dict(row) if row else None
 
     def create_chat(self, community_id, faq_id, title, neighbor_id, technician_id) -> str:
-        chats = self._read_json(self.chats_path)
-        chat_id = str(uuid.uuid4())
-        chats.append({
-            "id": chat_id,
-            "community_id": community_id,
-            "faq_id": faq_id,
-            "title": title,
-            "neighbor_id": neighbor_id,
-            "technician_id": technician_id,
-            "status": "OPEN",
-            "created_at": datetime.now().isoformat(),
-            "resolved_at": None,
-        })
-        self._write_json(self.chats_path, chats)
-        return chat_id
+        new_id = self.db.insert(
+            table="chat_thread",
+            data={
+                "community_id": int(community_id),
+                "created_by_user_id": int(neighbor_id),
+                "assigned_user_id": int(technician_id),
+                "subject": str(title),
+                "status": "OPEN",
+            },
+        )
+        return str(new_id)
+
+    def resolve_chat(self, chat_id: int | str) -> None:
+        self.db.update(
+            table="chat_thread",
+            data={
+                "status": "RESOLVED",
+                "closed_at": datetime.now(),
+            },
+            where={"thread_id": int(chat_id)},
+        )
+
+    def get_messages(self, chat_id: int | str) -> List[Dict[str, Any]]:
+        sql = """
+            SELECT
+                cm.message_id,
+                cm.thread_id,
+                cm.sender_user_id,
+                cm.content,
+                cm.message_type,
+                cm.sent_at,
+                u.role AS sender_role
+            FROM chat_message cm
+            INNER JOIN user u
+                ON u.user_id = cm.sender_user_id
+            WHERE cm.thread_id = %s
+            ORDER BY cm.sent_at ASC, cm.message_id ASC
+        """
+        rows = self.db.execute(sql, (int(chat_id),))
+        return [self._row_to_message_dict(row) for row in rows]
 
     def add_message(self, chat_id, sender_id, sender_role, text) -> None:
-        msgs = self._read_json(self.messages_path)
-        msgs.append({
-            "id": str(uuid.uuid4()),
-            "chat_id": chat_id,
-            "sender_id": sender_id,
-            "sender_role": sender_role,
-            "text": text,
-            "timestamp": datetime.now().isoformat(),
-        })
-        self._write_json(self.messages_path, msgs)
-
-    def resolve_chat(self, chat_id: str) -> None:
-        chats = self._read_json(self.chats_path)
-        for c in chats:
-            if c.get("id") == chat_id:
-                c["status"] = "RESOLVED"
-                c["resolved_at"] = datetime.now().isoformat()
-                break
-        self._write_json(self.chats_path, chats)
+        normalized_type = "TEXT"
+        self.db.insert(
+            table="chat_message",
+            data={
+                "thread_id": int(chat_id),
+                "sender_user_id": int(sender_id),
+                "content": str(text),
+                "message_type": normalized_type,
+            },
+        )

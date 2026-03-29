@@ -1,3 +1,7 @@
 # Flet dependencies
 flet==0.22.0
 pytest
+
+# DB connector
+mariadb=1.1.14
+mysql-connector-python=9.6.0 # As backup, in case mariadb connector causes issues.

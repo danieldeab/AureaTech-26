@@ -17,7 +17,3 @@ class IReadingRepository(ABC):
     @abstractmethod
     def get_all(self) -> List[Reading]:
         pass
-
-    @abstractmethod
-    def save(self) -> None:
-        pass

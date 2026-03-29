@@ -1,7 +1,7 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 @dataclass(slots=True)
@@ -12,6 +12,23 @@ class Sensor:
     is_enabled: bool = False
     created_at: Optional[datetime] = None
     sensor_id: Optional[int] = None
+    thresholds: dict[str, float] = field(default_factory=dict)
+
+    @property
+    def community_id(self) -> int:
+        """
+        Legacy compatibility alias.
+        Real relational field is from_community_id.
+        """
+        return self.from_community_id
+
+    @property
+    def id(self) -> Optional[int]:
+        """
+        Legacy compatibility alias.
+        Real relational field is sensor_id.
+        """
+        return self.sensor_id
 
     @staticmethod
     def new(
@@ -19,12 +36,14 @@ class Sensor:
         type: str,
         location: str,
         is_enabled: bool = False,
+        thresholds: Optional[dict[str, float]] = None,
     ) -> "Sensor":
         return Sensor(
             type=type,
             location=location,
             from_community_id=from_community_id,
             is_enabled=is_enabled,
+            thresholds=thresholds or {},
         )
 
     def to_row(self) -> tuple:
@@ -43,6 +62,7 @@ class Sensor:
             "from_community_id": self.from_community_id,
             "is_enabled": self.is_enabled,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            "thresholds": self.thresholds,
         }
 
     @staticmethod
@@ -54,4 +74,5 @@ class Sensor:
             from_community_id=d["from_community_id"],
             is_enabled=bool(d.get("is_enabled", False)),
             created_at=datetime.fromisoformat(d["created_at"]) if d.get("created_at") else None,
+            thresholds=d.get("thresholds", {}) or {},
         )

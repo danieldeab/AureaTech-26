@@ -1,18 +1,15 @@
-# app/service/dashboard_service.py
-
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
-from uuid import UUID
 
 from app.model.user import User
 from app.repository.sensor_repository import SensorRepository
-from app.repository.alert_repository import AlertRepository
 from app.repository.log_repository import LogRepository
 from app.repository.reading_repository import ReadingRepository
 from app.repository.actuator_repository import ActuatorRepository
+from app.service.alert_service import AlertService
 
 
 # -----------------------------------------------------------------------------
@@ -65,12 +62,14 @@ class LogEntryDTO:
 # INTERNAL HELPERS
 # -----------------------------------------------------------------------------
 
-def _count_recent_readings(reading_repo: ReadingRepository, sensor_ids: List[UUID], hours: int = 24) -> int:
-    """Counts readings in the last N hours for a list of sensors."""
+def _count_recent_readings(
+    reading_repo: ReadingRepository,
+    sensor_ids: List[int],
+    hours: int = 24,
+) -> int:
     cutoff = datetime.now() - timedelta(hours=hours)
-    count = 0
-
     sensor_id_set = {str(x) for x in sensor_ids}
+    count = 0
 
     for r in reading_repo.get_all():
         try:
@@ -89,37 +88,29 @@ def _count_recent_readings(reading_repo: ReadingRepository, sensor_ids: List[UUI
 class DashboardService:
     """
     Provides aggregated dashboard data for the app.
-    Fully community-aware and compatible with the new architecture.
+    Uses AlertService for user-facing alert summaries because alerts are now
+    relationally split into Alert + UserAlert.
     """
 
     def __init__(
         self,
         sensor_repo: SensorRepository,
         actuator_repo: ActuatorRepository,
-        alert_repo: AlertRepository,
+        alert_service: AlertService,
         log_repo: LogRepository,
-        reading_repo: ReadingRepository
+        reading_repo: ReadingRepository,
     ):
         self.sensor_repo = sensor_repo
         self.actuator_repo = actuator_repo
-        self.alert_repo = alert_repo
+        self.alert_service = alert_service
         self.log_repo = log_repo
         self.reading_repo = reading_repo
 
-    # -------------------------------------------------------------------------
-    # PUBLIC API
-    # -------------------------------------------------------------------------
-
-    def get_dashboard_summary(self, user: User, effective_community_id: Optional[int]) -> DashboardDTO:
-        """
-        The controller will pass:
-            - user                  (User dataclass)
-            - effective_community_id (from Session.get_effective_community())
-
-        Admins may switch communities.
-        Neighbors/Technicians always use their own.
-        """
-
+    def get_dashboard_summary(
+        self,
+        user: User,
+        effective_community_id: Optional[int],
+    ) -> DashboardDTO:
         # ---------------------------------------------------------------------
         # USER INFO
         # ---------------------------------------------------------------------
@@ -138,18 +129,17 @@ class DashboardService:
             all_sensors = self.sensor_repo.get_all()
 
             if effective_community_id is not None:
-                sensors = [s for s in all_sensors if s.community_id == effective_community_id]
+                sensors = [s for s in all_sensors if s.from_community_id == effective_community_id]
             else:
                 sensors = list(all_sensors)
 
-            active_sensors = [s for s in sensors if getattr(s, "is_active", True)]
-
+            active_sensors = [s for s in sensors if getattr(s, "is_enabled", False)]
             sensor_types = sorted({s.type for s in sensors})
 
             recent_readings = _count_recent_readings(
                 self.reading_repo,
-                [s.id for s in sensors],
-                hours=24
+                [s.sensor_id for s in sensors if s.sensor_id is not None],
+                hours=24,
             )
 
             sensors_summary = {
@@ -165,7 +155,7 @@ class DashboardService:
                 "active_sensors": 0,
                 "recent_readings_24h": 0,
                 "types": [],
-                "error": str(e)
+                "error": str(e),
             }
 
         # ---------------------------------------------------------------------
@@ -174,19 +164,13 @@ class DashboardService:
         try:
             all_acts = self.actuator_repo.findAll()
 
-            # Community filtering applies if actuators have community_id
-            if all(hasattr(a, "community_id") for a in all_acts):
-                if effective_community_id is not None:
-                    actuators = [a for a in all_acts if a.community_id == effective_community_id]
-                else:
-                    actuators = all_acts
+            if effective_community_id is not None:
+                actuators = [a for a in all_acts if a.community_id == effective_community_id]
             else:
-                # Older dataset fallback
-                actuators = all_acts
+                actuators = list(all_acts)
 
             active = [a for a in actuators if a.state]
             inactive = [a for a in actuators if not a.state]
-
             types = sorted({a.type for a in actuators})
 
             actuators_summary = {
@@ -209,23 +193,36 @@ class DashboardService:
         # ALERT SUMMARY
         # ---------------------------------------------------------------------
         try:
-            all_alerts = self.alert_repo.get_all()
-            uid = str(user.id)
+            deliveries = self.alert_service.get_alert_deliveries_for_user(user.id)
 
-            user_alerts = [a for a in all_alerts if str(a.target_user_id) == uid]
-            unread = [a for a in user_alerts if not a.read_status]
+            unread = [d for d in deliveries if not d.get("read_status", False)]
 
             severity_count: Dict[str, int] = {}
-            for a in user_alerts:
-                sev = a.severity.value if hasattr(a.severity, "value") else str(a.severity)
+            for d in deliveries:
+                sev = d["severity"].value if hasattr(d["severity"], "value") else str(d["severity"])
                 severity_count[sev] = severity_count.get(sev, 0) + 1
 
+            recent_alerts = []
+            for d in deliveries[:5]:
+                recent_alerts.append(
+                    {
+                        "alert_id": d["alert_id"],
+                        "user_alert_id": d["user_alert_id"],
+                        "alert_type": d["alert_type"],
+                        "severity": d["severity"].value if hasattr(d["severity"], "value") else str(d["severity"]),
+                        "message": d["message"],
+                        "created_at": d["created_at"].isoformat() if d.get("created_at") else None,
+                        "read_status": d["read_status"],
+                        "read_at": d["read_at"].isoformat() if d.get("read_at") else None,
+                    }
+                )
+
             alerts_summary = {
-                "total": len(user_alerts),
+                "total": len(deliveries),
                 "unread": len(unread),
-                "read": len(user_alerts) - len(unread),
+                "read": len(deliveries) - len(unread),
                 "by_severity": severity_count,
-                "recent_alerts": [a.to_dict() for a in user_alerts[:5]],
+                "recent_alerts": recent_alerts,
             }
 
         except Exception as e:
@@ -249,31 +246,42 @@ class DashboardService:
 
             recent_logs = [
                 LogEntryDTO(
-                    id=str(l.get("id")),
-                    ts=int(l.get("ts")),
-                    event_type=l.get("event_type", "unknown"),
-                    user_id=l.get("user_id"),
-                    description=l.get("description", ""),
-                    metadata=l.get("metadata", {}),
+                    id=str(log.get("id")),
+                    ts=int(log.get("ts", 0)),
+                    event_type=log.get("event_type", ""),
+                    user_id=log.get("user_id"),
+                    description=log.get("description", ""),
+                    metadata=log.get("metadata", {}) or {},
                 ).to_dict()
-                for l in recent
+                for log in recent
             ]
 
-        except Exception:
-            recent_logs = []
+        except Exception as e:
+            recent_logs = [{
+                "id": "error",
+                "ts": 0,
+                "timestamp": "",
+                "event_type": "error",
+                "user_id": None,
+                "description": str(e),
+                "metadata": {},
+            }]
 
         # ---------------------------------------------------------------------
-        # SYSTEM STATISTICS
+        # AVAILABLE COMMUNITIES
+        # ---------------------------------------------------------------------
+        available_communities = sorted({
+            s.from_community_id for s in self.sensor_repo.get_all()
+            if getattr(s, "from_community_id", None) is not None
+        })
+
+        # ---------------------------------------------------------------------
+        # STATISTICS
         # ---------------------------------------------------------------------
         statistics = {
-            "total_events": len(recent_logs),
-            "last_update": datetime.now().isoformat(),
-            "system_status": "operational",
+            "generated_at": datetime.now().isoformat(),
+            "effective_community_id": effective_community_id,
         }
-        
-        available_communities = sorted(
-            {s.community_id for s in self.sensor_repo.get_all()}
-        )
 
         return DashboardDTO(
             user_info=user_info,
@@ -282,65 +290,5 @@ class DashboardService:
             actuators_summary=actuators_summary,
             alerts_summary=alerts_summary,
             recent_logs=recent_logs,
-            statistics=statistics
+            statistics=statistics,
         )
-
-
-    # -------------------------------------------------------------------------
-    # LOG FILTERING API (Equivalent to getLogs())
-    # -------------------------------------------------------------------------
-
-    def get_logs(self, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """
-        General-purpose log query interface, matching the ExportService filtering logic.
-        """
-        logs = self.log_repo.all()
-        if not filters:
-            filters = {}
-
-        def _parse(ts):
-            if ts is None:
-                return None
-            if isinstance(ts, int):
-                return ts
-            try:
-                return int(datetime.fromisoformat(ts).timestamp())
-            except Exception:
-                try:
-                    return int(ts)
-                except Exception:
-                    return None
-
-        start_ts = _parse(filters.get("start_date"))
-        end_ts = _parse(filters.get("end_date"))
-        user_id = filters.get("user_id")
-        event_type = filters.get("event_type")
-        limit = filters.get("limit", 100)
-
-        result = []
-
-        for l in logs:
-            ts = l.get("ts", 0)
-
-            if start_ts is not None and ts < start_ts:
-                continue
-            if end_ts is not None and ts > end_ts:
-                continue
-            if user_id and str(l.get("user_id")) != str(user_id):
-                continue
-            if event_type and l.get("event_type") != event_type:
-                continue
-
-            dto = LogEntryDTO(
-                id=str(l.get("id")),
-                ts=int(ts),
-                event_type=l.get("event_type", "unknown"),
-                user_id=l.get("user_id"),
-                description=l.get("description", ""),
-                metadata=l.get("metadata", {}),
-            )
-
-            result.append(dto.to_dict())
-
-        result.sort(key=lambda x: x["ts"], reverse=True)
-        return result[:limit]

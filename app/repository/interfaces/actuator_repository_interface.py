@@ -30,6 +30,3 @@ class IActuatorRepository(ABC):
     def save(self, actuator: Actuator) -> None:
         """Persist updates to an existing actuator."""
 
-    @abstractmethod
-    def write_all(self) -> None:
-        """Force-write all data to disk."""

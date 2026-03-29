@@ -94,9 +94,9 @@ class HistoryView(BaseDashboardView):
     def _build_sensor_items(self):
         sensors = self.sensor_repo.get_all()
         sensors_in_comm = {
-            str(s.id): s
+            str(s.sensor_id): s
             for s in sensors
-            if s.community_id == self.community_id
+            if s.from_community_id == self.community_id
         }
 
         readings = [
@@ -222,9 +222,9 @@ class HistoryView(BaseDashboardView):
             total_items = len([
                 r for r in self.reading_repo.get_all()
                 if str(r.sensor_id) in {
-                    str(s.id)
+                    str(s.sensor_id)
                     for s in self.sensor_repo.get_all()
-                    if s.community_id == self.community_id
+                    if s.from_community_id == self.community_id
                 }
             ])
         else:

@@ -16,8 +16,10 @@ class SensorTypeEnum(str, Enum):
     HUMIDITY = "HUMIDITY"
     LIGHT = "LIGHT"
     MOTION = "MOTION"
+    DISTANCE = "DISTANCE"
     CAMERA = "CAMERA"
     SMOKE = "SMOKE"
+    WIND = "WIND"
 
 class ActuatorTypeEnum(str, Enum):
     LED = "LED"

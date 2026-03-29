@@ -119,18 +119,13 @@ class ExportService:
     # Exportación de LECTURAS
     # ------------------------------------------------------
     def _collect_flat_readings(self) -> List[Dict[str, Any]]:
-        """
-        Aplana las lecturas combinando Reading + Sensor para poder:
-        - incluir community_id del sensor
-        - exportar en JSON/CSV fácilmente
-        """
-        sensors = {str(s.id): s for s in self._sensor_repo.get_all()}
+        sensors = {str(s.sensor_id): s for s in self._sensor_repo.get_all()}
         flat: List[Dict[str, Any]] = []
 
         for r in self._reading_repo.get_all():
             sensor_id = str(getattr(r, "sensor_id", ""))
             sensor = sensors.get(sensor_id)
-            community_id = getattr(sensor, "community_id", None) if sensor else None
+            community_id = getattr(sensor, "from_community_id", None) if sensor else None
 
             flat.append(
                 {

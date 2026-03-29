@@ -1,118 +1,66 @@
-import json
-import os
+from __future__ import annotations
+
 from typing import List
 from uuid import UUID
 
-"""
+from app.infraestructure.db import get_db
 from app.model.reading import Reading
 from app.repository.interfaces.reading_repository_interface import IReadingRepository
 
-# Resolve data path relative to package root, independent of CWD
-_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
-READINGS_PATH = os.path.join(DATA_DIR, "readings.json")
-
 
 class ReadingRepository(IReadingRepository):
-    def __init__(self, path: str = READINGS_PATH):
-        self.path = path
-        self.readings: List[Reading] = self._load()
+    """
+    MariaDB-backed repository for Reading.
 
-    def _load(self) -> List[Reading]:
-        # Asegura directorio y archivo si no existe
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        if not os.path.exists(self.path):
-            with open(self.path, "w", encoding="utf-8") as f:
-                json.dump([], f, ensure_ascii=False, indent=2)
-            return []
+    Source of truth:
+    - table: reading
+    - columns:
+        reading_id, sensor_id, reading_value, unit, recorded_at
+    """
 
-        try:
-            with open(self.path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except json.JSONDecodeError:
-            data = []
+    def __init__(self):
+        self.db = get_db()
 
-        if isinstance(data, dict) and "lecturas" in data:
-            data = data["lecturas"]
-        if not isinstance(data, list):
-            data = []
+    # --------------------------------------------------
+    # Mapping helpers
+    # --------------------------------------------------
+    def _row_to_reading(self, row: dict) -> Reading:
+        return Reading(
+            id=row["reading_id"],
+            sensor_id=row["sensor_id"],
+            timestamp=row["recorded_at"],
+            value=float(row["reading_value"]),
+            unit=row["unit"],
+        )
 
-        return [Reading.from_dict(d) for d in data]
+    def _reading_to_db_data(self, reading: Reading) -> dict:
+        return {
+            "sensor_id": reading.sensor_id,
+            "reading_value": reading.value,
+            "unit": reading.unit,
+        }
 
+    # --------------------------------------------------
+    # Interface API
+    # --------------------------------------------------
     def add_reading(self, reading: Reading) -> None:
-        self.readings.append(reading)
+        new_id = self.db.insert(
+            table="reading",
+            data=self._reading_to_db_data(reading),
+        )
+        reading.id = new_id
 
-    def find_by_sensor(self, sensor_id: UUID) -> List[Reading]:
-        sid = str(sensor_id)
-        return [r for r in self.readings if str(r.sensor_id) == sid]
+    def find_by_sensor(self, sensor_id: UUID | int | str) -> List[Reading]:
+        rows = self.db.fetch_all(
+            table="reading",
+            where={"sensor_id": sensor_id},
+            order_by="recorded_at DESC",
+        )
+        return [self._row_to_reading(row) for row in rows]
 
     def get_all(self) -> List[Reading]:
-        return self.readings
-
-    def save(self) -> None:
-        with open(self.path, "w", encoding="utf-8") as f:
-            json.dump([r.to_dict() for r in self.readings], f, ensure_ascii=False, indent=2)
-
-"""
-
-from app.model.reading import Reading
-from app.repository.interfaces.reading_repository_interface import IReadingRepository
-
-
-class ReadingRepository(IReadingRepository):
-    def __init__(self, db):
-        self.db = db
-        
-    def add_reading(self, reading: Reading) -> None:
-        """
-        En la tabla readings el orden sería:
-        [
-            from_sensor_id,
-            value,
-            unit
-        ]
-        timestamp se genera solo en la BD
-        """
-
-        data = [
-            reading.sensor_id,
-            reading.value,
-            reading.unit
-        ]
-
-        self.db.add("readings", data)
-
-    def find_by_sensor(self, sensor_id: int):
-        response = self.db.select("readings", "from_sensor_id", sensor_id)
-
-        readings = []
-        for row in response:
-            reading = Reading(
-                row[0],  # reading_id
-                row[1],  # from_sensor_id
-                row[2],  # value
-                row[3],  # unit
-                row[4]   # timestamp
-            )
-            readings.append(reading)
-
-        return readings
-
-    def get_all(self):
-        response = self.db.select_all("readings")
-
-        readings = []
-        for row in response:
-            reading = Reading(
-                row[0],  # reading_id
-                row[1],  # from_sensor_id
-                row[2],  # value
-                row[3],  # unit
-                row[4]   # timestamp
-            )
-            readings.append(reading)
-
-        return readings
-
-    def save(self) -> None:
-        pass
+        rows = self.db.fetch_all(
+            table="reading",
+            order_by="recorded_at DESC",
+        )
+        return [self._row_to_reading(row) for row in rows]

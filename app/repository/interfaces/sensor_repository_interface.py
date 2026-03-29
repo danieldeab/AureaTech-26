@@ -19,8 +19,3 @@ class ISensorRepository(ABC):
     def get_all(self) -> List[Sensor]:
         #Devuelve la lista completa de sensores cargados
         pass
-
-    @abstractmethod
-    def save(self) -> None:
-        #Guarda todos los sensores al archivo JSON
-        pass

@@ -15,45 +15,15 @@ class DatabaseError(Exception):
 
 
 class Database:
-    """
-    Generic DB access layer for repositories.
-
-    Responsibilities:
-    - Load DB credentials from auth.txt
-    - Create connections
-    - Build generic CRUD SQL
-    - Execute queries and return rows as dicts
-
-    Repositories should:
-    - call methods like fetch_one / fetch_all / insert / update / delete
-    - map returned rows into domain dataclasses
-
-    Expected auth.txt format (flexible):
-        host=127.0.0.1
-        port=3306
-        user=root
-        password=secret
-        database=pii26_aureatech
-
-    Also accepted:
-        host: 127.0.0.1
-        db=pii26_aureatech
-
-    Lines starting with # are ignored.
-    """
-
     _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
     _PACKAGE_ROOT = Path(__file__).resolve().parents[2]
-    DEFAULT_AUTH_PATH = _PACKAGE_ROOT / "auth.txt"
+    DEFAULT_AUTH_PATH = _PACKAGE_ROOT / "data" / "auth.txt"
 
     def __init__(self, auth_path: str | os.PathLike[str] | None = None):
         self.auth_path = Path(auth_path) if auth_path else self.DEFAULT_AUTH_PATH
         self.config = self._load_auth_file(self.auth_path)
         self.driver_name, self.driver = self._load_driver()
 
-    # --------------------------------------------------
-    # Driver / config
-    # --------------------------------------------------
     def _load_driver(self):
         try:
             import mariadb  # type: ignore
@@ -115,18 +85,12 @@ class Database:
             "database": database,
         }
 
-    # --------------------------------------------------
-    # Connection helpers
-    # --------------------------------------------------
     def connect(self):
         try:
             return self.driver.connect(**self.config)
         except Exception as exc:
             raise DatabaseError(f"Could not connect to database: {exc}") from exc
 
-    # --------------------------------------------------
-    # Public CRUD API
-    # --------------------------------------------------
     def fetch_one(
         self,
         *,
@@ -196,7 +160,6 @@ class Database:
 
         columns_sql = ", ".join(columns)
         placeholders = ", ".join(["%s"] * len(columns))
-
         sql = f"INSERT INTO {table_sql} ({columns_sql}) VALUES ({placeholders})"
 
         conn = self.connect()
@@ -239,7 +202,6 @@ class Database:
 
         where_sql, where_params = self._build_where(where)
         params.extend(where_params)
-
         sql = f"UPDATE {table_sql} SET {', '.join(set_parts)}{where_sql}"
 
         conn = self.connect()
@@ -261,7 +223,6 @@ class Database:
 
         table_sql = self._validate_identifier(table)
         where_sql, params = self._build_where(where)
-
         sql = f"DELETE FROM {table_sql}{where_sql}"
 
         conn = self.connect()
@@ -293,9 +254,6 @@ class Database:
         )
         return int(row["total"]) if row else 0
 
-    # --------------------------------------------------
-    # Internal SQL builders
-    # --------------------------------------------------
     def _build_select(
         self,
         *,
@@ -310,7 +268,6 @@ class Database:
         where_sql, params = self._build_where(where)
         order_sql = self._build_order_by(order_by)
         limit_sql = self._build_limit(limit)
-
         sql = f"SELECT {columns_sql} FROM {table_sql}{where_sql}{order_sql}{limit_sql}"
         return sql, params
 
@@ -318,7 +275,6 @@ class Database:
         if isinstance(columns, str):
             if columns == "*":
                 return columns
-            # allow safe SQL aliasing expressions like COUNT(*) AS total
             return columns
 
         if not columns:
@@ -388,9 +344,6 @@ class Database:
             raise DatabaseError("LIMIT must be > 0")
         return f" LIMIT {int(limit)}"
 
-    # --------------------------------------------------
-    # Internal utilities
-    # --------------------------------------------------
     def _validate_identifier(self, identifier: str) -> str:
         if not self._IDENTIFIER_RE.fullmatch(identifier):
             raise DatabaseError(f"Unsafe SQL identifier: {identifier}")
@@ -399,27 +352,28 @@ class Database:
     @staticmethod
     def _row_to_dict(cursor, row: Any) -> dict[str, Any]:
         columns = [desc[0] for desc in cursor.description] if cursor.description else []
-
         if isinstance(row, dict):
             return row
-
         return dict(zip(columns, row))
 
-    # --------------------------------------------------
-    # Optional raw SQL fallback
-    # --------------------------------------------------
     def execute(
         self,
         sql: str,
         params: tuple[Any, ...] | list[Any] | None = None,
         *,
-        commit: bool = True,
-    ) -> int:
+        commit: bool | None = None,
+    ):
         conn = self.connect()
         cur = conn.cursor()
         try:
             cur.execute(sql, params or ())
-            if commit:
+            is_select = sql.lstrip().upper().startswith("SELECT")
+
+            if is_select:
+                rows = cur.fetchall()
+                return [self._row_to_dict(cur, row) for row in rows]
+
+            if commit is not False:
                 conn.commit()
             return cur.rowcount
         except Exception as exc:
@@ -434,19 +388,7 @@ _db_instance: Database | None = None
 
 
 def get_db(auth_path: str | os.PathLike[str] | None = None) -> Database:
-    """
-    Singleton-style accessor for repositories.
-
-    Example:
-        db = get_db()
-        row = db.fetch_one(
-            table=\"user\",
-            where={\"email\": \"test@example.com\"}
-        )
-    """
     global _db_instance
-
     if _db_instance is None:
         _db_instance = Database(auth_path=auth_path)
-
     return _db_instance

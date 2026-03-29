@@ -17,9 +17,5 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def save(self):
-        pass
-
-    @abstractmethod
     def get_all(self) -> List[User]:
         pass

@@ -63,12 +63,18 @@ class InfoControlView(BaseDashboardView):
         """
         title = f"{sensor.type} ({sensor.location})"
 
-        threshold_texts = []
-        for name, value in (sensor.thresholds or {}).items():
-            threshold_texts.append(f"- {name}: {value}")
+        thresholds = getattr(sensor, "thresholds", {}) or {}
 
-        if not threshold_texts:
-            threshold_texts.append("- Sin umbrales definidos")
+        threshold_controls = []
+        for name, value in thresholds.items():
+            threshold_controls.append(
+                ft.Text(f"{name}: {value}", size=12)
+            )
+
+        if not threshold_controls:
+            threshold_controls.append(
+                ft.Text("No thresholds configured", size=12, italic=True, color=BRAND_ACCENT_BLUE)
+            )
 
         return ft.Container(
             bgcolor=WHITE,
@@ -78,7 +84,7 @@ class InfoControlView(BaseDashboardView):
                 spacing=4,
                 controls=[
                     ft.Text(title, size=14, weight=ft.FontWeight.BOLD, color=PRIMARY_GREEN),
-                    *[ft.Text(t, size=12, color=FULL_BLACK) for t in threshold_texts],
+                    *threshold_controls,
                 ],
             ),
         )

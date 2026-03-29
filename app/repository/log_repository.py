@@ -1,103 +1,121 @@
-import json, uuid, os
+from __future__ import annotations
 
-"""
-from datetime import datetime
-from app.repository.interfaces.log_repository_interface import ILogRepository
+from datetime import datetime, timezone
+from typing import Dict, List, Any
+
+from app.infraestructure.db import get_db
 from app.model.log_entry import LogEntry
+from app.repository.interfaces.log_repository_interface import ILogRepository
 
-# Resolve data path to package root, not CWD
-_PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
-LOGS_PATH = os.path.join(DATA_DIR, "logs.json")
 
 class LogRepository(ILogRepository):
-    def __init__(self, path=LOGS_PATH):
-        self.path = path
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        if not os.path.exists(self.path):
-            with open(self.path, "w", encoding="utf-8") as f:
-                json.dump({"eventos": []}, f, ensure_ascii=False, indent=2)
+    """
+    MariaDB-backed repository for audit logs.
 
-    def add(self, entry: LogEntry) -> None:
-        if not isinstance(entry, LogEntry):
-            raise TypeError("LogRepository.add expects a LogEntry object")
-        
-        with open(self.path, "r", encoding="utf-8") as f:
-            db = json.load(f)
+    DB source of truth:
+    - table: audit_log
+    - columns:
+        log_id, user_id, actor_role, category, action, details, created_at
 
-        if "eventos" not in db:
-            db["eventos"] = []
+    Read API intentionally returns legacy dicts because DashboardService
+    still expects the old JSON-style shape.
+    """
 
-        db["eventos"].append(entry.to_dict())
+    def __init__(self):
+        self.db = get_db()
 
-        with open(self.path, "w", encoding="utf-8") as f:
-            json.dump(db, f, indent=2)
-
-    def get_all(self):
-        with open(self.path, "r", encoding="utf-8") as f:
-            db = json.load(f)
-        return db.get("eventos", [])
-
-"""
-
-from app.model.reading import Reading
-from app.repository.interfaces.reading_repository_interface import IReadingRepository
-
-
-class ReadingRepository(IReadingRepository):
-    def __init__(self, db):
-        self.db = db
-
-    def add_reading(self, reading: Reading) -> None:
+    # --------------------------------------------------
+    # Write path
+    # --------------------------------------------------
+    def add(self, entry: Dict | LogEntry):
         """
-        En la tabla readings el orden sería:
-        [
-            from_sensor_id,
-            value,
-            unit
-        ]
-        timestamp se genera solo en la BD
+        Accepts either:
+        - LogEntry dataclass
+        - legacy dict-like entry
         """
+        if isinstance(entry, LogEntry):
+            actor_id = entry.actor_id
+            actor_role = entry.actor_role.value if hasattr(entry.actor_role, "value") else str(entry.actor_role)
+            category = entry.category
+            action = entry.action
+            details = entry.details or ""
 
-        data = [
-            reading.sensor_id,
-            reading.value,
-            reading.unit
-        ]
+            # audit_log.user_id is INT NOT NULL in the schema
+            # If actor_id is not coercible to int, fail loudly rather than corrupting data.
+            try:
+                user_id = int(actor_id)
+            except Exception as exc:
+                raise ValueError(
+                    f"audit_log.user_id must be an int-compatible value, got {actor_id!r}"
+                ) from exc
 
-        self.db.add("readings", data)
-
-    def find_by_sensor(self, sensor_id: int):
-        response = self.db.select("readings", "from_sensor_id", sensor_id)
-
-        readings = []
-        for row in response:
-            reading = Reading(
-                row[0],  # reading_id
-                row[1],  # from_sensor_id
-                row[2],  # value
-                row[3],  # unit
-                row[4]   # timestamp
+            self.db.insert(
+                table="audit_log",
+                data={
+                    "user_id": user_id,
+                    "actor_role": actor_role,
+                    "category": category,
+                    "action": action,
+                    "details": details,
+                },
             )
-            readings.append(reading)
+            return
 
-        return readings
+        if isinstance(entry, dict):
+            raw_user_id = entry.get("user_id")
+            try:
+                user_id = int(raw_user_id)
+            except Exception as exc:
+                raise ValueError(
+                    f"legacy log dict must include an int-compatible user_id, got {raw_user_id!r}"
+                ) from exc
 
-    def get_all(self):
-        response = self.db.select_all("readings")
-
-        readings = []
-        for row in response:
-            reading = Reading(
-                row[0],  # reading_id
-                row[1],  # from_sensor_id
-                row[2],  # value
-                row[3],  # unit
-                row[4]   # timestamp
+            metadata = entry.get("metadata", {}) or {}
+            self.db.insert(
+                table="audit_log",
+                data={
+                    "user_id": user_id,
+                    "actor_role": str(metadata.get("actor_role", "SYSTEM")),
+                    "category": str(metadata.get("category", "GENERAL")),
+                    "action": str(entry.get("event_type", "unknown")),
+                    "details": str(entry.get("description", "")),
+                },
             )
-            readings.append(reading)
+            return
 
-        return readings
+        raise TypeError("LogRepository.add expects LogEntry or dict")
 
-    def save(self) -> None:
-        pass
+    # --------------------------------------------------
+    # Read path
+    # --------------------------------------------------
+    def all(self) -> List[Dict[str, Any]]:
+        rows = self.db.fetch_all(
+            table="audit_log",
+            order_by="created_at DESC",
+        )
+
+        results: List[Dict[str, Any]] = []
+        for row in rows:
+            created_at = row["created_at"]
+
+            if isinstance(created_at, datetime):
+                ts = int(created_at.replace(tzinfo=timezone.utc).timestamp())
+            else:
+                # defensive fallback
+                ts = 0
+
+            results.append(
+                {
+                    "id": str(row["log_id"]),
+                    "ts": ts,
+                    "event_type": row["action"],
+                    "user_id": str(row["user_id"]) if row["user_id"] is not None else None,
+                    "description": row["details"] or "",
+                    "metadata": {
+                        "category": row["category"],
+                        "actor_role": row["actor_role"],
+                    },
+                }
+            )
+
+        return results

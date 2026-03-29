@@ -1,48 +1,79 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, asdict
-from uuid import UUID, uuid4
 from datetime import datetime, timezone
+from typing import Optional
+
 from .enums import SeverityEnum
 
 @dataclass(slots=True)
 class Alert:
-    id: str
-    type: str
+    """
+    DB-faithful alert entity.
+
+    Maps to table:
+        alert(
+            alert_id,
+            community_id,
+            rule_alert_action_id,
+            alert_type,
+            severity,
+            message,
+            created_at
+        )
+    """
+    id: int | None
+    community_id: int
+    rule_alert_action_id: int
+    alert_type: str
     severity: SeverityEnum
     message: str
-    target_user_id: str
-    timestamp: datetime
-    read_status: bool = False
+    created_at: datetime | None = None
 
     @staticmethod
-    def new(type: str, severity: SeverityEnum, message: str, target_user_id: UUID) -> "Alert":
+    def new(
+        *,
+        community_id: int,
+        rule_alert_action_id: int,
+        alert_type: str,
+        severity: SeverityEnum,
+        message: str,
+        created_at: datetime | None = None,
+    ) -> "Alert":
         return Alert(
-            id=uuid4(),
-            type=type,
+            id=None,
+            community_id=community_id,
+            rule_alert_action_id=rule_alert_action_id,
+            alert_type=alert_type,
             severity=severity,
             message=message,
-            target_user_id=target_user_id,
-            timestamp=datetime.now(timezone.utc),
-            read_status=False,
+            created_at=created_at or datetime.now(timezone.utc),
         )
 
     def to_dict(self) -> dict:
         d = asdict(self)
-        d["id"] = str(self.id)
-        d["target_user_id"] = str(self.target_user_id)
         d["severity"] = self.severity.value
-        d["timestamp"] = self.timestamp.isoformat()
+        d["created_at"] = self.created_at.isoformat() if self.created_at else None
         return d
 
     @staticmethod
     def from_dict(data: dict) -> "Alert":
-        return Alert(
-            id=str(data["id"]),                     # keep as string
-            type=data["type"],
-            severity=SeverityEnum[data["severity"]],
-            message=data["message"],
-            target_user_id=str(data["target_user_id"]),  # community id
-            timestamp=datetime.fromisoformat(data["timestamp"]),
-            read_status=data.get("read_status", False),
+        raw_severity = data["severity"]
+        severity = raw_severity if isinstance(raw_severity, SeverityEnum) else SeverityEnum(str(raw_severity))
+
+        raw_created_at = data.get("created_at")
+        created_at = (
+            datetime.fromisoformat(raw_created_at)
+            if isinstance(raw_created_at, str) and raw_created_at
+            else raw_created_at
         )
 
+        return Alert(
+            id=data.get("id"),
+            community_id=data["community_id"],
+            rule_alert_action_id=data["rule_alert_action_id"],
+            alert_type=data["alert_type"],
+            severity=severity,
+            message=data["message"],
+            created_at=created_at,
+        )
