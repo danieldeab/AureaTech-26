@@ -1,42 +1,57 @@
-import json, uuid, os
+import json
+import os
+from typing import List
+from uuid import UUID
 
 """
-from datetime import datetime
-from app.repository.interfaces.log_repository_interface import ILogRepository
+from app.model.reading import Reading
+from app.repository.interfaces.reading_repository_interface import IReadingRepository
 
-# Resolve data path to package root, not CWD
+# Resolve data path relative to package root, independent of CWD
 _PACKAGE_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(_PACKAGE_ROOT, "data")
-LOGS_PATH = os.path.join(DATA_DIR, "logs.json")
+READINGS_PATH = os.path.join(DATA_DIR, "readings.json")
 
-class LogRepository(ILogRepository):
-    def __init__(self, path=LOGS_PATH):
+
+class ReadingRepository(IReadingRepository):
+    def __init__(self, path: str = READINGS_PATH):
         self.path = path
+        self.readings: List[Reading] = self._load()
+
+    def _load(self) -> List[Reading]:
+        # Asegura directorio y archivo si no existe
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         if not os.path.exists(self.path):
             with open(self.path, "w", encoding="utf-8") as f:
-                json.dump({"eventos": []}, f, ensure_ascii=False, indent=2)
+                json.dump([], f, ensure_ascii=False, indent=2)
+            return []
 
-    def add(self, entry: dict):
-        entry["id"] = str(uuid.uuid4())
-        entry["ts"] = int(datetime.now().timestamp())
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            data = []
 
-        with open(self.path, "r") as f:
-            db = json.load(f)
+        if isinstance(data, dict) and "lecturas" in data:
+            data = data["lecturas"]
+        if not isinstance(data, list):
+            data = []
 
-        if "eventos" not in db:
-            db["eventos"] = []
+        return [Reading.from_dict(d) for d in data]
 
-        db["eventos"].append(entry)
+    def add_reading(self, reading: Reading) -> None:
+        self.readings.append(reading)
 
-        with open(self.path, "w") as f:
-            json.dump(db, f, indent=2)
+    def find_by_sensor(self, sensor_id: UUID) -> List[Reading]:
+        sid = str(sensor_id)
+        return [r for r in self.readings if str(r.sensor_id) == sid]
 
-    def all(self):
-        with open(self.path, "r") as f:
-            db = json.load(f)
+    def get_all(self) -> List[Reading]:
+        return self.readings
 
-        return db.get("eventos", [])
+    def save(self) -> None:
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump([r.to_dict() for r in self.readings], f, ensure_ascii=False, indent=2)
 
 """
 
@@ -47,7 +62,7 @@ from app.repository.interfaces.reading_repository_interface import IReadingRepos
 class ReadingRepository(IReadingRepository):
     def __init__(self, db):
         self.db = db
-
+        
     def add_reading(self, reading: Reading) -> None:
         """
         En la tabla readings el orden sería:
