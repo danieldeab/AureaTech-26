@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import Any, List
 from uuid import UUID
 
 from app.infraestructure.db import get_db
@@ -34,11 +34,14 @@ class ReadingRepository(IReadingRepository):
         )
 
     def _reading_to_db_data(self, reading: Reading) -> dict:
-        return {
+        data = {
             "sensor_id": reading.sensor_id,
             "reading_value": reading.value,
             "unit": reading.unit,
         }
+        if getattr(reading, "timestamp", None) is not None:
+            data["recorded_at"] = reading.timestamp
+        return data
 
     # --------------------------------------------------
     # Interface API
@@ -63,4 +66,54 @@ class ReadingRepository(IReadingRepository):
             table="reading",
             order_by="recorded_at DESC",
         )
+        return [self._row_to_reading(row) for row in rows]
+
+    def search(
+        self,
+        filters: dict[str, Any] | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> List[Reading]:
+        filters = filters or {}
+        where_clauses = ["1=1"]
+        params: list[Any] = []
+
+        if filters.get("sensor_id") is not None:
+            where_clauses.append("r.sensor_id = %s")
+            params.append(int(filters["sensor_id"]))
+        if filters.get("community_id") is not None:
+            where_clauses.append("s.community_id = %s")
+            params.append(int(filters["community_id"]))
+        if filters.get("sensor_type"):
+            where_clauses.append("s.sensor_type = %s")
+            params.append(str(filters["sensor_type"]).upper())
+        if filters.get("start_date"):
+            where_clauses.append("r.recorded_at >= %s")
+            params.append(filters["start_date"])
+        if filters.get("end_date"):
+            where_clauses.append("r.recorded_at <= %s")
+            params.append(filters["end_date"])
+
+        sql = """
+            SELECT
+                r.reading_id,
+                r.sensor_id,
+                r.reading_value,
+                r.unit,
+                r.recorded_at
+            FROM reading r
+            INNER JOIN sensor s
+                ON s.sensor_id = r.sensor_id
+            WHERE {where_sql}
+            ORDER BY r.recorded_at DESC, r.reading_id DESC
+        """.format(where_sql=" AND ".join(where_clauses))
+
+        if limit is not None:
+            sql += " LIMIT %s"
+            params.append(int(limit))
+            if offset is not None:
+                sql += " OFFSET %s"
+                params.append(int(offset))
+
+        rows = self.db.execute(sql, tuple(params))
         return [self._row_to_reading(row) for row in rows]

@@ -1,26 +1,20 @@
-# app/view/chats/view_chat_messages.py
-
-import flet as ft
 from dataclasses import dataclass
 from typing import Callable, List, Optional
+
+import flet as ft
+
+from app.view.theme import BRAND_ACCENT_BLUE, FULL_BLACK, PRIMARY_GREEN, WHITE
 
 
 @dataclass(frozen=True)
 class ChatMessageItem:
     sender_name: str
-    sender_role: str          # "NEIGHBOR" / "TECHNICIAN"
+    sender_role: str
     text: str
-    timestamp: str            # formatted for UI
+    timestamp: str
 
 
 class ChatMessagesView(ft.UserControl):
-    """
-    Chat message screen for neighbor or technician.
-    - Renders messages
-    - Input box + send button
-    - Optional resolve button (for technicians)
-    """
-
     def __init__(
         self,
         page: ft.Page,
@@ -39,24 +33,23 @@ class ChatMessagesView(ft.UserControl):
         self.on_back = on_back
         self.on_send = on_send
         self.on_resolve = on_resolve
-
         self._title = title
-        self._messages: List[ChatMessageItem] = messages or []
+        self._messages = messages or []
 
         self._input = ft.TextField(
-            hint_text="Type a message…",
+            hint_text="Message",
             expand=True,
+            dense=True,
+            border_radius=24,
             on_submit=self._handle_send,
         )
-
-        self._messages_list = ft.ListView(expand=True, spacing=8, auto_scroll=True)
-
+        self._messages_list = ft.ListView(
+            expand=True,
+            spacing=8,
+            padding=ft.padding.only(left=12, right=12, top=12, bottom=12),
+            auto_scroll=True,
+        )
         self._rebuild_messages()
-
-    def set_messages(self, messages: List[ChatMessageItem]) -> None:
-        self._messages = messages
-        self._rebuild_messages()
-        self.update()
 
     def _handle_send(self, e: ft.ControlEvent) -> None:
         text = (self._input.value or "").strip()
@@ -64,64 +57,95 @@ class ChatMessagesView(ft.UserControl):
             return
         self._input.value = ""
         self.on_send(text)
-        self.update()
 
     def _rebuild_messages(self) -> None:
         self._messages_list.controls.clear()
-        for m in self._messages:
-            self._messages_list.controls.append(self._bubble(m))
+        for message in self._messages:
+            self._messages_list.controls.append(self._bubble(message))
 
-    def _bubble(self, m: ChatMessageItem) -> ft.Control:
-        mine = (m.sender_role or "").upper() == self.current_user_role
+    def _bubble(self, message: ChatMessageItem) -> ft.Control:
+        mine = (message.sender_role or "").upper() == self.current_user_role
+        bubble_color = "#D9FDD3" if mine else WHITE
         align = ft.MainAxisAlignment.END if mine else ft.MainAxisAlignment.START
+        radius = ft.border_radius.only(
+            top_left=16,
+            top_right=16,
+            bottom_left=16 if mine else 4,
+            bottom_right=4 if mine else 16,
+        )
 
         bubble = ft.Container(
-            padding=10,
-            border_radius=12,
-            bgcolor=ft.Colors.BLUE_50 if mine else ft.Colors.GREY_100,
+            bgcolor=bubble_color,
+            border_radius=radius,
+            padding=ft.padding.symmetric(horizontal=12, vertical=8),
+            width=430,
             content=ft.Column(
-                spacing=2,
+                spacing=4,
                 controls=[
-                    ft.Text(f"{m.sender_name} • {m.timestamp}", size=11, italic=True),
-                    ft.Text(m.text, selectable=True),
+                    ft.Text(message.sender_name, size=11, color=BRAND_ACCENT_BLUE, weight=ft.FontWeight.BOLD),
+                    ft.Text(message.text, size=14, color=FULL_BLACK, selectable=True),
+                    ft.Text(str(message.timestamp).replace("T", " ")[:19], size=10, color="#63706C", text_align=ft.TextAlign.RIGHT),
                 ],
             ),
         )
-
         return ft.Row(alignment=align, controls=[bubble])
 
     def build(self) -> ft.Control:
-        top_actions = [
-            ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=lambda e: self.on_back())
+        actions = [
+            ft.IconButton(icon=ft.icons.ARROW_BACK, icon_color=PRIMARY_GREEN, on_click=lambda e: self.on_back())
         ]
-
         if self.on_resolve and self.current_user_role == "TECHNICIAN":
-            top_actions.append(
-                ft.FilledButton(
+            actions.append(
+                ft.TextButton(
                     text="Resolve",
-                    icon=ft.Icons.CHECK,
+                    icon=ft.icons.CHECK,
                     on_click=lambda e: self.on_resolve(),
                 )
             )
 
-        return ft.Column(
-            expand=True,
-            controls=[
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    controls=[
-                        ft.Text(self._title, size=18, weight=ft.FontWeight.BOLD),
-                        ft.Row(controls=top_actions),
-                    ],
-                ),
-                ft.Divider(height=1),
-                self._messages_list,
-                ft.Divider(height=1),
-                ft.Row(
-                    controls=[
-                        self._input,
-                        ft.IconButton(icon=ft.Icons.SEND, on_click=self._handle_send),
-                    ]
-                ),
-            ],
+        return ft.Container(
+            width=980,
+            height=640,
+            bgcolor="#ECE5DD",
+            border_radius=16,
+            content=ft.Column(
+                spacing=0,
+                controls=[
+                    ft.Container(
+                        bgcolor=WHITE,
+                        padding=12,
+                        content=ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                ft.Row(
+                                    spacing=10,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                    controls=[
+                                        ft.CircleAvatar(radius=18, bgcolor=PRIMARY_GREEN, content=ft.Text(self._title[:1].upper(), color=WHITE)),
+                                        ft.Text(self._title, size=16, weight=ft.FontWeight.BOLD, color=PRIMARY_GREEN),
+                                    ],
+                                ),
+                                ft.Row(controls=actions),
+                            ],
+                        ),
+                    ),
+                    ft.Container(expand=True, content=self._messages_list),
+                    ft.Container(
+                        bgcolor="#F7F7F7",
+                        padding=10,
+                        content=ft.Row(
+                            spacing=8,
+                            controls=[
+                                self._input,
+                                ft.IconButton(
+                                    icon=ft.icons.SEND,
+                                    icon_color=PRIMARY_GREEN,
+                                    on_click=self._handle_send,
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
         )

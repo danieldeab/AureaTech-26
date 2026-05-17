@@ -5,10 +5,10 @@ from uuid import UUID
 from datetime import datetime, timezone
 
 from app.model.actuator import Actuator
-from app.model.log_entry import LogEntry
 from app.model.enums import RoleEnum
 from app.repository.actuator_repository import ActuatorRepository
-from app.repository.log_repository import LogRepository
+from app.service.audit_log_service import AuditLogService
+from app.service.error_service import ErrorService
 
 
 class ActuatorService:
@@ -23,9 +23,15 @@ class ActuatorService:
         - Log actuator mutations
     """
 
-    def __init__(self, actuator_repo: ActuatorRepository):
+    def __init__(
+        self,
+        actuator_repo: ActuatorRepository,
+        audit_log_service: AuditLogService | None = None,
+        error_service: ErrorService | None = None,
+    ):
         self.repo = actuator_repo
-        self.log_repo = LogRepository()
+        self.audit_log_service = audit_log_service or AuditLogService()
+        self.error_service = error_service or ErrorService()
 
     # ---------------------------------------------------------
     # Query API
@@ -90,14 +96,16 @@ class ActuatorService:
         act.state = not bool(act.state)
         self._persist_state_change(act)
 
-        log = LogEntry.new(
+        self.audit_log_service.log(
             actor_id=self._normalize_actor_id(user_id),
             actor_role=user_role,
             category="ACTUATOR",
-            action="TOGGLE",
+            action="actuator_command",
             details=f"Actuator {act.id} set to {'ON' if act.state else 'OFF'} (community {act.community_id})",
+            community_id=act.community_id,
+            target_entity_type="actuator",
+            target_entity_id=int(act.id),
         )
-        self.log_repo.add(log)
 
         return act
 
@@ -120,17 +128,19 @@ class ActuatorService:
                     act.state = desired
                     self._persist_state_change(act)
 
-                    log = LogEntry.new(
+                    self.audit_log_service.log(
                         actor_id=1,
                         actor_role=RoleEnum.ADMIN,
                         category="AUTOMATION",
-                        action="AUTO_TOGGLE",
+                        action="actuator_command",
                         details=(
                             f"Streetlight {'ON' if desired else 'OFF'} due to sensors "
                             f"(community {community_id}, actuator {act.id})"
                         ),
+                        community_id=community_id,
+                        target_entity_type="actuator",
+                        target_entity_id=int(act.id),
                     )
-                    self.log_repo.add(log)
                     changed.append(act)
 
         return changed

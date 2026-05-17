@@ -1,18 +1,27 @@
 from __future__ import annotations
 from typing import List, Optional
 from uuid import UUID
-import hashlib
 
 from app.model.user import User
 from app.model.enums import RoleEnum
 from app.repository.interfaces.user_repository_interface import IUserRepository
+from app.service.audit_log_service import AuditLogService
+from app.service.error_service import ErrorService
+from app.service.password_service import hash_password
 
 
 class UserService:
     """DB-backed user management service."""
 
-    def __init__(self, user_repo: IUserRepository):
+    def __init__(
+        self,
+        user_repo: IUserRepository,
+        audit_log_service: AuditLogService | None = None,
+        error_service: ErrorService | None = None,
+    ):
         self.repo = user_repo
+        self.audit_log_service = audit_log_service or AuditLogService()
+        self.error_service = error_service or ErrorService()
 
     def get_users_in_community(self, community_id: int) -> List[User]:
         finder = getattr(self.repo, "find_by_community_id", None)
@@ -41,16 +50,31 @@ class UserService:
         community_id: int,
         picture_path: Optional[str] = None,
     ) -> User:
-        new_user = User.new(
-            name=fullname,
-            email=email.lower(),
-            password_hash=hashlib.sha256(password.encode("utf-8")).hexdigest(),
-            dob=dob,
-            role=role,
-            community_id=int(community_id),
-        )
-        new_user.picture_path = picture_path
-        return self.repo.add_user(new_user)
+        try:
+            new_user = User.new(
+                name=fullname,
+                email=email.lower(),
+                password_hash=hash_password(password),
+                dob=dob,
+                role=role,
+                community_id=int(community_id),
+            )
+            new_user.picture_path = picture_path
+            created = self.repo.add_user(new_user)
+            self.audit_log_service.log(
+                actor_id=1,
+                actor_role=RoleEnum.ADMIN,
+                category="USER",
+                action="user_create",
+                details=f"Created user {created.email}",
+                community_id=created.community_id,
+                target_entity_type="user",
+                target_entity_id=int(created.id),
+            )
+            return created
+        except Exception as exc:
+            self.error_service.capture_exception(exc, source_layer="SERVICE")
+            raise
 
     def admin_update_user(
         self,
@@ -63,6 +87,7 @@ class UserService:
         community_id: Optional[int] = None,
         picture_path: Optional[str] = None,
     ) -> User:
+        original_community_id = target_user.community_id
         if fullname is not None:
             target_user.name = fullname
         if email is not None:
@@ -79,6 +104,17 @@ class UserService:
         save_fn = getattr(self.repo, "save", None)
         if callable(save_fn):
             persisted = save_fn(target_user)
+            persisted_user = persisted or target_user
+            self.audit_log_service.log(
+                actor_id=1,
+                actor_role=RoleEnum.ADMIN,
+                category="USER",
+                action="user_update",
+                details=f"Updated user {persisted_user.email}",
+                community_id=persisted_user.community_id or original_community_id,
+                target_entity_type="user",
+                target_entity_id=int(persisted_user.id),
+            )
             return persisted or target_user
         return target_user
 
@@ -86,6 +122,16 @@ class UserService:
         delete_fn = getattr(self.repo, "delete_user", None)
         if callable(delete_fn) and user.id is not None:
             delete_fn(str(user.id))
+            self.audit_log_service.log(
+                actor_id=1,
+                actor_role=RoleEnum.ADMIN,
+                category="USER",
+                action="user_delete",
+                details=f"Deleted user {user.email}",
+                community_id=user.community_id,
+                target_entity_type="user",
+                target_entity_id=int(user.id),
+            )
 
     def update_own_profile(
         self,
@@ -96,17 +142,39 @@ class UserService:
         dob: Optional[str] = None,
         picture_path: Optional[str] = None,
     ) -> User:
-        if fullname is not None:
-            user.name = fullname
-        if email is not None:
-            user.email = email.lower()
-        if dob is not None:
-            user.dob = dob
-        if picture_path is not None:
-            user.picture_path = picture_path
+        try:
+            if fullname is not None:
+                user.name = fullname
+            if email is not None:
+                user.email = email.lower()
+            if dob is not None:
+                user.dob = dob
+            if picture_path is not None:
+                user.picture_path = picture_path
 
-        save_fn = getattr(self.repo, "save", None)
-        if callable(save_fn):
-            persisted = save_fn(user)
-            return persisted or user
-        return user
+            save_fn = getattr(self.repo, "save", None)
+            if callable(save_fn):
+                persisted = save_fn(user)
+                persisted_user = persisted or user
+                self.audit_log_service.log(
+                    actor_id=int(persisted_user.id),
+                    actor_role=persisted_user.role,
+                    category="USER",
+                    action="user_update",
+                    details=f"Updated own profile ({persisted_user.email})",
+                    community_id=persisted_user.community_id,
+                    target_entity_type="user",
+                    target_entity_id=int(persisted_user.id),
+                )
+                return persisted_user
+            return user
+        except Exception as exc:
+            self.error_service.capture_exception(
+                exc,
+                source_layer="SERVICE",
+                user_id=int(user.id) if user.id is not None else None,
+                community_id=user.community_id,
+                target_entity_type="user",
+                target_entity_id=int(user.id) if user.id is not None else None,
+            )
+            raise

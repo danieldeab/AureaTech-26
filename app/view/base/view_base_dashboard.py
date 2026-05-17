@@ -193,6 +193,7 @@ class BaseDashboardView(ft.UserControl):
         if role == "neighbor":
             controls = [
                 faq_btn,
+                chats_btn,
                 dashboard_btn,
                 alerts_btn,
                 logout_btn,
@@ -257,8 +258,10 @@ class BaseDashboardView(ft.UserControl):
                             ),
                             bgcolor=WHITE,
                             border_radius=22,
-                            content=ft.Column(
-                                scroll=ft.ScrollMode.AUTO,
+                            content=ft.ListView(
+                                expand=True,
+                                spacing=0,
+                                padding=0,
                                 controls=[self.build_body()],
                             ),
                         ),

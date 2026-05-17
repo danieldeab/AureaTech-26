@@ -90,7 +90,7 @@ class SignupView(ViewBaseAuth):
     # --------------------------
     # FILE PICKER CALLBACK
     # --------------------------
-    def _on_file_picked(self, e: ft.FilePickerResultEvent):
+    def _on_file_picked(self, e: ft.ControlEvent):
         if e.files:
             file = e.files[0]
             self.profile_picture_path = file.path

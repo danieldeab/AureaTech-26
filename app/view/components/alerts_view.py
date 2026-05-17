@@ -73,27 +73,61 @@ class AlertsList(ft.UserControl):
     The controller or dashboard passes a list of Alert objects.
     """
 
-    def __init__(self, alerts):
+    def __init__(self, alerts, on_mark_read=None):
         super().__init__()
         self.alerts = alerts    # Expecting iterable of Alert objects or dict-like items
+        self.on_mark_read = on_mark_read
 
     def build(self):
         alert_cards = []
 
         for a in self.alerts:
-            # For now, we assume each alert has: message, type
-            # Later you can enhance it with timestamps, severity, icons, etc.
-            severity = getattr(a, "severity", SeverityEnum.INFO)
-            message = getattr(a, "message", "Alerta")
+            if isinstance(a, dict):
+                severity = a.get("severity", SeverityEnum.INFO)
+                message = a.get("message") or a.get("description") or "Alerta"
+                created_at = a.get("created_at") or a.get("timestamp")
+                unread = not bool(a.get("read_status", False))
+                alert_id = a.get("alert_id")
+                action_required = bool(a.get("action_required", False)) or str(a.get("alert_type", "")).lower() == "unauthorized_plate"
+            else:
+                severity = getattr(a, "severity", SeverityEnum.INFO)
+                message = getattr(a, "message", "Alerta")
+                created_at = getattr(a, "created_at", None)
+                unread = False
+                alert_id = None
+                action_required = False
+
+            if not isinstance(severity, SeverityEnum):
+                try:
+                    severity = SeverityEnum(str(severity))
+                except ValueError:
+                    severity = SeverityEnum.INFO
 
             if severity == SeverityEnum.CRIT:
                 card = AlertBox(message, ERROR_RED, WHITE)
             elif severity == SeverityEnum.WARN:
                 card = AlertBox(message, WARNING_YELLOW, PRIMARY_GREEN)
-            elif severity == SeverityEnum.INFO:
+            else:
                 card = AlertBox(message, INFO_BLUE, PRIMARY_GREEN)
 
-            alert_cards.append(card)
+            details = []
+            if created_at:
+                details.append(ft.Text(str(created_at).replace("T", " ")[:19], size=11, color=PRIMARY_GREEN))
+            if action_required:
+                details.append(ft.Text("Action required", size=11, color=ERROR_RED, weight=ft.FontWeight.BOLD))
+
+            row_controls = [card, *details]
+            if unread and self.on_mark_read and alert_id is not None:
+                row_controls.append(
+                    ft.TextButton(
+                        text="Mark as read",
+                        on_click=lambda e, aid=alert_id: self.on_mark_read(aid),
+                    )
+                )
+            alert_cards.append(ft.Column(spacing=6, controls=row_controls))
+
+        if not alert_cards:
+            alert_cards.append(ft.Text("No alerts.", size=12, color=PRIMARY_GREEN))
 
         return ft.Column(
             spacing=15,

@@ -57,6 +57,9 @@ class LogRepository(ILogRepository):
                     "category": category,
                     "action": action,
                     "details": details,
+                    "community_id": getattr(entry, "community_id", None),
+                    "target_entity_type": getattr(entry, "target_entity_type", None),
+                    "target_entity_id": getattr(entry, "target_entity_id", None),
                 },
             )
             return
@@ -79,6 +82,9 @@ class LogRepository(ILogRepository):
                     "category": str(metadata.get("category", "GENERAL")),
                     "action": str(entry.get("event_type", "unknown")),
                     "details": str(entry.get("description", "")),
+                    "community_id": metadata.get("community_id"),
+                    "target_entity_type": metadata.get("target_entity_type"),
+                    "target_entity_id": metadata.get("target_entity_id"),
                 },
             )
             return
@@ -110,12 +116,104 @@ class LogRepository(ILogRepository):
                     "ts": ts,
                     "event_type": row["action"],
                     "user_id": str(row["user_id"]) if row["user_id"] is not None else None,
+                    "community_id": row.get("community_id"),
                     "description": row["details"] or "",
                     "metadata": {
                         "category": row["category"],
                         "actor_role": row["actor_role"],
+                        "target_entity_type": row.get("target_entity_type"),
+                        "target_entity_id": row.get("target_entity_id"),
                     },
                 }
             )
 
+        return results
+
+    def search(
+        self,
+        filters: Dict[str, Any] | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> List[Dict[str, Any]]:
+        filters = filters or {}
+
+        where_clauses = ["1=1"]
+        params: list[Any] = []
+
+        if filters.get("start_date"):
+            where_clauses.append("created_at >= %s")
+            params.append(filters["start_date"])
+        if filters.get("end_date"):
+            where_clauses.append("created_at <= %s")
+            params.append(filters["end_date"])
+        if filters.get("category"):
+            where_clauses.append("category = %s")
+            params.append(filters["category"])
+        if filters.get("actor_role"):
+            where_clauses.append("actor_role = %s")
+            params.append(filters["actor_role"])
+        if filters.get("action"):
+            where_clauses.append("action = %s")
+            params.append(filters["action"])
+        if filters.get("event_type"):
+            where_clauses.append("action = %s")
+            params.append(filters["event_type"])
+        if filters.get("user_id"):
+            where_clauses.append("user_id = %s")
+            params.append(filters["user_id"])
+        if filters.get("community_id") is not None:
+            where_clauses.append("community_id = %s")
+            params.append(filters["community_id"])
+        if filters.get("target_entity_type"):
+            where_clauses.append("target_entity_type = %s")
+            params.append(filters["target_entity_type"])
+        if filters.get("target_entity_id") is not None:
+            where_clauses.append("target_entity_id = %s")
+            params.append(filters["target_entity_id"])
+
+        sql = """
+            SELECT
+                log_id,
+                user_id,
+                actor_role,
+                category,
+                action,
+                details,
+                community_id,
+                target_entity_type,
+                target_entity_id,
+                created_at
+            FROM audit_log
+            WHERE {where_sql}
+            ORDER BY created_at DESC
+        """.format(where_sql=" AND ".join(where_clauses))
+
+        if limit is not None:
+            sql += " LIMIT %s"
+            params.append(int(limit))
+            if offset is not None:
+                sql += " OFFSET %s"
+                params.append(int(offset))
+
+        rows = self.db.execute(sql, tuple(params))
+        results: List[Dict[str, Any]] = []
+        for row in rows:
+            created_at = row["created_at"]
+            ts = int(created_at.replace(tzinfo=timezone.utc).timestamp()) if isinstance(created_at, datetime) else 0
+            results.append(
+                {
+                    "id": str(row["log_id"]),
+                    "ts": ts,
+                    "event_type": row["action"],
+                    "user_id": str(row["user_id"]) if row["user_id"] is not None else None,
+                    "community_id": row.get("community_id"),
+                    "description": row.get("details") or "",
+                    "metadata": {
+                        "category": row.get("category"),
+                        "actor_role": row.get("actor_role"),
+                        "target_entity_type": row.get("target_entity_type"),
+                        "target_entity_id": row.get("target_entity_id"),
+                    },
+                }
+            )
         return results

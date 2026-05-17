@@ -142,9 +142,14 @@ CREATE TABLE IF NOT EXISTS `error_event` (
   `message` TEXT NOT NULL,
   `source_layer` VARCHAR(100) NOT NULL,
   `stacktrace` TEXT DEFAULT NULL,
+  `user_id` INT NULL,
+  `community_id` INT NULL,
+  `target_entity_type` VARCHAR(100) DEFAULT NULL,
+  `target_entity_id` INT DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`error_id`),
-  KEY `idx_error_event_created_at` (`created_at`)
+  KEY `idx_error_event_created_at` (`created_at`),
+  KEY `idx_error_event_scope` (`created_at`, `severity`, `source_layer`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS `faq` (
@@ -166,14 +171,19 @@ CREATE TABLE IF NOT EXISTS `faq` (
 CREATE TABLE IF NOT EXISTS `audit_log` (
   `log_id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NOT NULL,
+  `community_id` INT NULL,
   `actor_role` VARCHAR(50) NOT NULL,
   `category` VARCHAR(100) NOT NULL,
   `action` VARCHAR(100) NOT NULL,
+  `target_entity_type` VARCHAR(100) DEFAULT NULL,
+  `target_entity_id` INT DEFAULT NULL,
   `details` TEXT DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`log_id`),
   KEY `idx_audit_log_user` (`user_id`),
   KEY `idx_audit_log_created_at` (`created_at`),
+  KEY `idx_audit_log_scope` (`created_at`, `category`, `community_id`),
+  KEY `idx_audit_log_actor_action` (`actor_role`, `action`),
   CONSTRAINT `fk_audit_log_user`
     FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
     ON UPDATE CASCADE

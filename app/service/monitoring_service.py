@@ -5,7 +5,6 @@ from typing import Optional, Iterable
 
 from app.model.reading import Reading
 from app.model.sensor import Sensor
-from app.model.log_entry import LogEntry
 from app.model.enums import SeverityEnum, RoleEnum
 
 from app.repository.sensor_repository import SensorRepository
@@ -13,6 +12,8 @@ from app.repository.reading_repository import ReadingRepository
 from app.repository.log_repository import LogRepository
 
 from app.service.alert_service import AlertService
+from app.service.audit_log_service import AuditLogService
+from app.service.error_service import ErrorService
 
 
 class MonitoringService:
@@ -37,11 +38,14 @@ class MonitoringService:
         reading_repo: ReadingRepository,
         alert_service: AlertService,
         log_repo: LogRepository,
+        audit_log_service: AuditLogService | None = None,
+        error_service: ErrorService | None = None,
     ):
         self.sensor_repo = sensor_repo
         self.reading_repo = reading_repo
         self.alert_service = alert_service
-        self.log_repo = log_repo
+        self.audit_log_service = audit_log_service or AuditLogService(log_repo)
+        self.error_service = error_service or ErrorService()
 
     # ----------------------------------------------------------------------
     # Internal helpers
@@ -98,14 +102,14 @@ class MonitoringService:
         Uses actor_id=1 as a system/admin surrogate because audit_log.user_id
         is INT NOT NULL and the current schema has no dedicated nullable system actor.
         """
-        entry = LogEntry.new(
+        self.audit_log_service.log(
             actor_id=actor_id,
             actor_role=RoleEnum.ADMIN,
             category="AUTOMATION",
             action=action,
             details=details,
+            target_entity_type="community",
         )
-        self.log_repo.add(entry)
 
     # ----------------------------------------------------------------------
     # AUTOMATIONS

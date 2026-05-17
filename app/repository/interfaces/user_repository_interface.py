@@ -12,6 +12,9 @@ class IUserRepository(ABC):
     def find_by_community_id(self, community_id: int) -> List[User]:
         pass
 
+    def find_by_soporte_id(self, soporte_id: int) -> List[User]:
+        return []
+
     @abstractmethod
     def add_user(self, user: User):
         pass

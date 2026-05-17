@@ -7,7 +7,7 @@ from app.view.theme import (
     BORDER_SOFT, PANEL_W, PANEL_H
 )
 
-class MenuView( ft.UserControl):
+class MenuView(ft.UserControl):
     """
     Main entry menu where the user chooses:
         - Login

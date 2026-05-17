@@ -167,6 +167,7 @@ class AlertService:
             "high_humidity": 1,
             "low_humidity": 1,
             "streetlight_automation": 2,
+            "unauthorized_plate": 1,
         }
         return mapping.get(alert_type, 1)
 

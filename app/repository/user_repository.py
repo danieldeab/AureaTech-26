@@ -102,6 +102,56 @@ class UserRepository(IUserRepository):
         )
         return [self._row_to_user(row) for row in rows]
 
+    def search(
+        self,
+        filters: dict | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ):
+        filters = filters or {}
+        where_clauses = ["is_active = 1"]
+        params: list = []
+
+        if filters.get("community_id") is not None:
+            where_clauses.append("community_id = %s")
+            params.append(int(filters["community_id"]))
+        if filters.get("role"):
+            where_clauses.append("role = %s")
+            params.append(str(filters["role"]).upper())
+        if filters.get("email"):
+            where_clauses.append("email LIKE %s")
+            params.append(f"%{str(filters['email']).strip().lower()}%")
+        if filters.get("name"):
+            where_clauses.append("full_name LIKE %s")
+            params.append(f"%{str(filters['name']).strip()}%")
+
+        sql = """
+            SELECT
+                user_id,
+                community_id,
+                full_name,
+                email,
+                password_hash,
+                role,
+                date_of_birth,
+                picture_path,
+                picture_url,
+                is_active
+            FROM user
+            WHERE {where_sql}
+            ORDER BY user_id ASC
+        """.format(where_sql=" AND ".join(where_clauses))
+
+        if limit is not None:
+            sql += " LIMIT %s"
+            params.append(int(limit))
+            if offset is not None:
+                sql += " OFFSET %s"
+                params.append(int(offset))
+
+        rows = self.db.execute(sql, tuple(params))
+        return [self._row_to_user(row) for row in rows]
+
     def update_role(self, user_id: str, new_role: str):
         role_value = new_role.value if isinstance(new_role, RoleEnum) else str(new_role)
         self.db.update(
@@ -156,3 +206,7 @@ class UserRepository(IUserRepository):
             where={"user_id": int(user_id)},
         )
         return self._row_to_user(row) if row else None
+    def find_by_soporte_id(self, soporte_id: int):
+        # Legacy first-semester support-center API. The S2 schema scopes support
+        # users by community instead of a centro_soporte table.
+        return []

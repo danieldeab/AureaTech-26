@@ -3,6 +3,7 @@ import flet as ft
 # Controller imports
 from app.controller.auth_controller import AuthController, Session
 from app.controller.dashboard_controller import DashboardController
+from app.model.enums import RoleEnum
 
 # View imports
 from app.view.auth.view_login import LoginView
@@ -30,12 +31,18 @@ from app.repository.log_repository import LogRepository
 from app.repository.reading_repository import ReadingRepository
 from app.repository.faq_repository import FAQRepository
 from app.repository.chat_repository import ChatRepository
+from app.repository.plate_repository import PlateRepository
 
 # Service imports
 from app.service.alert_service import AlertService
 from app.service.dashboard_service import DashboardService
 from app.service.monitoring_service import MonitoringService
 from app.service.actuator_service import ActuatorService
+from app.service.user_service import UserService
+from app.service.audit_log_service import AuditLogService
+from app.service.error_service import ErrorService
+from app.service.chat_service import ChatService
+from app.service.plate_recognition_service import PlateRecognitionService
 
 # Theme imports
 from app.view.theme import (
@@ -76,18 +83,46 @@ class UIController:
         self.actuator_repo = ActuatorRepository()
         self.log_repo = LogRepository()
         self.reading_repo = ReadingRepository()
+        self.audit_log_service = AuditLogService(self.log_repo)
+        self.error_service = ErrorService()
 
-        self.actuator_service = ActuatorService(self.actuator_repo)
+        self.actuator_service = ActuatorService(
+            self.actuator_repo,
+            audit_log_service=self.audit_log_service,
+            error_service=self.error_service,
+        )
+        self.user_service = UserService(
+            auth_controller.repo,
+            audit_log_service=self.audit_log_service,
+            error_service=self.error_service,
+        )
 
         self.monitoring_service = MonitoringService(
             self.sensor_repo,
             self.reading_repo,
             self.alert_service,
             self.log_repo,
+            audit_log_service=self.audit_log_service,
+            error_service=self.error_service,
         )
 
         self.faq_repo = FAQRepository()
         self.chat_repo = ChatRepository()
+        self.plate_repo = PlateRepository()
+        self.chat_service = ChatService(
+            chat_repository=self.chat_repo,
+            user_repository=auth_controller.repo,
+            faq_repository=self.faq_repo,
+            audit_log_service=self.audit_log_service,
+            error_service=self.error_service,
+        )
+        self.plate_service = PlateRecognitionService(
+            self.plate_repo,
+            audit_log_service=self.audit_log_service,
+            error_service=self.error_service,
+            alert_service=self.alert_service,
+            user_repository=auth_controller.repo,
+        )
 
         self.dashboard = DashboardController(
             self.alert_service,
@@ -98,6 +133,7 @@ class UIController:
             user_repository=auth_controller.repo,
             faq_repository=self.faq_repo,
             chat_repository=self.chat_repo,
+            chat_service=self.chat_service,
         )
 
         self.dashboard_service = DashboardService(
@@ -111,11 +147,12 @@ class UIController:
 
         self.history = []             # navigation stack
         self.page.assets_dir = "app/assets"
+        self.admin_chart_period = "7d"
 
     # ======================================================
     # Internal navigation utilities
     # ======================================================
-    def _push(self, name: str, view:  ft.UserControl):
+    def _push(self, name: str, view: ft.Control):
         if not self.history or self.history[-1] != name:
             self.history.append(name)
 
@@ -123,7 +160,7 @@ class UIController:
         self.page.add(view)
         self.page.update()
 
-    def _replace(self, name: str, view:  ft.UserControl):
+    def _replace(self, name: str, view: ft.Control):
         if self.history:
             self.history[-1] = name
         else:
@@ -296,6 +333,21 @@ class UIController:
         
     def show_user_dashboard(self, e=None):
         user = self.session.current_user
+        summary = self.dashboard_service.get_dashboard_summary(
+            user=user,
+            effective_community_id=user.community_id,
+        ).to_dict()
+        temp_series = self.dashboard_service.get_sensor_timeseries(user.community_id, "TEMPERATURE", "24h")
+        hum_series = self.dashboard_service.get_sensor_timeseries(user.community_id, "HUMIDITY", "24h")
+        alerts_data = self.dashboard_service.get_alert_chart_data(user.community_id, "7d")
+        latest_temp = self.dashboard_service.get_latest_sensor_reading(user.community_id, "TEMPERATURE")
+        latest_hum = self.dashboard_service.get_latest_sensor_reading(user.community_id, "HUMIDITY")
+        latest_smoke = self.dashboard_service.get_latest_sensor_reading(user.community_id, "SMOKE")
+        week_temp_stats = self.dashboard_service.get_basic_statistics(user.community_id, "TEMPERATURE", "7d")
+        month_temp_stats = self.dashboard_service.get_basic_statistics(user.community_id, "TEMPERATURE", "30d")
+        week_hum_stats = self.dashboard_service.get_basic_statistics(user.community_id, "HUMIDITY", "7d")
+        month_hum_stats = self.dashboard_service.get_basic_statistics(user.community_id, "HUMIDITY", "30d")
+        plate_history = self.dashboard_service.get_user_plate_history(user.id, user.community_id, 20)
 
         view = UserDashboardView(
             page=self.page,
@@ -303,6 +355,18 @@ class UIController:
             user=user,
             role=user.role.value,
             community_id=user.community_id,
+            summary=summary,
+            temp_series=temp_series,
+            hum_series=hum_series,
+            alerts_data=alerts_data,
+            latest_temp=latest_temp,
+            latest_hum=latest_hum,
+            latest_smoke=latest_smoke,
+            week_temp_stats=week_temp_stats,
+            month_temp_stats=month_temp_stats,
+            week_hum_stats=week_hum_stats,
+            month_hum_stats=month_hum_stats,
+            plate_history=plate_history,
 
             # nav buttons
             on_settings=self.show_settings,
@@ -334,6 +398,17 @@ class UIController:
             role=user.role.value,
             community_id=user.community_id,
             summary=summary,
+            temp_series=self.dashboard_service.get_sensor_timeseries(user.community_id, "TEMPERATURE", "24h"),
+            hum_series=self.dashboard_service.get_sensor_timeseries(user.community_id, "HUMIDITY", "24h"),
+            alert_chart=self.dashboard_service.get_alert_chart_data(user.community_id, "7d"),
+            actuator_state=self.dashboard_service.get_actuator_state_summary(user.community_id),
+            error_summary=self.dashboard_service.get_error_summary(user.community_id, "7d"),
+            temp_stats=self.dashboard_service.get_basic_statistics(user.community_id, "TEMPERATURE", "24h"),
+            sensor_options={
+                "TEMPERATURE": self.dashboard_service.get_sensors_for_community_and_type(user.community_id, "TEMPERATURE"),
+                "HUMIDITY": self.dashboard_service.get_sensors_for_community_and_type(user.community_id, "HUMIDITY"),
+                "WIND": self.dashboard_service.get_sensors_for_community_and_type(user.community_id, "WIND"),
+            },
             on_settings=self.show_settings,
             on_alerts=self.show_alerts,
             on_dashboard=self.show_tecnico_dashboard,
@@ -375,7 +450,12 @@ class UIController:
                 role=user.role.value,
                 community_id=None,
                 summary=summary,
-                on_settings=self.show_settings,
+                all_communities_overview=[],
+                sensitive_summary={"total": 0, "by_community": {}},
+            temp_line_series=[],
+            hum_line_series=[],
+            aggregation_period=self.admin_chart_period,
+            on_settings=self.show_settings,
                 on_alerts=self.show_alerts,
                 on_dashboard=self.show_admin_dashboard,
                 on_logout=self.logout,
@@ -398,6 +478,11 @@ class UIController:
             role=user.role.value,
             community_id=cid,
             summary=summary,
+            all_communities_overview=self._build_admin_communities_overview(summary.get("available_communities", [])),
+            sensitive_summary=self.dashboard_service.get_unknown_plate_events_summary(None, "7d"),
+            temp_line_series=self._get_admin_aggregated_series(cid, "TEMPERATURE"),
+            hum_line_series=self._get_admin_aggregated_series(cid, "HUMIDITY"),
+            aggregation_period=self.admin_chart_period,
             on_settings=self.show_settings,
             on_alerts=self.show_alerts,
             on_dashboard=self.show_admin_dashboard,
@@ -407,9 +492,54 @@ class UIController:
         self.history = ["dashboard"]
         self._replace("dashboard", view)
 
+    def _get_admin_aggregated_series(self, community_id: int, sensor_type: str):
+        options = self.dashboard_service.get_sensors_for_community_and_type(community_id, sensor_type)
+        if not options:
+            return []
+        sensor_id = int(options[0]["sensor_id"])
+        return self.dashboard_service.get_sensor_series_by_id(
+            sensor_id,
+            window=self.admin_chart_period,
+            aggregate=True,
+            aggregate_bucket="hour_2" if self.admin_chart_period == "24h" else "weekday",
+        )
+
+    def set_admin_chart_options(self, *, period: str | None = None):
+        if period:
+            self.admin_chart_period = str(period)
+        self.show_admin_dashboard()
+
+    def get_sensor_series_for_dashboard(self, sensor_id: int, aggregate: bool, window: str = "7d", aggregate_bucket: str = "weekday"):
+        return self.dashboard_service.get_sensor_series_by_id(
+            sensor_id,
+            window=window,
+            aggregate=aggregate,
+            aggregate_bucket=aggregate_bucket,
+        )
+
+    def _build_admin_communities_overview(self, communities: list[int]) -> list[dict]:
+        rows = []
+        for community_id in communities:
+            sensor_total = self.dashboard_service.get_dashboard_summary(
+                user=self.session.current_user,
+                effective_community_id=community_id,
+            ).sensors_summary.get("total_sensors", 0)
+            alerts_total = self.dashboard_service.get_alert_chart_data(community_id, "7d").get("total", 0)
+            errors_total = self.dashboard_service.get_error_summary(community_id, "7d").get("total", 0)
+            unknown_total = self.dashboard_service.get_unknown_plate_events_summary(community_id, "7d").get("total", 0)
+            rows.append(
+                {
+                    "community_id": community_id,
+                    "sensors": sensor_total,
+                    "alerts_7d": alerts_total,
+                    "errors_7d": errors_total,
+                    "unknown_plates_7d": unknown_total,
+                }
+            )
+        return rows
+
     
     def show_alerts(self, e=None):
-        print(">>> showing alerts")
 
         user = self.session.current_user
         if not user:
@@ -417,19 +547,17 @@ class UIController:
 
         role = user.role.value.lower()
 
-        # determine community id based on role
+        # Keep automation/evaluation side effects for admin/technician flows.
         if role == "admin":
             cid = self.session.selected_community_id
-            if cid is None:
-                # Admin must select a community first
-                self._notify("Seleccione una comunidad primero.")
-                return self.show_admin_dashboard()
-        else:
-            # Technician / Neighbor -> always fixed community
-            cid = user.community_id
+            if cid is not None:
+                self.dashboard.get_alerts(user, selected_community_id=cid)
+        elif role == "technician":
+            self.dashboard.get_alerts(user, selected_community_id=user.community_id)
 
-        alerts = self.dashboard.get_alerts(user, selected_community_id=cid)
-        print(f">>> fetched {len(alerts)} alerts for community {cid}")
+        # Read/unread capable list for every role: always use user deliveries.
+        alerts = self.alert_service.get_alert_deliveries_for_user(user.id)
+
         # route to dashboard
         if role == "admin":
             back_fn = self.show_admin_dashboard
@@ -450,9 +578,18 @@ class UIController:
             on_logout=self.logout,
             on_back=None,
             on_settings=self.show_settings,
+            on_mark_read=self.mark_alert_as_read,
         )
 
         self._replace("alerts", view)
+
+    def mark_alert_as_read(self, alert_id: int):
+        user = self.session.current_user
+        if not user:
+            return self.show_login()
+        ok = self.alert_service.mark_read(alert_id, user.id)
+        self._notify("Alert marked as read." if ok else "Could not mark alert as read.")
+        self.show_alerts()
 
 
     def show_settings(self, e=None):
@@ -469,32 +606,10 @@ class UIController:
             on_settings=self.show_settings,
             on_alerts=self.show_alerts,
             on_logout=self.logout,
+            plates=self.plate_service.list_user_plates(user.id) if user.id is not None else [],
         )
 
         self._replace("settings", view)
-
-    def show_actuator_history(self, actuator_id: int):
-        logs = self.log_repo.all()
-
-        actuator_logs = [
-            l for l in logs
-            if l.get("category") == "ACTUATOR"
-            and str(l.get("target_id")) == str(actuator_id)
-        ]
-
-        view = AlertsDashboardView(
-            page=self.page,
-            controller=self,
-            user=self.session.current_user,
-            role=self.session.current_user.role,
-            alerts=actuator_logs,  # reuse alerts-style list
-            on_dashboard=self.show_dashboard,
-            on_alerts=self.show_alerts,
-            on_logout=self.logout,
-            on_back=self.show_info_control,
-        )
-
-        self._replace("actuator_history", view)
 
     def show_faqs(self):
         user = self.session.current_user
@@ -519,24 +634,34 @@ class UIController:
 
     def show_chat_thread_list(self):
         user = self.session.current_user
-        if not user or user.role.value.lower() != "technician":
+        if not user:
             return
-
-        threads = self.dashboard.get_chat_threads_for_technician(user.id)
+        role = user.role.value.lower()
+        if role == "technician":
+            threads = self.dashboard.get_chat_threads_for_technician(user.id)
+            back_fn = self.show_tecnico_dashboard
+            can_resolve = True
+        elif role == "neighbor":
+            threads = self.dashboard.get_chat_threads_for_neighbor(user.id)
+            back_fn = self.show_user_dashboard
+            can_resolve = False
+        else:
+            return
 
         view = ChatThreadListView(
             page=self.page,
             controller=self,
             user=user,
             role=user.role.value,
-            on_dashboard=self.show_tecnico_dashboard,
+            on_dashboard=back_fn,
             on_alerts=self.show_alerts,
             on_logout=self.logout,
-            on_back=self.show_tecnico_dashboard,
+            on_back=back_fn,
             on_settings=self.show_settings,
             threads=threads,
             on_open_chat=self.show_chat_messages,
             on_resolve_chat=self.resolve_chat,
+            can_resolve=can_resolve,
         )
         self._replace("chat_threads", view)
 
@@ -548,6 +673,8 @@ class UIController:
         chat = self.dashboard.get_chat_by_id(chat_id)
         if not chat:
             return self._notify("Chat no encontrado.")
+        if not self._can_current_user_open_chat(chat):
+            return self._notify("No tienes permiso para abrir este chat.")
 
         messages = self.dashboard.get_chat_messages(chat_id)
 
@@ -555,7 +682,7 @@ class UIController:
         if user.role.value.lower() == "technician":
             back_fn = self.show_chat_thread_list
         else:
-            back_fn = self.show_faqs
+            back_fn = self.show_chat_thread_list
 
         view = ChatMessagesView(
             page=self.page,
@@ -592,12 +719,15 @@ class UIController:
         if not user:
             return self.show_login()
 
-        self.dashboard.send_chat_message(
-            chat_id=chat_id,
-            sender_id=user.id,
-            sender_role=user.role.value.lower(),
-            text=text,
-        )
+        try:
+            self.dashboard.send_chat_message(
+                chat_id=chat_id,
+                sender_id=user.id,
+                sender_role=user.role.value,
+                text=text,
+            )
+        except (PermissionError, ValueError) as exc:
+            return self._notify(str(exc))
 
         self.show_chat_messages(chat_id)
     
@@ -609,9 +739,25 @@ class UIController:
         if user.role.value.lower() != "technician":
             return self._notify("Solo un técnico puede resolver chats.")
 
-        self.dashboard.resolve_chat(chat_id, technician_id=user.id)
+        try:
+            self.dashboard.resolve_chat(chat_id, technician_id=user.id)
+        except (PermissionError, ValueError) as exc:
+            return self._notify(str(exc))
         self._notify("Chat resuelto correctamente.")
         self.show_chat_thread_list()  
+
+    def _can_current_user_open_chat(self, chat: dict) -> bool:
+        user = self.session.current_user
+        if not user:
+            return False
+        if user.role == RoleEnum.NEIGHBOR:
+            return int(chat.get("created_by_user_id")) == int(user.id)
+        if user.role == RoleEnum.TECHNICIAN:
+            assigned_user_id = chat.get("assigned_user_id")
+            if assigned_user_id is not None:
+                return int(assigned_user_id) == int(user.id)
+            return int(chat.get("community_id")) == int(user.community_id)
+        return user.role == RoleEnum.ADMIN
    
     def get_kpis(self) -> dict:
         """
@@ -723,19 +869,114 @@ class UIController:
         if existing and getattr(existing, "id", None) != getattr(user, "id", None):
             return False, "Ya existe un usuario con ese correo."
 
-        user.name = name
-        user.email = email
+        try:
+            self.user_service.update_own_profile(user, fullname=name, email=email)
+            return True, "Perfil actualizado correctamente."
+        except Exception:
+            return False, "Error tecnico al actualizar el perfil."
 
-        save_fn = getattr(self.auth.repo, "save", None)
-        if callable(save_fn):
-            save_fn(user)
+    def request_plate_registration(self, plate: str):
+        user = self.session.current_user
+        if not user:
+            return False, "No hay usuario en sesion."
+        try:
+            self.plate_service.request_user_plate(
+                user_id=int(user.id),
+                community_id=int(user.community_id),
+                plate=plate,
+            )
+            return True, "Matricula enviada para aprobacion."
+        except Exception as exc:
+            self.error_service.capture_exception(
+                exc,
+                source_layer="CONTROLLER",
+                user_id=int(user.id) if user.id is not None else None,
+                community_id=user.community_id,
+                target_entity_type="allowed_plate",
+            )
+            return False, "No se pudo registrar la matricula."
 
-        return True, "Perfil actualizado correctamente."
+    def deactivate_plate_registration(self, allowed_plate_id: int):
+        user = self.session.current_user
+        if not user:
+            return False, "No hay usuario en sesion."
+        try:
+            self.plate_service.deactivate_user_plate(
+                allowed_plate_id=int(allowed_plate_id),
+                user_id=int(user.id),
+                community_id=int(user.community_id),
+            )
+            return True, "Matricula desactivada."
+        except Exception as exc:
+            self.error_service.capture_exception(
+                exc,
+                source_layer="CONTROLLER",
+                user_id=int(user.id) if user.id is not None else None,
+                community_id=user.community_id,
+                target_entity_type="allowed_plate",
+                target_entity_id=int(allowed_plate_id),
+            )
+            return False, "No se pudo desactivar la matricula."
+
+    def approve_plate_registration(self, allowed_plate_id: int):
+        user = self.session.current_user
+        if not user:
+            return False, "No hay usuario en sesion."
+        try:
+            role = user.role if isinstance(user.role, RoleEnum) else RoleEnum(user.role)
+            self.plate_service.approve_plate(
+                allowed_plate_id=int(allowed_plate_id),
+                actor_id=int(user.id),
+                actor_role=role,
+                community_id=user.community_id,
+            )
+            return True, "Matricula aprobada."
+        except Exception as exc:
+            self.error_service.capture_exception(
+                exc,
+                source_layer="CONTROLLER",
+                user_id=int(user.id) if user.id is not None else None,
+                community_id=user.community_id,
+                target_entity_type="allowed_plate",
+                target_entity_id=int(allowed_plate_id),
+            )
+            return False, "No se pudo aprobar la matricula."
+
+    def deny_plate_registration(self, allowed_plate_id: int):
+        user = self.session.current_user
+        if not user:
+            return False, "No hay usuario en sesion."
+        try:
+            role = user.role if isinstance(user.role, RoleEnum) else RoleEnum(user.role)
+            self.plate_service.deny_plate(
+                allowed_plate_id=int(allowed_plate_id),
+                actor_id=int(user.id),
+                actor_role=role,
+                community_id=None,
+            )
+            return True, "Solicitud de matricula denegada."
+        except Exception as exc:
+            self.error_service.capture_exception(
+                exc,
+                source_layer="CONTROLLER",
+                user_id=int(user.id) if user.id is not None else None,
+                community_id=getattr(user, "community_id", None),
+                target_entity_type="allowed_plate",
+                target_entity_id=int(allowed_plate_id),
+            )
+            return False, "No se pudo denegar la matricula."
+
+    def get_pending_plate_requests_for_admin(self):
+        user = self.session.current_user
+        if not user:
+            return []
+        role_value = user.role.value if hasattr(user.role, "value") else str(user.role)
+        if role_value != "ADMIN":
+            return []
+        return self.plate_service.list_pending_plates(None)
   
 
-    def logout(self, e=None):
-        print(">>> LOGOUT")
-        
+    def logout(self, e=None):        
         # clear session
         self.session.logout()
 

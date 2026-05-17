@@ -30,9 +30,12 @@ class UserEditView(BaseDashboardView):
         on_settings,
         on_alerts,
         on_logout,
+        plates: list[dict] | None = None,
     ):
         self._name_field: ft.TextField | None = None
         self._email_field: ft.TextField | None = None
+        self._plate_field: ft.TextField | None = None
+        self.plates = plates or []
 
         super().__init__(
             page=page,
@@ -101,6 +104,54 @@ class UserEditView(BaseDashboardView):
             controls=[save_button, cancel_button],
         )
 
+        self._plate_field = ft.TextField(
+            label="Nueva matricula",
+            width=260,
+            border_radius=12,
+            border=ft.InputBorder.UNDERLINE,
+            color=INPUT_TEXT,
+            hint_text="1234 ABC",
+            hint_style=ft.TextStyle(color=INPUT_PLACEHOLDER),
+        )
+
+        plate_rows: list[ft.Control] = []
+        for plate in self.plates:
+            status = plate.get("status") or ("APPROVED" if plate.get("is_active") else "PENDING")
+            plate_id = plate.get("allowed_plate_id")
+            row_controls: list[ft.Control] = [
+                ft.Text(str(plate.get("plate", "--")), width=120, color=PRIMARY_GREEN, weight=ft.FontWeight.BOLD),
+                ft.Text(str(status), width=100, color=TEXT_SECONDARY),
+            ]
+            if plate_id is not None:
+                row_controls.append(
+                    ft.TextButton(
+                        text="Desactivar",
+                        on_click=lambda e, pid=plate_id: self._on_deactivate_plate(pid),
+                    )
+                )
+            plate_rows.append(ft.Row(spacing=10, controls=row_controls))
+
+        plates_section = ft.Container(
+            bgcolor=WHITE,
+            border_radius=10,
+            padding=12,
+            content=ft.Column(
+                spacing=10,
+                controls=[
+                    ft.Text("Matriculas registradas", size=16, weight=ft.FontWeight.BOLD, color=PRIMARY_GREEN),
+                    ft.Text("Las nuevas matriculas quedan pendientes hasta que las apruebe un tecnico o administrador.", size=12, color=TEXT_SECONDARY),
+                    *(plate_rows or [ft.Text("No hay matriculas registradas.", size=12, color=TEXT_SECONDARY)]),
+                    ft.Row(
+                        spacing=10,
+                        controls=[
+                            self._plate_field,
+                            ft.ElevatedButton(text="Solicitar alta", on_click=self._on_add_plate),
+                        ],
+                    ),
+                ],
+            ),
+        )
+
         return ft.Column(
             spacing=20,
             controls=[
@@ -109,6 +160,7 @@ class UserEditView(BaseDashboardView):
                 self._name_field,
                 self._email_field,
                 buttons_row,
+                plates_section,
             ],
         )
 
@@ -129,3 +181,20 @@ class UserEditView(BaseDashboardView):
         if ok:
             # After a successful update, go back to dashboard
             self.on_dashboard()
+
+    def _on_add_plate(self, e):
+        plate = (self._plate_field.value or "").strip() if self._plate_field else ""
+        ok, msg = self.controller.request_plate_registration(plate)
+        self.page.snack_bar = ft.SnackBar(ft.Text(msg))
+        self.page.snack_bar.open = True
+        self.page.update()
+        if ok:
+            self.on_settings()
+
+    def _on_deactivate_plate(self, allowed_plate_id: int):
+        ok, msg = self.controller.deactivate_plate_registration(allowed_plate_id)
+        self.page.snack_bar = ft.SnackBar(ft.Text(msg))
+        self.page.snack_bar.open = True
+        self.page.update()
+        if ok:
+            self.on_settings()

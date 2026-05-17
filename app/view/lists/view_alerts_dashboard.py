@@ -28,6 +28,7 @@ class AlertsDashboardView(BaseListView):
         on_logout,
         on_back=None,
         on_settings=None,
+        on_mark_read=None,
     ):
         super().__init__(
             page=page,
@@ -42,10 +43,17 @@ class AlertsDashboardView(BaseListView):
             title="Alertas",
         )
         self.alerts = alerts
+        self.on_mark_read = on_mark_read
 
 
     def build_list(self) -> ft.Control:
         """
         Use your existing AlertsList component to render the alerts.
         """
-        return AlertsList(alerts=self.alerts)
+        return ft.Container(
+            height=430,
+            content=ft.ListView(
+                spacing=10,
+                controls=[AlertsList(alerts=self.alerts, on_mark_read=self.on_mark_read)],
+            ),
+        )

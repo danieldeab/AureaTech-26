@@ -14,9 +14,21 @@ class LogEntry:
     category: str
     action: str
     details: str
+    community_id: int | None = None
+    target_entity_type: str | None = None
+    target_entity_id: int | None = None
 
     @staticmethod
-    def new(actor_id: int, actor_role: RoleEnum, category: str, action: str, details: str = "") -> "LogEntry":
+    def new(
+        actor_id: int,
+        actor_role: RoleEnum,
+        category: str,
+        action: str,
+        details: str = "",
+        community_id: int | None = None,
+        target_entity_type: str | None = None,
+        target_entity_id: int | None = None,
+    ) -> "LogEntry":
         return LogEntry(
             id=uuid4(),
             timestamp=datetime.now(timezone.utc),
@@ -25,6 +37,9 @@ class LogEntry:
             category=category,
             action=action,
             details=details,
+            community_id=community_id,
+            target_entity_type=target_entity_type,
+            target_entity_id=target_entity_id,
         )
 
     def to_dict(self) -> dict:
@@ -44,4 +59,7 @@ class LogEntry:
             category=d["category"],
             action=d["action"],
             details=d.get("details", ""),
+            community_id=d.get("community_id"),
+            target_entity_type=d.get("target_entity_type"),
+            target_entity_id=d.get("target_entity_id"),
         )

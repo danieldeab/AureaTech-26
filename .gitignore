@@ -1,10 +1,12 @@
 ############################################
 # PYTHON BASICS
 ############################################
-<<<<<<< HEAD
 __pycache__/
+<<<<<<< HEAD
 =======
 
+=======
+>>>>>>> d1d17d4 (feat(db): enhance error_event and audit_log tables with additional fields and indexes)
 *.py[cod]
 *$py.class
 
@@ -64,6 +66,10 @@ web/dist/
 *.sublime-project
 *.sublime-workspace
 
+# IntelliJ
+*.ipr
+.idea/
+*.iws
 
 ############################################
 # OS SPECIFIC (SAFE TO IGNORE)
@@ -94,7 +100,7 @@ logs/
 exported_logs/
 temp_logs/
 
-JSON database files (optional — uncomment if needed)
+# JSON database files (optional — uncomment if needed)
 data/*.json
 data/*.txt
 
@@ -107,9 +113,13 @@ screens/
 screenshots/
 
 # Local testing artifacts
-test_output/
+tests/
 tmp/
 temp/
+pytest.ini
+
+# Exported logs and reports
+exports/
 
 ############################################
 # ENV FILES / TOKENS

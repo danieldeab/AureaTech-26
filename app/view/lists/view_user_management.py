@@ -31,11 +31,13 @@ class UserManagementView(BaseListView):
     ):
         self.user_repo = UserRepository()
         self.selected_filter = "ALL"  # ALL, NEIGHBOR, TECHNICIAN, ADMIN
+        self.show_plate_reviews = False
 
         # List container that we will update in-place
         self._list_view = ft.Column(
             spacing=12,
             scroll=ft.ScrollMode.AUTO,
+            height=360,
             controls=[],
         )
 
@@ -65,6 +67,10 @@ class UserManagementView(BaseListView):
         if not users:
             return [ft.Text("No hay usuarios.", size=12)]
         return [self._user_tile(u) for u in users]
+
+    def _get_pending_plates(self):
+        getter = getattr(self.controller, "get_pending_plate_requests_for_admin", None)
+        return getter() if callable(getter) else []
 
     def _refresh_list(self):
         self._list_view.controls = self._build_tiles()
@@ -116,6 +122,47 @@ class UserManagementView(BaseListView):
         )
 
         return chips
+
+    def _plate_review_notification(self) -> ft.Control:
+        pending = self._get_pending_plates()
+        label = f"Solicitudes de matricula pendientes: {len(pending)}"
+        return ft.Container(
+            bgcolor=WHITE,
+            border_radius=12,
+            padding=12,
+            content=ft.Column(
+                spacing=10,
+                controls=[
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        controls=[
+                            ft.Text(label, color=PRIMARY_GREEN, weight=ft.FontWeight.BOLD),
+                            ft.ElevatedButton(text="Revisar", on_click=self._open_plate_review_dialog),
+                        ],
+                    ),
+                ],
+            ),
+        )
+
+    def _plate_review_rows(self, pending: list[dict]) -> list[ft.Control]:
+        if not pending:
+            return [ft.Text("No hay matriculas pendientes.", size=12, color=FULL_BLACK)]
+        rows = []
+        for plate in pending:
+            plate_id = plate.get("allowed_plate_id")
+            rows.append(
+                ft.Row(
+                    spacing=12,
+                    controls=[
+                        ft.Container(width=120, content=ft.Text(str(plate.get("plate", "--")), color=PRIMARY_GREEN, weight=ft.FontWeight.BOLD)),
+                        ft.Container(width=100, content=ft.Text(f"User {plate.get('user_id', '--')}", size=12, color=FULL_BLACK)),
+                        ft.Container(width=120, content=ft.Text(f"Community {plate.get('community_id', '--')}", size=12, color=FULL_BLACK)),
+                        ft.TextButton(text="Aprobar", on_click=lambda e, pid=plate_id: self._approve_plate(pid)),
+                        ft.TextButton(text="Denegar", on_click=lambda e, pid=plate_id: self._deny_plate(pid)),
+                    ],
+                )
+            )
+        return rows
 
     # ===============================================================
     # ITEM TILE
@@ -210,6 +257,47 @@ class UserManagementView(BaseListView):
         self.controller._notify("Usuario eliminado.")
         self._refresh_list()
 
+    def _open_plate_review_dialog(self, e):
+        pending = self._get_pending_plates()
+        content = ft.Column(
+            width=620,
+            height=360,
+            scroll=ft.ScrollMode.AUTO,
+            spacing=10,
+            controls=self._plate_review_rows(pending),
+        )
+        self.page.dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Solicitudes de matricula pendientes"),
+            content=content,
+            actions=[ft.TextButton("Cerrar", on_click=self._close_plate_review_dialog)],
+        )
+        self.page.dialog.open = True
+        self.page.update()
+
+    def _close_plate_review_dialog(self, e=None):
+        if self.page.dialog:
+            self.page.dialog.open = False
+        self.page.update()
+
+    def _approve_plate(self, allowed_plate_id):
+        if allowed_plate_id is None:
+            return
+        ok, msg = self.controller.approve_plate_registration(int(allowed_plate_id))
+        self.controller._notify(msg)
+        if ok:
+            self._close_plate_review_dialog()
+            self.controller.show_user_management()
+
+    def _deny_plate(self, allowed_plate_id):
+        if allowed_plate_id is None:
+            return
+        ok, msg = self.controller.deny_plate_registration(int(allowed_plate_id))
+        self.controller._notify(msg)
+        if ok:
+            self._close_plate_review_dialog()
+            self.controller.show_user_management()
+
     # OVERRIDES
     def build(self):
         self._refresh_list()
@@ -228,6 +316,7 @@ class UserManagementView(BaseListView):
         return ft.Column(
             spacing=16,
             controls=[
+                self._plate_review_notification(),
                 self._filter_chips(),
                 self._list_view,
             ],

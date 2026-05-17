@@ -10,6 +10,7 @@ from app.service.actuator_service import ActuatorService
 from app.repository.sensor_repository import SensorRepository
 from app.repository.reading_repository import ReadingRepository
 from app.repository.actuator_repository import ActuatorRepository
+from app.repository.automation_rule_repository import AutomationRuleRepository
 from app.model.enums import RoleEnum
 
 
@@ -40,6 +41,8 @@ class InfoControlView(BaseDashboardView):
         # Services for data access
         self.sensor_service = SensorService(SensorRepository(), ReadingRepository())
         self.actuator_service = ActuatorService(ActuatorRepository())
+        self.automation_rule_repo = AutomationRuleRepository()
+        self._rules_by_sensor: dict[int, list[dict]] = {}
 
         super().__init__(
             page=page,
@@ -63,17 +66,26 @@ class InfoControlView(BaseDashboardView):
         """
         title = f"{sensor.type} ({sensor.location})"
 
-        thresholds = getattr(sensor, "thresholds", {}) or {}
-
         threshold_controls = []
-        for name, value in thresholds.items():
+        for rule in self._rules_by_sensor.get(int(sensor.sensor_id), []):
+            enabled = "enabled" if bool(rule.get("is_enabled")) else "disabled"
+            action_parts = []
+            if rule.get("alert_type"):
+                action_parts.append(f"alert {rule.get('alert_type')} ({rule.get('severity')})")
+            if rule.get("actuator_id"):
+                action_parts.append(f"actuator {rule.get('actuator_id')} -> {rule.get('target_state')}")
+            action_text = "; ".join(action_parts) if action_parts else "no action"
             threshold_controls.append(
-                ft.Text(f"{name}: {value}", size=12)
+                ft.Text(
+                    f"{rule.get('metric_key')} {rule.get('comparison_operator')} {rule.get('threshold_value')} - {enabled} - {action_text}",
+                    size=12,
+                    color=FULL_BLACK,
+                )
             )
 
         if not threshold_controls:
             threshold_controls.append(
-                ft.Text("No thresholds configured", size=12, italic=True, color=BRAND_ACCENT_BLUE)
+                ft.Text("No automation rules configured", size=12, italic=True, color=BRAND_ACCENT_BLUE)
             )
 
         return ft.Container(
@@ -162,6 +174,10 @@ class InfoControlView(BaseDashboardView):
         # Load data for the selected community
         sensors = self.sensor_service.get_sensors_in_community(self.community_id)
         actuators = self.actuator_service.get_actuators_in_community(self.community_id)
+        self._rules_by_sensor = {}
+        for rule in self.automation_rule_repo.find_by_community_id(self.community_id):
+            sensor_id = int(rule["sensor_id"])
+            self._rules_by_sensor.setdefault(sensor_id, []).append(rule)
 
         sensor_tiles = [self._sensor_tile(s) for s in sensors]
         if not sensor_tiles:

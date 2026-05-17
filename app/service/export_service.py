@@ -9,6 +9,9 @@ from typing import Dict, Any, Optional, List, Iterable, Set
 
 from app.model.user import User
 from app.model.enums import RoleEnum
+from app.service.audit_log_service import AuditLogService
+from app.service.error_service import ErrorService
+from app.repository.error_repository import ErrorRepository
 from app.repository.log_repository import LogRepository
 from app.repository.reading_repository import ReadingRepository
 from app.repository.sensor_repository import SensorRepository
@@ -32,12 +35,18 @@ class ExportService:
     def __init__(
         self,
         log_repo: LogRepository | None = None,
+        error_repo: ErrorRepository | None = None,
         reading_repo: ReadingRepository | None = None,
         sensor_repo: SensorRepository | None = None,
+        audit_log_service: AuditLogService | None = None,
+        error_service: ErrorService | None = None,
     ):
         self._log_repo = log_repo or LogRepository()
+        self._error_repo = error_repo or ErrorRepository()
         self._reading_repo = reading_repo or ReadingRepository()
         self._sensor_repo = sensor_repo or SensorRepository()
+        self._audit_log_service = audit_log_service or AuditLogService(self._log_repo)
+        self._error_service = error_service or ErrorService()
 
     # ------------------------------------------------------
     # Helpers de ámbito de comunidad
@@ -60,6 +69,39 @@ class ExportService:
             return None
         return {int(cid)}
 
+    def _actor_id(self, user: User) -> int:
+        try:
+            return int(getattr(user, "id", 1))
+        except Exception:
+            return 1
+
+    def _actor_role(self, user: User) -> RoleEnum:
+        role = getattr(user, "role", RoleEnum.ADMIN)
+        if isinstance(role, RoleEnum):
+            return role
+        try:
+            return RoleEnum(str(role))
+        except ValueError:
+            return RoleEnum.ADMIN
+
+    def _metadata(
+        self,
+        *,
+        user: User,
+        filters: Dict[str, Any],
+        export_type: str,
+        row_count: int,
+    ) -> Dict[str, Any]:
+        return {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_by": self._actor_id(user),
+            "role": self._actor_role(user).value,
+            "export_type": export_type,
+            "filters": filters,
+            "schema_version": "drivers-v1",
+            "row_count": row_count,
+        }
+
     # ------------------------------------------------------
     # Exportación de LOGS
     # ------------------------------------------------------
@@ -74,26 +116,109 @@ class ExportService:
         """
         Exporta logs respetando el ámbito de comunidad según el rol del usuario.
         """
-        filters = filters or {}
-        allowed_communities = self._allowed_communities_for_user(user, all_communities)
+        try:
+            filters = filters or {}
+            allowed_communities = self._allowed_communities_for_user(user, all_communities)
 
-        all_logs = self._log_repo.all()
-        filtered_logs = _filter_logs(all_logs, filters, allowed_communities)
+            search_filters = dict(filters)
+            if allowed_communities is not None:
+                if len(allowed_communities) == 1:
+                    search_filters["community_id"] = next(iter(allowed_communities))
+                else:
+                    search_filters["community_id"] = next(iter(allowed_communities))
+            filtered_logs = self._log_repo.search(search_filters)
 
-        # Ordenar por timestamp (campo 'ts' unix)
-        filtered_logs.sort(key=lambda x: x.get("ts", 0), reverse=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            metadata = self._metadata(
+                user=user,
+                filters=search_filters,
+                export_type="audit_logs",
+                row_count=len(filtered_logs),
+            )
+            if format.lower() == "csv":
+                filename = f"logs_export_{timestamp}.csv"
+                filepath = os.path.join(EXPORT_DIR, filename)
+                _export_logs_to_csv(filtered_logs, filepath, metadata=metadata)
+            else:
+                filename = f"logs_export_{timestamp}.json"
+                filepath = os.path.join(EXPORT_DIR, filename)
+                _export_logs_to_json(filtered_logs, filepath, metadata=metadata)
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        if format.lower() == "csv":
-            filename = f"logs_export_{timestamp}.csv"
-            filepath = os.path.join(EXPORT_DIR, filename)
-            _export_logs_to_csv(filtered_logs, filepath)
-        else:
-            filename = f"logs_export_{timestamp}.json"
-            filepath = os.path.join(EXPORT_DIR, filename)
-            _export_logs_to_json(filtered_logs, filepath)
+            self._audit_log_service.log(
+                actor_id=self._actor_id(user),
+                actor_role=self._actor_role(user),
+                category="EXPORT",
+                action="export_requested",
+                details=f"audit_logs format={format.lower()} records={len(filtered_logs)}",
+                community_id=getattr(user, "community_id", None),
+                target_entity_type="audit_log",
+            )
+            return filepath
+        except Exception as exc:
+            self._error_service.capture_exception(
+                exc,
+                source_layer="SERVICE",
+                user_id=int(user.id) if getattr(user, "id", None) is not None else None,
+                community_id=getattr(user, "community_id", None),
+                target_entity_type="audit_log",
+            )
+            raise
 
-        return filepath
+    def export_error_events_for_user(
+        self,
+        user: User,
+        filters: Optional[Dict[str, Any]] = None,
+        format: str = "json",
+        *,
+        all_communities: bool = False,
+    ) -> str:
+        try:
+            filters = filters or {}
+            allowed_communities = self._allowed_communities_for_user(user, all_communities)
+            search_filters = dict(filters)
+            if allowed_communities is not None:
+                if len(allowed_communities) == 1:
+                    search_filters["community_id"] = next(iter(allowed_communities))
+                else:
+                    search_filters["community_id"] = next(iter(allowed_communities))
+
+            events = self._error_repo.search(search_filters)
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            metadata = self._metadata(
+                user=user,
+                filters=search_filters,
+                export_type="error_events",
+                row_count=len(events),
+            )
+            if format.lower() == "csv":
+                filename = f"errors_export_{timestamp}.csv"
+                filepath = os.path.join(EXPORT_DIR, filename)
+                _export_error_events_to_csv(events, filepath, metadata=metadata)
+            else:
+                filename = f"errors_export_{timestamp}.json"
+                filepath = os.path.join(EXPORT_DIR, filename)
+                _export_error_events_to_json(events, filepath, metadata=metadata)
+
+            self._audit_log_service.log(
+                actor_id=self._actor_id(user),
+                actor_role=self._actor_role(user),
+                category="EXPORT",
+                action="export_requested",
+                details=f"error_events format={format.lower()} records={len(events)}",
+                community_id=getattr(user, "community_id", None),
+                target_entity_type="error_event",
+            )
+            return filepath
+        except Exception as exc:
+            self._error_service.capture_exception(
+                exc,
+                source_layer="SERVICE",
+                user_id=int(user.id) if getattr(user, "id", None) is not None else None,
+                community_id=getattr(user, "community_id", None),
+                target_entity_type="error_event",
+            )
+            raise
 
     def export_logs_as_admin(
         self,
@@ -163,14 +288,20 @@ class ExportService:
         filtered_readings.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        metadata = self._metadata(
+            user=user,
+            filters=filters,
+            export_type="readings",
+            row_count=len(filtered_readings),
+        )
         if format.lower() == "csv":
             filename = f"readings_export_{timestamp}.csv"
             filepath = os.path.join(EXPORT_DIR, filename)
-            _export_readings_to_csv(filtered_readings, filepath)
+            _export_readings_to_csv(filtered_readings, filepath, metadata=metadata)
         else:
             filename = f"readings_export_{timestamp}.json"
             filepath = os.path.join(EXPORT_DIR, filename)
-            _export_readings_to_json(filtered_readings, filepath)
+            _export_readings_to_json(filtered_readings, filepath, metadata=metadata)
 
         return filepath
 
@@ -349,29 +480,42 @@ def _filter_readings(
     return filtered
 
 
-def _export_logs_to_json(logs: List[Dict[str, Any]], filepath: str) -> None:
+def _export_logs_to_json(logs: List[Dict[str, Any]], filepath: str, metadata: Dict[str, Any] | None = None) -> None:
     export_data = {
         "export_date": datetime.now().isoformat(),
         "total_records": len(logs),
+        "metadata": metadata or {},
         "logs": logs,
     }
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(export_data, f, ensure_ascii=False, indent=2)
 
 
-def _export_logs_to_csv(logs: List[Dict[str, Any]], filepath: str) -> None:
+def _write_csv_metadata(writer: csv.writer, metadata: Dict[str, Any] | None) -> None:
+    metadata = metadata or {}
+    writer.writerow(["metadata_key", "metadata_value"])
+    for key in ["generated_at", "generated_by", "role", "export_type", "filters", "schema_version", "row_count"]:
+        writer.writerow([key, metadata.get(key, "")])
+    writer.writerow([])
+
+
+def _export_logs_to_csv(logs: List[Dict[str, Any]], filepath: str, metadata: Dict[str, Any] | None = None) -> None:
     if not logs:
         with open(filepath, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
+            _write_csv_metadata(writer, metadata)
             writer.writerow(["id", "timestamp", "event_type", "user_id", "description"])
         return
 
     fieldnames = set()
     for log in logs:
         fieldnames.update(log.keys())
+    fieldnames.add("timestamp_readable")
     fieldnames = sorted(fieldnames)
 
     with open(filepath, "w", encoding="utf-8", newline="") as f:
+        raw_writer = csv.writer(f)
+        _write_csv_metadata(raw_writer, metadata)
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for log in logs:
@@ -381,20 +525,54 @@ def _export_logs_to_csv(logs: List[Dict[str, Any]], filepath: str) -> None:
             writer.writerow(row)
 
 
-def _export_readings_to_json(readings: List[Dict[str, Any]], filepath: str) -> None:
+def _export_error_events_to_json(events: List[Dict[str, Any]], filepath: str, metadata: Dict[str, Any] | None = None) -> None:
+    export_data = {
+        "export_date": datetime.now().isoformat(),
+        "total_records": len(events),
+        "metadata": metadata or {},
+        "errors": events,
+    }
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(export_data, f, ensure_ascii=False, indent=2)
+
+
+def _export_error_events_to_csv(events: List[Dict[str, Any]], filepath: str, metadata: Dict[str, Any] | None = None) -> None:
+    if not events:
+        with open(filepath, "w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            _write_csv_metadata(writer, metadata)
+            writer.writerow(["id", "timestamp", "severity", "source_layer", "message"])
+        return
+
+    fieldnames = set()
+    for event in events:
+        fieldnames.update(event.keys())
+    fieldnames = sorted(fieldnames)
+
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        raw_writer = csv.writer(f)
+        _write_csv_metadata(raw_writer, metadata)
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(events)
+
+
+def _export_readings_to_json(readings: List[Dict[str, Any]], filepath: str, metadata: Dict[str, Any] | None = None) -> None:
     export_data = {
         "export_date": datetime.now().isoformat(),
         "total_records": len(readings),
+        "metadata": metadata or {},
         "readings": readings,
     }
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(export_data, f, ensure_ascii=False, indent=2)
 
 
-def _export_readings_to_csv(readings: List[Dict[str, Any]], filepath: str) -> None:
+def _export_readings_to_csv(readings: List[Dict[str, Any]], filepath: str, metadata: Dict[str, Any] | None = None) -> None:
     if not readings:
         with open(filepath, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
+            _write_csv_metadata(writer, metadata)
             writer.writerow(["sensor_id", "timestamp", "value", "unit", "type"])
         return
 
@@ -404,6 +582,8 @@ def _export_readings_to_csv(readings: List[Dict[str, Any]], filepath: str) -> No
     fieldnames = sorted(fieldnames)
 
     with open(filepath, "w", encoding="utf-8", newline="") as f:
+        raw_writer = csv.writer(f)
+        _write_csv_metadata(raw_writer, metadata)
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(readings)
