@@ -4,8 +4,7 @@
 <<<<<<< HEAD
 __pycache__/
 =======
-_pycache_/
->>>>>>> daniel
+
 *.py[cod]
 *$py.class
 
@@ -119,3 +118,13 @@ temp/
 .env.*
 *.secret
 *.key
+
+############################################
+# VISION / LICENSE PLATE TEST ARTIFACTS
+############################################
+
+# Cache de Python generado al ejecutar los tests
+app/infraestructure/vision/__pycache__/
+
+# Resultados generados automáticamente por el detector
+app/infraestructure/vision/results/
