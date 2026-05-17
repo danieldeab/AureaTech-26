@@ -13,6 +13,7 @@ class FaqItem:
     id: str
     question: str
     answer: str
+    tags: str = ""
 
 
 def _normalize(s: str) -> str:
@@ -39,6 +40,22 @@ def _cheap_fuzzy_score(query: str, text: str) -> float:
     overlap = len(q_tokens & t_tokens) / max(len(q_tokens), 1)
     coverage = len(q_tokens & t_tokens) / max(len(t_tokens), 1)
     return 0.7 * overlap + 0.3 * coverage
+
+
+def filter_faqs(query: str, faqs: List[FaqItem]) -> List[FaqItem]:
+    q = query or ""
+    if not q.strip():
+        return list(faqs)
+
+    scored = []
+    for item in faqs:
+        text = f"{item.question}\n{item.answer}\n{item.tags}"
+        score = _cheap_fuzzy_score(q, text)
+        if score >= 0.2:
+            scored.append((score, item.question.casefold(), item))
+
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    return [item for _, __, item in scored]
 
 
 class FaqsView(BaseListView):
@@ -114,16 +131,11 @@ class FaqsView(BaseListView):
         if not q.strip():
             self._filtered = list(self._all_faqs)
         else:
-            scored = []
-            for item in self._all_faqs:
-                text = f"{item.question}\n{item.answer}"
-                scored.append((_cheap_fuzzy_score(q, text), item))
-            scored.sort(key=lambda x: x[0], reverse=True)
-            # Keep only reasonably relevant results
-            self._filtered = [it for score, it in scored if score >= 0.2]
+            self._filtered = filter_faqs(q, self._all_faqs)
 
         self._rebuild_list()
-        self.page.update()
+        if self.page:
+            self.page.update()
 
     def _rebuild_list(self) -> None:
         self._list_column.controls.clear()

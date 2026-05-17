@@ -1,5 +1,6 @@
+#  app/infraestructure/vision/plate_recognizer.py
+
 from pathlib import Path
-from ultralytics import YOLO
 
 
 BASE_DIR = Path(__file__).parent
@@ -9,8 +10,11 @@ RESULTS_DIR = BASE_DIR / "results"
 
 
 class PlateRecognizer:
-    def __init__(self):
-        self.model = YOLO(str(MODEL_PATH))
+    def __init__(self, model_path: str | Path | None = None):
+        from ultralytics import YOLO
+
+        self.model_path = Path(model_path) if model_path else MODEL_PATH
+        self.model = YOLO(str(self.model_path))
 
     def detect(self, image_path: str, save_result: bool = True):
         """

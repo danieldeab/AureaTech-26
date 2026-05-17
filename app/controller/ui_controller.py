@@ -32,6 +32,7 @@ from app.repository.reading_repository import ReadingRepository
 from app.repository.faq_repository import FAQRepository
 from app.repository.chat_repository import ChatRepository
 from app.repository.plate_repository import PlateRepository
+from app.repository.automation_rule_repository import AutomationRuleRepository
 
 # Service imports
 from app.service.alert_service import AlertService
@@ -43,6 +44,8 @@ from app.service.audit_log_service import AuditLogService
 from app.service.error_service import ErrorService
 from app.service.chat_service import ChatService
 from app.service.plate_recognition_service import PlateRecognitionService
+from app.service.automation_rule_service import AutomationRuleService
+from app.service.vision_plate_service import VisionPlateService
 
 # Theme imports
 from app.view.theme import (
@@ -83,6 +86,7 @@ class UIController:
         self.actuator_repo = ActuatorRepository()
         self.log_repo = LogRepository()
         self.reading_repo = ReadingRepository()
+        self.automation_rule_repo = AutomationRuleRepository()
         self.audit_log_service = AuditLogService(self.log_repo)
         self.error_service = ErrorService()
 
@@ -96,6 +100,14 @@ class UIController:
             audit_log_service=self.audit_log_service,
             error_service=self.error_service,
         )
+        self.automation_rule_service = AutomationRuleService(
+            self.automation_rule_repo,
+            alert_service=self.alert_service,
+            actuator_service=self.actuator_service,
+            user_repository=auth_controller.repo,
+            audit_log_service=self.audit_log_service,
+            error_service=self.error_service,
+        )
 
         self.monitoring_service = MonitoringService(
             self.sensor_repo,
@@ -104,6 +116,7 @@ class UIController:
             self.log_repo,
             audit_log_service=self.audit_log_service,
             error_service=self.error_service,
+            automation_rule_service=self.automation_rule_service,
         )
 
         self.faq_repo = FAQRepository()
@@ -120,8 +133,13 @@ class UIController:
             self.plate_repo,
             audit_log_service=self.audit_log_service,
             error_service=self.error_service,
+            actuator_service=self.actuator_service,
             alert_service=self.alert_service,
             user_repository=auth_controller.repo,
+        )
+        self.vision_plate_service = VisionPlateService(
+            plate_recognition_service=self.plate_service,
+            error_service=self.error_service,
         )
 
         self.dashboard = DashboardController(

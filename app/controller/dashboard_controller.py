@@ -50,13 +50,6 @@ class DashboardController:
         else:
             comm = user.community_id
 
-        decision = self.monitoring_service.evaluate_streetlights_for_community(comm)
-
-        if decision is not None:
-            changed = self.actuator_service.apply_streetlight_decision(decision)
-            if changed and decision.get("streetlights_on"):
-                self.alert_service.apply_streetlight_decision(decision)
-
         return self.alert_service.get_alerts_for_community(comm)
 
     def get_faqs_for_community(self, community_id: str):
@@ -66,6 +59,7 @@ class DashboardController:
                 id=r["id"],
                 question=r["question"],
                 answer=r["answer"],
+                tags=r.get("tags") or "",
             )
             for r in rows
         ]

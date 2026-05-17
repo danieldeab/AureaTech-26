@@ -68,11 +68,18 @@ class PlateRecognitionService:
             )
 
             alert_result = None
+            actuator_result = None
             if not is_allowed:
                 alert_result = self._notify_technicians(
                     community_id=int(community_id),
                     plate=plate,
                     camera_event_id=int(event_id),
+                )
+            else:
+                actuator_result = self._open_garage(
+                    community_id=int(community_id),
+                    camera_event_id=int(event_id),
+                    actor_id=int(actor_id),
                 )
 
             return {
@@ -83,6 +90,7 @@ class PlateRecognitionService:
                 "is_allowed": is_allowed,
                 "allowed_plate": allowed,
                 "alert_result": alert_result,
+                "actuator_result": actuator_result,
             }
         except Exception as exc:
             self.error_service.capture_exception(
@@ -92,6 +100,20 @@ class PlateRecognitionService:
                 target_entity_type="camera_event",
             )
             raise
+
+    def _open_garage(self, *, community_id: int, camera_event_id: int, actor_id: int):
+        if not self.actuator_service:
+            return None
+
+        opener = getattr(self.actuator_service, "open_garage_for_plate", None)
+        if not callable(opener):
+            return None
+
+        return opener(
+            community_id=int(community_id),
+            camera_event_id=int(camera_event_id),
+            actor_id=int(actor_id),
+        )
 
     def list_user_plates(self, user_id: int) -> list[dict[str, Any]]:
         return self.plate_repository.list_user_plates(int(user_id))

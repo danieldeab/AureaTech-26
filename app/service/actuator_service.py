@@ -61,6 +61,29 @@ class ActuatorService:
         actuator.lastChangedAt = datetime.now(timezone.utc)
         self.repo.save(actuator)
 
+    def _target_state_to_bool(self, target_state) -> bool:
+        normalized = str(target_state or "").strip().upper()
+        if normalized in {"1", "TRUE", "ON", "OPEN", "ACTIVE", "ENABLED"}:
+            return True
+        if normalized in {"0", "FALSE", "OFF", "CLOSED", "INACTIVE", "DISABLED"}:
+            return False
+        raise ValueError(f"Unsupported actuator target_state: {target_state!r}")
+
+    def _state_for_rule_command(self, *, command_type: str, target_state, current_state: bool) -> str:
+        command = str(command_type or "SET").strip().upper()
+        target = str(target_state or "").strip().upper()
+        if command in {"SET", "SET_STATE"}:
+            if target in {"OPEN", "CLOSED"}:
+                return target
+            return "ON" if self._target_state_to_bool(target) else "OFF"
+        if command == "TOGGLE":
+            return "OFF" if bool(current_state) else "ON"
+        if command == "BLINK":
+            return "BLINKING"
+        if command == "BEEP":
+            return "BEEPING"
+        raise ValueError(f"Unsupported actuator command_type: {command_type!r}")
+
     # ---------------------------------------------------------
     # Mutation API
     # ---------------------------------------------------------
@@ -93,21 +116,108 @@ class ActuatorService:
         else:
             return None
 
-        act.state = not bool(act.state)
-        self._persist_state_change(act)
+        target_state = "ON" if not bool(act.state) else "OFF"
+        if str(act.type).upper() == "SERVOMOTOR":
+            state_reader = getattr(self.repo, "get_state", None)
+            current_state = state_reader(actuator_id) if callable(state_reader) else ("OPEN" if bool(act.state) else "CLOSED")
+            target_state = "CLOSED" if current_state == "OPEN" else "OPEN"
+            act.state = target_state == "OPEN"
+            updater = getattr(self.repo, "update_state", None)
+            if callable(updater):
+                updater(actuator_id, target_state)
+            else:
+                self._persist_state_change(act)
+        else:
+            act.state = target_state == "ON"
+            self._persist_state_change(act)
 
         self.audit_log_service.log(
             actor_id=self._normalize_actor_id(user_id),
             actor_role=user_role,
             category="ACTUATOR",
             action="actuator_command",
-            details=f"Actuator {act.id} set to {'ON' if act.state else 'OFF'} (community {act.community_id})",
+            details=f"Actuator {act.id} set to {target_state} (community {act.community_id})",
             community_id=act.community_id,
             target_entity_type="actuator",
             target_entity_id=int(act.id),
         )
 
         return act
+
+    def apply_rule_action(
+        self,
+        *,
+        actuator_id: str | int | UUID,
+        target_state,
+        command_type: str = "SET_STATE",
+        rule_id: int | None = None,
+        community_id: int | None = None,
+        actor_id: int = 1,
+    ) -> Optional[Actuator]:
+        act = self.repo.findById(actuator_id)
+        if not act:
+            return None
+
+        desired_state = self._state_for_rule_command(
+            command_type=command_type,
+            target_state=target_state,
+            current_state=bool(act.state),
+        )
+        state_reader = getattr(self.repo, "get_state", None)
+        current_state = (
+            state_reader(actuator_id)
+            if callable(state_reader)
+            else ("ON" if bool(act.state) else "OFF")
+        )
+        if current_state == desired_state:
+            return act
+
+        act.state = desired_state in {"ON", "OPEN", "BLINKING", "BEEPING"}
+        updater = getattr(self.repo, "update_state", None)
+        if callable(updater):
+            updater(actuator_id, desired_state)
+        else:
+            self._persist_state_change(act)
+
+        self.audit_log_service.log(
+            actor_id=self._normalize_actor_id(actor_id),
+            actor_role=RoleEnum.ADMIN,
+            category="AUTOMATION",
+            action="rule_actuator_action",
+            details=(
+                f"Rule {rule_id or '-'} command {command_type or 'SET'} "
+                f"set actuator {act.id} to {desired_state}"
+            ),
+            community_id=community_id if community_id is not None else act.community_id,
+            target_entity_type="actuator",
+            target_entity_id=int(act.id),
+        )
+
+        return act
+
+    def open_garage_for_plate(
+        self,
+        *,
+        community_id: int,
+        camera_event_id: int | None = None,
+        actor_id: int = 1,
+    ) -> Optional[Actuator]:
+        finder = getattr(self.repo, "find_garage_door_by_community", None)
+        if not callable(finder):
+            return None
+
+        garage = finder(int(community_id))
+        if not garage:
+            return None
+
+        return self.apply_rule_action(
+            actuator_id=garage.id,
+            command_type="SET",
+            target_state="OPEN",
+            rule_id=None,
+            community_id=int(community_id),
+            actor_id=actor_id,
+        )
 
     def apply_streetlight_decision(self, decision: dict) -> list[Actuator]:
         """

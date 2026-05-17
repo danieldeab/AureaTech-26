@@ -79,6 +79,7 @@ class AdminDashboardView(BaseDashboardView):
 
         rows = []
         for row in self.all_communities_overview:
+            unknown_plates = int(row.get("unknown_plates_7d", 0))
             rows.append(
                 ft.DataRow(
                     cells=[
@@ -86,9 +87,15 @@ class AdminDashboardView(BaseDashboardView):
                         ft.DataCell(ft.Text(str(row.get("sensors", 0)), color=BRAND_DARK_GREY)),
                         ft.DataCell(ft.Text(str(row.get("alerts_7d", 0)), color=BRAND_DARK_GREY)),
                         ft.DataCell(ft.Text(str(row.get("errors_7d", 0)), color=BRAND_DARK_GREY)),
-                        ft.DataCell(ft.Text(str(row.get("unknown_plates_7d", 0)), color=BRAND_DARK_GREY)),
+                        ft.DataCell(
+                            ft.Container(
+                                bgcolor=BTN_DANGER_BG if unknown_plates > 0 else None,
+                                padding=8,
+                                border_radius=6,
+                                content=ft.Text(str(unknown_plates), color=BRAND_DARK_GREY),
+                            ),
+                        ),
                     ],
-                    color=BTN_DANGER_BG if row.get("unknown_plates_7d", 0) > 0 else None,
                 )
             )
 

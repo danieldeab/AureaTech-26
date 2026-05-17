@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from types import SimpleNamespace
 from typing import Optional, Iterable
 
 from app.model.reading import Reading
@@ -40,12 +41,14 @@ class MonitoringService:
         log_repo: LogRepository,
         audit_log_service: AuditLogService | None = None,
         error_service: ErrorService | None = None,
+        automation_rule_service=None,
     ):
         self.sensor_repo = sensor_repo
         self.reading_repo = reading_repo
         self.alert_service = alert_service
         self.audit_log_service = audit_log_service or AuditLogService(log_repo)
         self.error_service = error_service or ErrorService()
+        self.automation_rule_service = automation_rule_service
 
     # ----------------------------------------------------------------------
     # Internal helpers
@@ -181,12 +184,24 @@ class MonitoringService:
         Since Reading does not natively contain sensor_type/community_id/user routing,
         this method enriches it dynamically before delegating to AlertService.
         """
-        setattr(reading, "sensor_type", sensor_type)
-        setattr(reading, "community_id", community_id)
+        if self.automation_rule_service:
+            return self.automation_rule_service.evaluate_reading(
+                reading,
+                sensor_type=sensor_type,
+                community_id=community_id,
+                recipient_user_ids=recipient_user_ids,
+                user_id=user_id,
+            )
 
-        if recipient_user_ids is not None:
-            setattr(reading, "recipient_user_ids", recipient_user_ids)
-        if user_id is not None:
-            setattr(reading, "user_id", user_id)
-
-        return self.alert_service.evaluate(reading)
+        enriched_reading = SimpleNamespace(
+            id=getattr(reading, "id", None),
+            sensor_id=getattr(reading, "sensor_id", None),
+            timestamp=getattr(reading, "timestamp", None),
+            value=getattr(reading, "value", None),
+            unit=getattr(reading, "unit", None),
+            sensor_type=sensor_type,
+            community_id=community_id,
+            recipient_user_ids=recipient_user_ids,
+            user_id=user_id,
+        )
+        return self.alert_service.evaluate(enriched_reading)

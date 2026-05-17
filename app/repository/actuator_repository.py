@@ -40,6 +40,8 @@ class ActuatorRepository(IActuatorRepository):
         return normalized in {"1", "TRUE", "ON", "OPEN", "ACTIVE", "ENABLED"}
 
     def _bool_to_db_state(self, state: bool) -> str:
+        if isinstance(state, str):
+            return state.strip().upper()
         return "ON" if bool(state) else "OFF"
 
     def _row_to_actuator(self, row: dict) -> Actuator:
@@ -89,6 +91,17 @@ class ActuatorRepository(IActuatorRepository):
         )
         return self._row_to_actuator(row) if row else None
 
+    def find_garage_door_by_community(self, community_id: int) -> Optional[Actuator]:
+        row = self.db.fetch_one(
+            table="actuator",
+            where={
+                "community_id": int(community_id),
+                "actuator_type": "SERVOMOTOR",
+            },
+            order_by="actuator_id ASC",
+        )
+        return self._row_to_actuator(row) if row else None
+
     def save(self, actuator: Actuator) -> None:
         if getattr(actuator, "id", None) is None:
             self.add(actuator)
@@ -99,3 +112,18 @@ class ActuatorRepository(IActuatorRepository):
             data=self._actuator_to_db_data(actuator),
             where={"actuator_id": actuator.id},
         )
+
+    def update_state(self, actuator_id: str | int | UUID, state: str) -> int:
+        return self.db.update(
+            table="actuator",
+            data={"current_state": str(state).strip().upper()},
+            where={"actuator_id": actuator_id},
+        )
+
+    def get_state(self, actuator_id: str | int | UUID) -> Optional[str]:
+        row = self.db.fetch_one(
+            table="actuator",
+            columns=["current_state"],
+            where={"actuator_id": actuator_id},
+        )
+        return str(row["current_state"]).strip().upper() if row and row.get("current_state") is not None else None

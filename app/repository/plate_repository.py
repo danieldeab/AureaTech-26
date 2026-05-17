@@ -28,15 +28,37 @@ class PlateRepository:
         return int(row["community_id"]) if row and row.get("community_id") is not None else None
 
     def find_allowed_plate(self, plate: str, community_id: int) -> dict[str, Any] | None:
-        row = self.db.fetch_one(
-            table="allowed_plate",
-            where={
-                "plate": normalize_plate(plate),
-                "community_id": int(community_id),
-                "is_active": 1,
-            },
-        )
-        return row
+        sql = """
+            SELECT
+                ap.allowed_plate_id,
+                ap.community_id,
+                ap.user_id,
+                ap.plate,
+                ap.is_active,
+                ap.created_at,
+                u.role AS owner_role,
+                u.community_id AS owner_community_id
+            FROM allowed_plate ap
+            INNER JOIN user u
+                ON u.user_id = ap.user_id
+            WHERE ap.plate = %s
+              AND ap.is_active = 1
+              AND u.is_active = 1
+              AND (
+                    u.role = 'ADMIN'
+                    OR (
+                        u.role IN ('NEIGHBOR', 'TECHNICIAN')
+                        AND u.community_id = %s
+                        AND ap.community_id = %s
+                    )
+              )
+            ORDER BY
+                CASE WHEN u.role = 'ADMIN' THEN 0 ELSE 1 END,
+                ap.allowed_plate_id ASC
+            LIMIT 1
+        """
+        rows = self.db.execute(sql, (normalize_plate(plate), int(community_id), int(community_id)))
+        return rows[0] if rows else None
 
     def list_user_plates(self, user_id: int) -> list[dict[str, Any]]:
         rows = self.db.fetch_all(
@@ -178,4 +200,4 @@ class PlateRepository:
 
 
 def normalize_plate(plate: str) -> str:
-    return " ".join(str(plate or "").strip().upper().split())
+    return "".join(str(plate or "").upper().split())

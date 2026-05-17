@@ -1,4 +1,4 @@
--- --------------------------------------------------------
+﻿-- --------------------------------------------------------
 -- AureaTech relational schema aligned with logicdiagram.txt
 -- Source of truth: logical ER model (PlantUML)
 -- Target: MariaDB / MySQL-compatible DDL
@@ -374,7 +374,7 @@ CREATE TABLE IF NOT EXISTS `chat_message` (
 
 -- Communities
 INSERT INTO community (community_id, name, address, created_at) VALUES
-(1, 'Los Álamos', 'Avenida de Castilla 37, Las Rozas - Madrid', NOW()),
+(1, 'Los Ãlamos', 'Avenida de Castilla 37, Las Rozas - Madrid', NOW()),
 (2, 'Villa Romana', 'Calle los Farolillos s/n, Agulo, La Gomera - Islas Canarias', NOW());
 
 -- Users
@@ -389,29 +389,71 @@ INSERT INTO user (
     picture_url
 ) VALUES
 
-(null, 'María Esperanza', 'admin@test.com',
- '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',
+(null, 'MarÃ­a Esperanza', 'admin@test.com',
+ 'pbkdf2_sha256$260000$e95ebd623fa6a2dfade14ac2559bfc38$bf4202343c08be1bfcbd0bfdcd9c1f7c61a6d07bba236e1b5736a72e1533c4cc',
  'ADMIN', NULL, '', 'https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg'),
 
 (1, 'Tech Support Comunidad 1', 'tech1@test.com',
- 'fe9bbd400bb6cb314531e3462507661401959afc69aae96bc6aec2c213b83bc1',
+ 'pbkdf2_sha256$260000$944e6581c97cfd9e1e5dded537130597$d565ede687d7105d80b6e657379400d4cbdc0af735ed560eb8b287a18cf56c21',
  'TECHNICIAN', NULL, '', 'https://images.pexels.com/photos/346529/pexels-photo-346529.jpeg'),
 
 (2, 'Tech Support Comunidad 2', 'tech2@test.com',
- 'fe9bbd400bb6cb314531e3462507661401959afc69aae96bc6aec2c213b83bc1',
+ 'pbkdf2_sha256$260000$faf0e19f7ea10fb712214de276369da6$73943db8a2c80e91f3c89c7f511d6dfd94845921a3cdee862085dec8cb237abd',
  'TECHNICIAN', NULL, '', 'https://images.pexels.com/photos/346529/pexels-photo-346529.jpeg'),
 
 (1, 'AureaTech', 'aurea@tech.com',
- '494aea83574267c4173aacdbb7768d0b3d4935eed2f7879f5e558f2198865fb5',
+ 'pbkdf2_sha256$260000$5c9e2bc05ee0028ce8472c37b75ea98b$1addff5dc1fb569b9e6acd7636e59c025113a273142e5149debc2ec1cdb1f805',
  'NEIGHBOR', NULL, '', 'https://images.pexels.com/photos/1542085/pexels-photo-1542085.jpeg'),
 
 (2, 'Juan', 'juan@juan.com',
- 'ed08c290d7e22f7bb324b15cbadce35b0b348564fd2d5f95752388d86d71bcca',
+ 'pbkdf2_sha256$260000$f4817f8cff4e6aabf9e1e7c7fd9930f7$f75dd958ccd186ac6dfb187c19540e8aaa976b4343c5c1dbebcae1ea8dbb6b6c',
  'NEIGHBOR', NULL, '', 'https://images.pexels.com/photos/1819483/pexels-photo-1819483.jpeg'),
 
-(2, 'Pepe Pérez', 'pepe@perez.com',
- '7c9e7c1494b2684ab7c19d6aff737e460fa9e98d5a234da1310c97ddf5691834',
- 'NEIGHBOR', STR_TO_DATE('14/12/2003','%d/%m/%Y'), NULL, NULL);
+(2, 'Pepe PÃ©rez', 'pepe@perez.com',
+ 'pbkdf2_sha256$260000$2457c5fd8f6dd196cf61c016a5c40d8f$f44b8e7576fb3ff266fc095813f793f7265924b2906cbbd5b38e8bd3ce35c08b',
+ 'NEIGHBOR', STR_TO_DATE('14/12/2003','%d/%m/%Y'), NULL, NULL),
+
+(NULL, 'Admin Norte', 'admin2@test.com',
+ 'pbkdf2_sha256$260000$315a9e0f8e76c96971eaf9168b0e4da1$03c2b83db25a807343b05165151aed5038103c41738174251fd66b40cba2f0fc',
+ 'ADMIN', NULL, '', NULL),
+(NULL, 'Admin Sur', 'admin3@test.com',
+ 'pbkdf2_sha256$260000$055cdc8f095c478f746eb33d17f04950$76582d829d4f608b8ea5d035db0a903fceb9dc3948f632308c67a1b1d299521a',
+ 'ADMIN', NULL, '', NULL),
+(NULL, 'Admin Operaciones', 'admin4@test.com',
+ 'pbkdf2_sha256$260000$2ff6f4abb2022c1c9f3ecc518fae0f07$4069c8d43bb33391d7a844fb0133b5cec7269718c7ee21fb2ec74cf44b749db4',
+ 'ADMIN', NULL, '', NULL),
+(NULL, 'Admin Seguridad', 'admin5@test.com',
+ 'pbkdf2_sha256$260000$a71deca0953817c607c5a0e62a640aef$7c811cff3feb2a2725400bb971711aaf0744ec2b8b83ce475ea9e428512df6a0',
+ 'ADMIN', NULL, '', NULL),
+
+(1, 'Tech Support Comunidad 1B', 'tech3@test.com',
+ 'pbkdf2_sha256$260000$6d77d7276abff901aa8ebe7e997c0543$d4f8aa3a4b5accc534412fde6536428684178fa796bce85c476bc245a12740b7',
+ 'TECHNICIAN', NULL, '', NULL),
+(2, 'Tech Support Comunidad 2B', 'tech4@test.com',
+ 'pbkdf2_sha256$260000$f571268d1efb57f6ca577ab5a0c1d76a$3f187aa7d768bf46a8e85108606bb5b5e1d10c3a2294d0fa68b63d9c8d1269f9',
+ 'TECHNICIAN', NULL, '', NULL),
+(1, 'Tech Support Guardia', 'tech5@test.com',
+ 'pbkdf2_sha256$260000$5e610de8f5f23deacff688432acdf7b7$556fc16fc763d6cb178b862b155d00e7041434a3d79d0cee432bfa49f5cecee8',
+ 'TECHNICIAN', NULL, '', NULL),
+
+(1, 'Lucia Martin', 'lucia@test.com',
+ 'pbkdf2_sha256$260000$be39e33ec015bc2f7a58852e79a0e084$b08a5209aa30d453c0d320357856e48bd4af801d285ff0823d4593bb8bf85f7d',
+ 'NEIGHBOR', NULL, '', NULL),
+(1, 'Carlos Ruiz', 'carlos@test.com',
+ 'pbkdf2_sha256$260000$5032c583d73039f65fd196a2e1e2698a$5e8403c181a2d580e3d0fc84573d6741bfd3a0a8f6731e1e904f20dafbb449a9',
+ 'NEIGHBOR', NULL, '', NULL),
+(1, 'Elena Sanz', 'elena@test.com',
+ 'pbkdf2_sha256$260000$d4eecaad6d82a14b71895ff519b61d7b$2133b4d6282aa7e1ef364aad742e725ba3a96a9ab9118916c855f368d6cfbd07',
+ 'NEIGHBOR', NULL, '', NULL),
+(2, 'Miguel Torres', 'miguel@test.com',
+ 'pbkdf2_sha256$260000$66c37add68ac7f5b9db9cacef17a01a7$f5ffc296e000c431db8e74fa82b1dce9e70eaf8fa3ec2a0a6daccada7ea3c5d9',
+ 'NEIGHBOR', NULL, '', NULL),
+(2, 'Sofia Leon', 'sofia@test.com',
+ 'pbkdf2_sha256$260000$6d753d5067246787a904df140358de1d$3e15151ca229c5dba11b65add68bc519f8d41a4e0b846a39c63120f0c25e2115',
+ 'NEIGHBOR', NULL, '', NULL),
+(2, 'Pablo Vega', 'pablo@test.com',
+ 'pbkdf2_sha256$260000$60d28dff240a88afe328c59f38eab38e$6ccd63701d7a2a73c527486de797091bfefc1328441d406eab5bb10799573b43',
+ 'NEIGHBOR', NULL, '', NULL);
  
 -- Sensors
 INSERT INTO sensor (
@@ -426,9 +468,9 @@ INSERT INTO sensor (
 (2, 'TEMPERATURE', 'Zona Residencial', 1, NOW()),
 (2, 'HUMIDITY',    'Zona Residencial', 1, NOW()),
 (1, 'LIGHT',       'Zona Residencial', 1, NOW()),
-(1, 'DISTANCE',      'Zona Residencial', 1, NOW()),
+(1, 'DISTANCE',    'Zona Residencial', 1, NOW()),
 (2, 'LIGHT',       'Zona Residencial', 1, NOW()),
-(2, 'DISTANCE',      'Zona Residencial', 1, NOW()),
+(2, 'DISTANCE',    'Zona Residencial', 1, NOW()),
 (1, 'SMOKE',       'Zona Residencial', 1, NOW()),
 (1, 'WIND',        'Zona Residencial', 1, NOW()),
 (2, 'SMOKE',       'Zona Residencial', 1, NOW()),
@@ -450,6 +492,7 @@ INSERT INTO actuator (
 (2, 'LED',        'Streetlight 2A', 'ON',     NOW(), '2025-12-14 16:22:34'),
 (2, 'LED',        'Streetlight 2B', 'OFF',    NOW(), '2025-12-14 21:25:43'),
 (1, 'BUZZER',     'Fire Alarm 1A',  'OFF',    NOW(), '2025-12-14 15:45:45'),
+(1, 'SERVOMOTOR', 'Garage Door 1A', 'CLOSED', NOW(), '2025-12-14 16:22:54'),
 (2, 'SERVOMOTOR', 'Garage Door 2A', 'OPEN',   NOW(), '2025-12-14 16:22:54');
 
 -- Sensor readings
@@ -486,15 +529,16 @@ INSERT INTO `allowed_plate` (
   `is_active`,
   `created_at`
 ) VALUES
-(1, 4, '9172 VCW', 1, NOW()),
-(1, 4, '0620 SBW', 1, NOW()),
-(1, 2, '5013 XVX', 1, NOW()),
-(1, 2, '1113 YBY', 1, NOW()),
+(1, 4, '9172VCW', 1, NOW()),
+(1, 4, '0620SBW', 1, NOW()),
+(1, 2, '5013XVX', 1, NOW()),
+(1, 2, '1113YBY', 1, NOW()),
+(1, 1, '0000ADM', 1, NOW()),
 
-(2, 5, '0879 LPM', 1, NOW()),
-(2, 5, '8488 KDG', 1, NOW()),
-(2, 6, '9315 DSN', 1, NOW()),
-(2, 6, '1731 KJJ', 1, NOW());
+(2, 5, '0879LPM', 1, NOW()),
+(2, 5, '8488KDG', 1, NOW()),
+(2, 6, '9315DSN', 1, NOW()),
+(2, 6, '1731KJJ', 1, NOW());
 
 -- Audit logs
 INSERT INTO audit_log (
@@ -614,9 +658,21 @@ INSERT INTO rule_alert_action (
   severity,
   message_template
 ) VALUES
-(1, 'high_temperature', 'CRIT', 'Temperatura crítica detectada'),
+(1, 'high_temperature', 'CRIT', 'Temperatura crÃ­tica detectada'),
 (2, 'low_light',        'INFO', 'Nivel de luz bajo'),
 (3, 'poor_air_quality', 'WARN', 'Calidad del aire deficiente');
+
+-- Rule actuator actions used by the app-side rule engine
+INSERT INTO rule_actuator_action (
+  rule_id,
+  actuator_id,
+  command_type,
+  target_state
+) VALUES
+(1, 5, 'SET', 'ON'),
+(2, 1, 'SET', 'ON'),
+(2, 2, 'SET', 'ON'),
+(3, 5, 'SET', 'ON');
 
 -- Alerts
 INSERT INTO alert (
@@ -627,11 +683,11 @@ INSERT INTO alert (
   message,
   created_at
 ) VALUES
-(2, 1, 'high_temperature', 'CRIT',
- 'Temperatura crítica detectada: 38.4°C',
+(1, 1, 'high_temperature', 'CRIT',
+ 'Temperatura crÃ­tica detectada: 38.4Â°C',
  '2025-12-14 18:05:00'),
 
-(2, 2, 'low_light', 'INFO',
+(1, 2, 'low_light', 'INFO',
  'Nivel de luz bajo: 42 lux',
  '2025-12-14 17:52:00'),
 
@@ -666,7 +722,8 @@ INSERT INTO camera_event (
   detected_at,
   image_path
 ) VALUES
-(13, '9172 VCW', 1, '2026-03-24 18:45:00', NULL),
-(13, '5983 CPR', 0, '2026-03-27 21:00:00', NULL),
-(14, '8488 KDG', 1, '2026-03-24 19:15:00', NULL),
-(14, '9999 ZZZ', 0, '2026-03-28 22:15:00', NULL);
+(13, '9172VCW', 1, '2026-03-24 18:45:00', NULL),
+(13, '5983CPR', 0, '2026-03-27 21:00:00', NULL),
+(14, '8488KDG', 1, '2026-03-24 19:15:00', NULL),
+(14, '9999ZZZ', 0, '2026-03-28 22:15:00', NULL);
+

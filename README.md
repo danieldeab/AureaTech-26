@@ -1,4 +1,5 @@
 # 🏙️ AureaTech — Zona Residencial Simulada
+# README DESACTUALIZADO, MIRAR GITHUB PARA LA ULTIMA VERSION
 
 **AureaTech** is an academic software engineering project that simulates a **smart residential area** using an **IoT-inspired architecture**, a **Python backend**, and a **graphical interface built with Flet**.
 The system allows different user roles to monitor sensors, control actuators, and inspect historical data, all persisted using **JSON files** and structured under the **Model–View–Controller (MVC)** pattern.

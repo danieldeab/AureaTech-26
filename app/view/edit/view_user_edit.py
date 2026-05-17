@@ -110,7 +110,7 @@ class UserEditView(BaseDashboardView):
             border_radius=12,
             border=ft.InputBorder.UNDERLINE,
             color=INPUT_TEXT,
-            hint_text="1234 ABC",
+            hint_text="1234ABC",
             hint_style=ft.TextStyle(color=INPUT_PLACEHOLDER),
         )
 
