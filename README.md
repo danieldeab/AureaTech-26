@@ -1,230 +1,226 @@
-# 🏙️ AureaTech — Zona Residencial Simulada
-# README DESACTUALIZADO, MIRAR GITHUB PARA LA ULTIMA VERSION
+# AureaTech Drivers
 
-**AureaTech** is an academic software engineering project that simulates a **smart residential area** using an **IoT-inspired architecture**, a **Python backend**, and a **graphical interface built with Flet**.
-The system allows different user roles to monitor sensors, control actuators, and inspect historical data, all persisted using **JSON files** and structured under the **Model–View–Controller (MVC)** pattern.
+AureaTech is a Flet desktop application for a smart residential community. The current repo is DB-backed: users, readings, alerts, automation rules, chats, plates, camera events, logs, and actuators are stored in MariaDB/MySQL through repository and service layers.
 
-This project has been developed following **SCRUM methodology** as part of *Proyecto de Informática I (PII1)* in the **Bachelor’s Degree in Computer Science Engineering** at **Universidad Europea de Madrid**.
+The app is built around the `docs/Drivers.docx` target, with ESP32 sensor/actuator integration and plate-recognition support.
 
----
+## Current Stack
 
-## 📌 Project Objectives
+- Python with Flet `0.22.0`
+- MariaDB/MySQL local database
+- MVC-style app structure under `app/`
+- Repository/service boundaries for DB access and business rules
+- PBKDF2 password hashes for seeded users
+- Optional YOLO plate-recognition model under `app/infraestructure/vision/`
+- ESP32 firmware under `docs/smartcity_esp32.ino`
 
-The main goal is to design and implement a **functional, modular, and extensible monitoring system** that:
+## Project Layout
 
-* Simulates data acquisition from multiple sensors
-* Differentiates access and views according to **user roles**
-* Stores all information using **JSON persistence**
-* Provides a **responsive graphical interface**
-* Follows **software engineering best practices**
-
-The system is intentionally designed to be **educational**, **portable**, and **demonstrable**, while remaining close to real IoT architectures.
-
----
-
-## 👥 User Roles
-
-The application supports **three distinct roles**, all accessed through a **single application and login system**:
-
-| Role              | Description                                                 |
-| ----------------- | ----------------------------------------------------------- |
-| **Administrator** | Manages users, sensors, actuators, and system configuration |
-| **Technician**    | Monitors sensor readings, logs, and system behavior         |
-| **Neighbor**      | Views simplified sensor data and personal alerts            |
-
-Each role is automatically redirected to a **different dashboard** after login.
-
----
-
-## 🧠 System Architecture
-
-The project strictly follows the **Model–View–Controller (MVC)** pattern:
-
-```
-app/
-├── model/          # Domain entities (User, Sensor, Reading, Actuator, Alert, LogEntry)
-├── repository/     # Interfaces + JSON-based implementations
-├── service/        # Business logic and use cases
-├── controller/     # UI controllers (event handling, navigation)
-├── view/           # Flet UI components and views
-├── infrastructure/ # JSON persistence, configuration, adapters
+```text
+app.py                         Flet app entry point
+app/controller/                UI orchestration and navigation
+app/model/                     Domain models
+app/repository/                DB repositories
+app/service/                   Business services and integrations
+app/view/                      Flet views and reusable UI
+app/infraestructure/db.py      MariaDB/MySQL adapter
+app/infraestructure/vision/    Plate recognizer and model files
+docs/db.sql                    Fresh DB schema and seed data
+docs/migration.sql             Migration for existing DBs
+docs/smartcity_esp32.ino       ESP32 firmware
+sim/                           Data generation helpers
+tests/                         Pytest coverage
 ```
 
-### Key Design Decisions
+## Setup
 
-* **MVC** for separation of concerns and maintainability
-* **Repositories + interfaces** to decouple storage from logic
-* **JSON files** as a lightweight, transparent persistence layer
-* **Service layer** to centralize business rules
-* **Role-based navigation** enforced at controller level
+Use a virtual environment. Do not install dependencies globally.
 
----
-
-## 🧪 Sensors & Actuators (Simulated)
-
-The system simulates realistic behavior for common IoT devices:
-
-### Sensors
-
-* **DHT22** — Temperature & humidity
-* **LDR** — Ambient light
-* **HC-SR04** — Distance / proximity
-
-### Actuators
-
-* Street lighting (ON/OFF)
-* Alarm indicators
-* Additional simulated actuators
-
-Sensor readings are generated **periodically**, stored with timestamps, and visualized in real time.
-
----
-
-## 💾 Data Persistence
-
-All data is stored in **JSON files**, ensuring portability and easy inspection:
-
-```
-data/
-├── users.json
-├── sensors.json
-├── readings.json
-├── actuators.json
-├── alerts.json
-├── logs.json
-```
-
-Features include:
-
-* Historical records
-* Log rotation / size control
-* Error handling for corrupted or missing files
-* Export functionality (JSON)
-
----
-
-## 🖥️ User Interface
-
-* Built with **Flet (Python)**
-* Responsive layout (desktop-first)
-* Corporate visual identity (**AureaTech** palette & typography)
-* Dynamic dashboards with live updates
-* Clear feedback (alerts, errors, confirmations)
-
----
-
-## 🚀 Installation & Execution
-
-### 1️⃣ Requirements
-
-* **Python 3.10+**
-* **pip**
-* Recommended IDE: **PyCharm**
-
-### 2️⃣ Install dependencies
-
-```bash
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is missing, install manually:
+If PowerShell blocks venv activation, run:
 
-```bash
-pip install flet
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
 ```
 
-(Additional standard libraries are part of Python)
+## Database
 
-### 3️⃣ Run the application
+Run a local MariaDB/MySQL server first. The app reads DB connection settings from:
 
-From the **project root**:
-
-```bash
-flet run app.py
+```text
+data/auth.txt
 ```
 
-> ⚠️ Important: Run the project from the root directory so that **relative paths** work correctly.
+Expected format:
 
----
+```text
+host=127.0.0.1
+port=3306
+user=admin
+password=admin
+database=pii26_aureatech
+```
 
-## 🔐 Authentication
+Create and seed a fresh database:
 
-* Unified login & registration system
-* Role-based redirection
-* Password hashing
-* Basic protection against repeated failed attempts
-* Session handling at application level
+```powershell
+mysql -u root -p pii26_aureatech < docs\db.sql
+```
 
----
+`docs/db.sql` includes schema, users, communities, sensors, actuators, automation rules, plate records, chats, alerts, camera events, logs, and seeded readings. Run the migration after backing up:
 
-## 🧪 Testing Strategy
+```powershell
+mysql -u root -p pii26_aureatech < docs\migration.sql
+```
 
-Testing is **continuous and incremental**, covering:
+The migration normalizes plates without spaces, moves seeded users to PBKDF2 hashes, inserts extra demo users, adds the community garage servomotor if needed, and inserts app-owned actuator rule actions.
 
-* **Unit tests** (repositories, services)
-* **Integration tests** (MVC flow)
-* **Functional tests** (user scenarios per role)
-* **Regression tests**
-* **Performance simulations** (long-running sensor updates)
+### Seed More Readings
 
-Tools used:
+The static seed includes sample readings, but charts and day/week comparisons work better with generated time-series data. After loading the DB and confirming `data/auth.txt` points to it, run one of:
 
-* `pytest`
-* Manual UI validation
-* Automated scripts for core flows
+```powershell
+.\.venv\Scripts\python.exe sim\generate_readings.py --hours 30 --interval-min 30
+```
 
----
+For broader week-level comparisons:
 
-## 🧭 Development Methodology
+```powershell
+.\.venv\Scripts\python.exe sim\generate_readings.py --hours 200 --interval-min 30
+```
 
-* **SCRUM**
-* Iterative development across **4 sprints**
-* Product Backlog + Sprint Backlogs
-* Daily SCRUMs
-* Sprint Reviews & Retrospectives
-* Full traceability via actas and documentation
+Use the 30-hour seed for daily dashboard testing and the 200-hour seed when validating 7-day aggregation.
 
----
+## Seeded Users
 
-## 👨‍💻 Team
+Seeded user counts:
 
-**AureaTech – Group 1**
+- 5 admins
+- 5 technicians
+- 9 neighbors
 
-* Daniel de Abajo Nacarino
-* Paula Gómez Lucas
-* Franco Nahuel Zimmermann
-* Pablo Serrano Tirado
+Passwords:
 
----
+- Admin users: `admin`
+- Technician users: `tech`
+- Neighbor users: email prefix, for example `aurea`, `juan`, `pepe`, `lucia`
 
-## 📄 Documentation
+Example logins:
 
-The repository is accompanied by:
+```text
+admin@test.com / admin
+tech1@test.com / tech
+aurea@tech.com / aurea
+juan@juan.com / juan
+```
 
-* Anteproyecto
-* Sprint planning & actas
-* UML class diagrams
-* BPMN test flow
-* Corporate identity guide
-* Prototype designs (Figma)
-* Test plan & validation reports
+## Run The App
 
----
+From the repo root with the venv active:
 
-## 🔮 Future Improvements
+```powershell
+python app.py
+```
 
-Planned or optional extensions include:
+The app expects the DB to be running and `data/auth.txt` to point to the seeded database.
 
-* Real sensor integration (ESP32 / Arduino)
-* Database backend (SQL)
-* Fire detection system
-* Automatic garage access with license-plate recognition
-* Predictive analytics (regression models)
-* Mobile deployment
+## Optional Vision Endpoint
 
----
+The normal Flet app owns the business workflow. A small local HTTP wrapper is available when the camera/model flow needs to post detections into the same services:
 
-## 📜 License
+```powershell
+python -m app.vision_server
+```
 
-This project is developed **for academic purposes only** as part of *Proyecto de Informática I*.
-Reuse for educational purposes is permitted with attribution.
+With the local YOLO model loaded:
+
+```powershell
+python -m app.vision_server --with-model
+```
+
+Endpoint:
+
+```text
+POST /plate-detections
+```
+
+Allowed plate detections create a `camera_event` and open the community `SERVOMOTOR` garage actuator. Unauthorized plate detections create technician alerts.
+
+## ESP32 Firmware
+
+Firmware lives in:
+
+```text
+docs/smartcity_esp32.ino
+```
+
+Install Arduino libraries:
+
+- `MySQL_Connector_Arduino`
+- `DHT sensor library`
+- `Adafruit Unified Sensor`
+- `ESP32Servo`
+
+Current expected IDs:
+
+```cpp
+#define SENSOR_ID_DHT_TEMP  1
+#define SENSOR_ID_DHT_HUM   2
+#define SENSOR_ID_LDR       5
+#define SENSOR_ID_ULTRASON  6
+#define SENSOR_ID_MQ2       9
+
+#define ACTUATOR_ID_LED_STATUS    0
+#define ACTUATOR_ID_LED_ACTION_1  1
+#define ACTUATOR_ID_LED_ACTION_2  2
+#define ACTUATOR_ID_BUZZER        5
+
+#define METRIC_LUMINOSITY   "light"
+#define METRIC_DISTANCE     "distance"
+#define METRIC_AIR_QUALITY  "smoke"
+```
+
+The status LED is firmware-local and is not persisted as a DB actuator. The garage servo is discovered from the community `SERVOMOTOR` actuator row and reacts to `OPEN` / `CLOSED`.
+
+## Tests
+
+Run the full suite:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+Run the model smoke test explicitly:
+
+```powershell
+$env:RUN_VISION_MODEL_TEST='1'
+.\.venv\Scripts\python.exe -m pytest app\infraestructure\vision\test_plate_recognizer.py -q
+```
+
+The model smoke test is skipped by default because it loads the local YOLO model.
+
+## Main Workflows
+
+- Authentication: PBKDF2 hashes with legacy SHA-256 upgrade support.
+- Dashboards: role-specific admin, technician, and neighbor views.
+- Readings: DB-backed readings, statistics, chart aggregation, and history.
+- Automation: `automation_rule`, `rule_alert_action`, and `rule_actuator_action` are enforced by services.
+- Alerts: DB alerts with user deliveries and read status.
+- Plates: stored and compared without spaces, with approval workflow.
+- Garage: allowed neighbor/technician plates in-community and admin plates globally open the garage servomotor.
+- Chat: DB-backed neighbor/technician threads and messages.
+- Exports: CSV exports for readings, logs, errors, users, chats, and scoped role workflows.
+
+## Notes
+
+- Keep SQL access in repositories.
+- Keep business rules in services.
+- Keep `docs/db.sql` as the fresh schema/seed source and `docs/migration.sql` for existing DBs.
+- Use the venv and pinned `requirements.txt`.
